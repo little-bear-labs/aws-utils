@@ -1,0 +1,30 @@
+{
+  "name": "graphql-input-schema",
+  "version": "2.0.0",
+  "main": "src/transformer",
+  "license": "MIT",
+  "keywords": ["graphql", "input types", "input", "rewriter", "directives"],
+  "devDependencies": {
+    "common-tags": "^1.7.2",
+    "graphql": "^0.13.2",
+    "graphql-tag": "^2.9.1",
+    "graphql-tools": "^3.0.0",
+    "lodash.merge": "^4.6.1"
+  },
+  "dependencies": {
+    "@babel/code-frame": "^7.0.0-beta.46",
+    "class-validator": "^0.8.5",
+    "debug": "^3.1.0",
+    "lodash.partition": "^4.6.0"
+  },
+  "peerDependencies": {
+    "graphql": ">=0.13.0 <1.0",
+    "graphql-tools": ">=3.0.0 <4.0"
+  },
+  "engines": {
+    "node": ">=8"
+  },
+  "scripts": {
+    "test": "eslint src/ __test__ && jest --coverage"
+  }
+}
