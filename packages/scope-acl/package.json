@@ -6,5 +6,8 @@
   "devDependencies": {
     "@conduitvc/aws-utils": "*",
     "uuid": "^3.2.1"
+  },
+  "peerDependencies": {
+    "aws-sdk": "^2.238.1"
   }
 }

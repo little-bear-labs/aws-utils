@@ -52,6 +52,8 @@ const bootstrapAWS = async ({ tables, dynamodb = defaultDynamoDB } = {}) => {
     await dynamodb.createTable(params).promise();
     await dynamodb.waitFor('tableExists', { TableName }).promise();
   }));
+
+  return { dynamodb };
 };
 
 const resetAWS = async ({ tables, dynamodb = defaultDynamoDB } = {}) => {
