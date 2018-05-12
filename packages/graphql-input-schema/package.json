@@ -1,5 +1,5 @@
 {
-  "name": "graphql-input-schema",
+  "name": "@conduitvc/graphql-input-schema",
   "version": "2.0.0",
   "main": "src/transformer",
   "license": "MIT",
