@@ -1,0 +1,17 @@
+{
+  "name": "aws-utils",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "workspaces": ["packages/**/*"],
+  "dependencies": {
+    "babel-eslint": "^8.2.3",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.11.0",
+    "jest": "^22.4.3",
+    "jest-runner-eslint": "^0.5.0",
+    "prettier": "^1.12.1"
+  }
+}
