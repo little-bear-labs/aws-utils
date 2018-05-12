@@ -9,10 +9,10 @@ const awsConfig = {
 };
 
 describe('ScopeACL', () => {
-  let client;
+  let dynamodb;
   beforeEach(async () => {
-    const { dynamodb } = await awsSetup.bootstrapAWS(awsConfig);
-    client = dynamodb;
+    const { dynamodb: client } = await awsSetup.bootstrapAWS(awsConfig);
+    dynamodb = client;
   });
   afterEach(() => awsSetup.resetAWS(awsConfig));
 
@@ -91,6 +91,21 @@ describe('ScopeACL', () => {
           });
         });
       });
+    });
+  });
+
+  describe('scope workflows', () => {
+    it('should add scope', async () => {
+      const manager = new subject.Manager(awsConfig.tables.UserScopesTable, dynamodb);
+      const id = 'foo';
+
+      expect(await manager.checkScope(id, 'foo::bar::qux')).toBeFalsy();
+      await manager.addScope(id, 'foo::bar::qux');
+      expect(await manager.checkScope(id, 'foo::bar::qux')).toBeTruthy();
+      await manager.deleteScope(id, 'foo::bar::qux');
+      expect(await manager.checkScope(id, 'foo::bar::qux')).toBeFalsy();
+      await manager.deleteRecord(id);
+      expect(await manager.checkScope(id, 'foo::bar::qux')).toBeFalsy();
     });
   });
 });
