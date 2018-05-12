@@ -1,0 +1,9 @@
+version: "3.0"
+services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "61023:4569"
+      - "61024:4572"
+      # The UI
+      - "61025:8080"
