@@ -15,6 +15,7 @@
     "prettier": "^1.12.1"
   },
   "scripts": {
-    "test": "yarn jest"
+    "test": "yarn jest --coverage",
+    "lint": "yarn eslint ."
   }
 }
