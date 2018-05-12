@@ -1,0 +1,12 @@
+{
+  "name": "@conduitvc/aws-utils",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.238.1",
+    "js-yaml": "^3.11.0",
+    "pkg-up": "^2.0.0",
+    "uuid": "^3.2.1"
+  }
+}

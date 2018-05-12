@@ -1,0 +1,20 @@
+# NOTE: WE do not actually publish a serverless config from this but instead
+# use the format of resources for our tests.
+
+resources:
+ Resources:
+    UserScopesTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: UserScopes

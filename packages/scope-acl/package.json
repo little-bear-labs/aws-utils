@@ -1,0 +1,10 @@
+{
+  "name": "@conduitvc/scope-acl",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@conduitvc/aws-utils": "*",
+    "uuid": "^3.2.1"
+  }
+}
