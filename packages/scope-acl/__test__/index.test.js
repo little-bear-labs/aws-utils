@@ -109,8 +109,9 @@ describe('ScopeACL', () => {
       const id = 'foo';
 
       expect(await manager.checkScope(id, 'foo::bar::qux')).toBeFalsy();
-      await manager.addScope(id, 'foo::bar::qux');
+      await manager.addScope(id, { resource: 'foo', action: 'bar', id: 'qux' });
       expect(await manager.checkScope(id, 'foo::bar::qux')).toBeTruthy();
+      expect(await manager.checkScope(id, { resource: 'foo', action: 'bar', id: 'qux' })).toBeTruthy();
       await manager.deleteScope(id, 'foo::bar::qux');
       expect(await manager.checkScope(id, 'foo::bar::qux')).toBeFalsy();
       await manager.deleteRecord(id);

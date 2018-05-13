@@ -29,15 +29,11 @@ function matchesScope(toCheckScopeStr, scopeStringArray) {
   });
 }
 
-class Scope {
-  // similar to ARN <resource>::<id>::<action> but we do not
-  // store them as strings.
-  constructor({ resource, id, action }) {
-    assert(resource, 'scope must have resource');
-    assert(id, 'scope must have id');
-    assert(action, 'scope must have action');
-    Object.assign(this, { resource, id, action });
-  }
+function processScope(scope) {
+  if (typeof scope === 'string') return scope;
+  assert(typeof scope === 'object');
+  const { resource, action, id } = scope;
+  return `${resource}::${action}::${id}`;
 }
 
 class Manager {
@@ -48,6 +44,8 @@ class Manager {
   }
 
   async addScope(id, scope) {
+    // eslint-disable-next-line no-param-reassign
+    scope = processScope(scope);
     assert(scope);
     assert(typeof scope === 'string');
     const params = {
@@ -63,6 +61,8 @@ class Manager {
   }
 
   async deleteScope(id, scope) {
+    // eslint-disable-next-line no-param-reassign
+    scope = processScope(scope);
     assert(scope);
     assert(typeof scope === 'string');
     const params = {
@@ -90,6 +90,8 @@ class Manager {
   }
 
   async checkScope(id, scopeToCheck) {
+    // eslint-disable-next-line no-param-reassign
+    scopeToCheck = processScope(scopeToCheck);
     assert(id);
     assert(typeof scopeToCheck === 'string');
     const { Item: doc } = await this.doc
@@ -111,7 +113,6 @@ class Manager {
 
 module.exports = {
   Manager,
-  Scope,
   parseScope,
   matchesScope,
 };
