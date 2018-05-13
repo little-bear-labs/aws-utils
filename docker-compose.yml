@@ -1,5 +1,11 @@
 version: "3.0"
 services:
+  wait:
+    depends_on:
+        - localstack
+    image: waisbrot/wait
+    environment:
+      TARGETS: localstack:4569,localstack:4572
   localstack:
     image: localstack/localstack
     ports:
