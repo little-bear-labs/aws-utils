@@ -1,0 +1,14 @@
+{
+  "name": "@conduitvc/graphql-scope-acl",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "graphql": "^0.13.2"
+  },
+  "peerDependencies": {
+    "@conduitvc/scope-acl": "1.x",
+    "graphql": ">0.13",
+    "graphql-tools": "3.x"
+  }
+}

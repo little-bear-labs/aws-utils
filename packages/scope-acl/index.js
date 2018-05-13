@@ -5,6 +5,12 @@ const aws = require('aws-sdk');
 const ScopeRegex = /^([a-zA-Z0-9./]+)::([a-zA-Z0-9*./]+)::(.*)$/;
 const AllowAllChar = '*';
 
+function scopeToString(scope) {
+  if (typeof scope === 'string') return scope;
+  const { resource, action, id } = scope;
+  return `${resource}::${action}::${id}`;
+}
+
 function parseScope(input) {
   const matches = ScopeRegex.exec(input);
   if (!matches) {
@@ -115,4 +121,5 @@ module.exports = {
   Manager,
   parseScope,
   matchesScope,
+  scopeToString,
 };
