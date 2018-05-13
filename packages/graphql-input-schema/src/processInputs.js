@@ -2,8 +2,8 @@ const { visit } = require('graphql/language');
 const { extractName, extractArguments, typeInfo } = require('./utils');
 const debug = require('debug')('graphql-input-schema:inputs');
 
-async function reduceTransformers(input, value, requestConfig, transformers, config) {
-  for (const transformer of transformers) {
+async function reduceDirectives(input, value, requestConfig, inputDirectives, config) {
+  for (const transformer of inputDirectives) {
     // eslint-disable-next-line
     value = await transformer.function(value, transformer.args, {
       type: input,
@@ -18,12 +18,12 @@ function createFieldTransformer(name, fields, config) {
   return async (object, requestConfig) => {
     const result = {};
     for (const [key, value] of Object.entries(object)) {
-      const { transformers } = fields[key];
-      result[key] = await reduceTransformers(
+      const { inputDirectives } = fields[key];
+      result[key] = await reduceDirectives(
         fields[key],
         value,
         requestConfig,
-        transformers,
+        inputDirectives,
         config,
       );
     }
@@ -33,22 +33,22 @@ function createFieldTransformer(name, fields, config) {
 
 function createObjectTransformer(input, config) {
   return async (object, requestConfig) =>
-    reduceTransformers(input, object, requestConfig, input.objectValidators, config);
+    reduceDirectives(input, object, requestConfig, input.objectValidators, config);
 }
 
-function processFieldDirective(source, field, node, { transformers }) {
+function processFieldDirective(source, field, node, { inputDirectives }) {
   const directiveName = extractName(node);
 
   // not our directive so return the node and move on.
-  if (!transformers[directiveName]) {
+  if (!inputDirectives[directiveName]) {
     // eslint-disable-next-line
     console.warn('Unknown validator', directiveName);
     return node;
   }
 
-  field.transformers.push({
+  field.inputDirectives.push({
     name: directiveName,
-    function: transformers[directiveName],
+    function: inputDirectives[directiveName],
     args: extractArguments(node.arguments),
   });
 
@@ -56,11 +56,11 @@ function processFieldDirective(source, field, node, { transformers }) {
   return null;
 }
 
-function processInputDirective(source, input, node, { transformers }) {
+function processInputDirective(source, input, node, { inputDirectives }) {
   const directiveName = extractName(node);
 
   // not our directive so return the node and move on.
-  if (!transformers[directiveName]) {
+  if (!inputDirectives[directiveName]) {
     // eslint-disable-next-line
     console.warn('Unknown validator', directiveName);
     return node;
@@ -68,7 +68,7 @@ function processInputDirective(source, input, node, { transformers }) {
 
   input.objectValidators.push({
     name: directiveName,
-    function: transformers[directiveName],
+    function: inputDirectives[directiveName],
     args: extractArguments(node.arguments),
   });
 
@@ -110,7 +110,7 @@ function processInput(source, doc, config) {
         field = {
           name: extractName(node),
           ...typeInfo(node),
-          transformers: [],
+          inputDirectives: [],
         };
         return node;
       },
@@ -159,7 +159,7 @@ function processInput(source, doc, config) {
         // have not been fully resolved yet. Once this entire loop is finished _then_
         // the validator will be ready to be called.
         debug('create nested validator', field.type, field.name);
-        field.transformers.push({
+        field.inputDirectives.push({
           name: 'nested',
           function: createFieldTransformer(inputType, inputMapping[inputType.name].fields, config),
           args: {},

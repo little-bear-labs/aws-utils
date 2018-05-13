@@ -29,22 +29,14 @@ describe('inputs', () => {
     User,
   };
 
-  const loadSchema = (
-    fixture,
-    resolvers,
-    fixtureClasses = classes,
-    transformers = {},
-  ) => {
-    const raw = fs.readFileSync(
-      `${__dirname}/graphql/${fixture}.graphql`,
-      'utf8',
-    );
+  const loadSchema = (fixture, resolvers, fixtureClasses = classes, inputDirectives = {}) => {
+    const raw = fs.readFileSync(`${__dirname}/graphql/${fixture}.graphql`, 'utf8');
 
     return makeExecutableSchema({
       typeDefs: raw,
       resolvers,
       classes: fixtureClasses,
-      transformers,
+      inputDirectives,
     });
   };
 

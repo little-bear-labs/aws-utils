@@ -58,10 +58,7 @@ function fieldToResolver(typeName, resolvers, field, inputTypes) {
     const parsedArgs = {};
 
     for (const [key, value] of Object.entries(args)) {
-      assert(
-        argHandlers[key],
-        'missing argument handler this should never happen!',
-      );
+      assert(argHandlers[key], 'missing argument handler this should never happen!');
       // XXX: These could run in parallel
       parsedArgs[key] = await argHandlers[key](value, {
         context: ctx,
@@ -78,7 +75,7 @@ function makeExecutableSchema({
   typeDefs,
   resolvers = {},
   classes = {},
-  transformers = {},
+  inputDirectives = {},
   config = {},
   ...otherOptions
 }) {
@@ -88,9 +85,9 @@ function makeExecutableSchema({
   const baseConfig = {
     // we will add context based on the request later.
     classes,
-    transformers: {
+    inputDirectives: {
       ...require('./directives'),
-      ...transformers,
+      ...inputDirectives,
     },
     ...config,
   };
@@ -104,12 +101,7 @@ function makeExecutableSchema({
       const name = extractName(node);
       const fieldResolvers = node.fields.reduce(
         (sum, field) => ({
-          [extractName(field)]: fieldToResolver(
-            name,
-            resolvers,
-            field,
-            inputTypes,
-          ),
+          [extractName(field)]: fieldToResolver(name, resolvers, field, inputTypes),
           ...sum,
         }),
         {},

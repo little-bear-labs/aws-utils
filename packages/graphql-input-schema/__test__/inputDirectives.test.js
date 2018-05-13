@@ -11,15 +11,16 @@ describe('transformers', () => {
     },
     Query: {},
   };
-  const execute = (schema, variables) => graphql({
-    schema,
-    source: gql`
+  const execute = (schema, variables) =>
+    graphql({
+      schema,
+      source: gql`
         mutation test($input: Input!) {
           test(input: $input)
         }
       `,
-    variableValues: variables,
-  });
+      variableValues: variables,
+    });
 
   test('transformer ordering', async () => {
     const schema = makeExecutableSchema({
@@ -43,7 +44,7 @@ describe('transformers', () => {
           test: (args, { input }) => input,
         },
       }),
-      transformers: {
+      inputDirectives: {
         async AddField(value) {
           return {
             ...value,

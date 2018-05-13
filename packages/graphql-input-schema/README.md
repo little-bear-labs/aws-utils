@@ -51,16 +51,16 @@ const schema = makeExecutableSchema({
 });
 ```
 
-### Custom Transformers
+### Custom input directives
 
-In addition to the many built in transformers it's easy to add more.
+In addition to the many built in directives it's easy to add more.
 
 ```js
 const schema = makeExecutableSchema({
   // ... stuff above
-  transformers: {
+  inputDirectives: {
     toUpperCase: value => value.toUpperCase(),
-    // transformers can be async functions.
+    // directives can be async functions.
     ValidateIsFoo: async value => {
       if (value !== 'foo') throw new Error('where is the foo?');
       // must return original or transformed value.
@@ -70,9 +70,9 @@ const schema = makeExecutableSchema({
 });
 ```
 
-NOTE: The built in transformers will (unless otherwise noted) iterate through arrays and validate each element. For maximum flexibility custom iterators must implement that functionality themselves if they wish to specifically validate elements instead of arrays. The `TypeMeta` will tell if you if the given type is an array.
+NOTE: The built in directives will (unless otherwise noted) iterate through arrays and validate each element. For maximum flexibility custom iterators must implement that functionality themselves if they wish to specifically validate elements instead of arrays. The `TypeMeta` will tell if you if the given type is an array.
 
-NOTE: If the element is `nullable` and the value is null transformers will not be run.
+NOTE: If the element is `nullable` and the value is null directives will not be run.
 
 ### Type signature for validator/transformer functions.
 
@@ -135,7 +135,7 @@ const schema = makeExecutableSchema({
     }
   `,
   resolvers,
-  transformers: {
+  inputDirectives: {
     ToUpper(value, args, config) {
       return value.toUpperCase();
     },
