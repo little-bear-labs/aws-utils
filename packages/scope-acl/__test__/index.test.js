@@ -39,7 +39,16 @@ describe('ScopeACL', () => {
           matches: ['foo::bar::quxr::!'],
           notMatches: ['*::*::*', 'foo::bar::1'],
         },
-
+        {
+          scope: 'a.b.c::write/action::quxr::!',
+          expected: {
+            resource: 'a.b.c',
+            action: 'write/action',
+            id: 'quxr::!',
+          },
+          matches: ['a.b.c::write/action::quxr::!'],
+          notMatches: ['a.b.c::write::qqqq'],
+        },
         {
           scope: 'f999oo::bar::۞',
           expected: {

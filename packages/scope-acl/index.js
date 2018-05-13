@@ -2,7 +2,7 @@ const assert = require('assert');
 const aws = require('aws-sdk');
 
 // <resource>::<action>::<id>
-const ScopeRegex = /^([a-zA-Z0-9]+)::([a-zA-Z0-9*]+)::(.*)$/;
+const ScopeRegex = /^([a-zA-Z0-9./]+)::([a-zA-Z0-9*./]+)::(.*)$/;
 const AllowAllChar = '*';
 
 function parseScope(input) {
