@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "@conduitvc/graphql-input-schema": "3.x",
     "graphql": "^0.13.2"
   },
   "peerDependencies": {

@@ -1,6 +1,7 @@
 const { graphql } = require('graphql');
 const { makeExecutableSchema } = require('graphql-tools');
-const makeACL = require('..');
+const { typeDirective, inputDirective } = require('..');
+const { makeExecutableSchema: inputExecSchema } = require('@conduitvc/graphql-input-schema');
 
 describe('@conduitvc/graphql-scope-acl', () => {
   it('should validate fields', async () => {
@@ -12,7 +13,7 @@ describe('@conduitvc/graphql-scope-acl', () => {
 
     let checkScopes = true;
     let ranCheckScope = false;
-    const Vistor = makeACL(
+    const Vistor = typeDirective(
       {
         async checkScope(id, scope) {
           ranCheckScope = true;
@@ -48,5 +49,67 @@ describe('@conduitvc/graphql-scope-acl', () => {
     const failure = await graphql(schema, '{ foo(id: "bar") }');
     expect(failure.errors).toBeTruthy();
     expect(failure.errors[0].message).toContain('foo::call::bar');
+  });
+
+  it.only('should validate input objects', async () => {
+    const typeDefs = `
+      input InputMe @acl(resource: "foo", action: "call", idArg: "personId") {
+        personId: ID!
+      }
+
+      type Query {
+        foo(obj: InputMe!): ID!
+      }
+    `;
+
+    let checkScopes = true;
+    let ranCheckScope = false;
+    const Vistor = inputDirective(
+      {
+        async checkScope(id, scope) {
+          ranCheckScope = true;
+          expect(scope).toEqual({
+            resource: 'foo',
+            action: 'call',
+            id: 'person',
+          });
+          return checkScopes;
+        },
+      },
+      (value) => {
+        expect(value).toMatchObject({ personId: 'person' });
+        return 'foo';
+      },
+    );
+    const schema = inputExecSchema({
+      typeDefs,
+      resolvers: {
+        Query: {
+          foo() {
+            return 'foo';
+          },
+        },
+      },
+      inputDirectives: {
+        acl: Vistor,
+      },
+    });
+
+    const success = await graphql(schema, 'query($foo: InputMe!) { foo(obj: $foo) }', null, null, {
+      foo: {
+        personId: 'person',
+      },
+    });
+    expect(success.errors).toBeFalsy();
+    expect(ranCheckScope).toBe(true);
+
+    checkScopes = false;
+    const failure = await graphql(schema, 'query($foo: InputMe!) { foo(obj: $foo) }', null, null, {
+      foo: {
+        personId: 'person',
+      },
+    });
+    expect(failure.errors).toBeTruthy();
+    expect(failure.errors[0].message).toContain('foo::call::person');
   });
 });
