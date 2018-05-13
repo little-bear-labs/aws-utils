@@ -8,8 +8,8 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - docker-compose up -d
-  - docker run -e TARGETS=0.0.0.0:61023,0.0.0.0:61024 waisbrot/wait
+  - docker-compose up -d localstack
+  - docker-compose run wait
 services:
   - docker
 node_js:
