@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "bin": {
+    "./bin/createCognitoUser.js": "createCognitoUser"
+  },
   "dependencies": {
+    "amazon-cognito-identity-js": "^2.0.6",
     "aws-sdk": "^2.238.1",
     "js-yaml": "^3.11.0",
+    "node-fetch": "^2.1.2",
     "pkg-up": "^2.0.0",
     "uuid": "^3.2.1"
   }
