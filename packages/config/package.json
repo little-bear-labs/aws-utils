@@ -1,0 +1,10 @@
+{
+  "name": "@conduitvc/config",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "lodash.merge": "^4.6.1",
+    "pkg-up": "^2.0.0"
+  }
+}
