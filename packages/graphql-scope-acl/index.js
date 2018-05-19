@@ -3,7 +3,7 @@ const { defaultResolver } = require('graphql');
 const { SchemaDirectiveVisitor } = require('graphql-tools');
 const { scopeToString } = require('@conduitvc/scope-acl');
 
-module.exports = (manager, getId) => {
+const typeDirective = (manager, getId) => {
   class SchemaVistor extends SchemaDirectiveVisitor {
     visitFieldDefinition(field) {
       const { args } = this;
@@ -31,3 +31,25 @@ module.exports = (manager, getId) => {
 
   return SchemaVistor;
 };
+
+const inputDirective = (manager, getId) => async (value, args, { context, info }) => {
+  assert(args);
+  const { resource, action, idArg } = args;
+  assert(resource, '@acl on input object must have resource attribute');
+  assert(action, '@acl on input object must have action attribute');
+  assert(idArg, '@acl on input object must have idArg attribute');
+
+  const id = value[idArg];
+  assert(id, `value has input for ${idArg}`);
+  const entityId = getId(value, null, context, info);
+  assert(entityId, 'getId must return an entity id');
+
+  const scope = { resource, action, id };
+  if (!(await manager.checkScope(entityId, scope))) {
+    throw new Error(`Entity: ${entityId} does not have permission to execute scope: ${scopeToString(scope)}`);
+  }
+
+  return value;
+};
+
+module.exports = { typeDirective, inputDirective };
