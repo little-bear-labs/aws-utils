@@ -1,10 +1,5 @@
 const aws = require('aws-sdk');
-const yaml = require('js-yaml');
-const path = require('path');
-const pkgUp = require('pkg-up');
-const fs = require('fs');
-
-const GlobalCache = {};
+const { findServerless } = require('./findServerless');
 
 const AwsDefaultConfig = {
   dynamodb: {
@@ -17,26 +12,8 @@ const AwsDefaultConfig = {
 
 const defaultDynamoDB = new aws.DynamoDB(AwsDefaultConfig.dynamodb);
 
-const findServerless = () => {
-  const {
-    parent: { filename },
-  } = module;
-  const serverlessPath = path.join(path.dirname(pkgUp.sync(filename)), 'serverless.yml');
-  if (GlobalCache[serverlessPath]) {
-    return GlobalCache[serverlessPath];
-  }
-
-  if (!fs.existsSync(serverlessPath)) {
-    throw new Error(`Expected serverless file at location: ${serverlessPath}`);
-  }
-
-  const parsed = yaml.safeLoad(fs.readFileSync(serverlessPath, 'utf8'));
-  // eslint-disable-next-lin
-  return (GlobalCache[serverlessPath] = parsed);
-};
-
 const bootstrapAWS = async ({ tables, dynamodb = defaultDynamoDB } = {}) => {
-  const dynamodbResources = Object.entries(findServerless().resources.Resources).filter(([, resource]) => resource.Type === 'AWS::DynamoDB::Table');
+  const dynamodbResources = Object.entries(findServerless(module).resources.Resources).filter(([, resource]) => resource.Type === 'AWS::DynamoDB::Table');
 
   await Promise.all(dynamodbResources.map(async ([name, resource]) => {
     const TableName = tables[name];
@@ -57,7 +34,7 @@ const bootstrapAWS = async ({ tables, dynamodb = defaultDynamoDB } = {}) => {
 };
 
 const resetAWS = async ({ tables, dynamodb = defaultDynamoDB } = {}) => {
-  const dynamodbResources = Object.entries(findServerless().resources.Resources).filter(([, resource]) => resource.Type === 'AWS::DynamoDB::Table');
+  const dynamodbResources = Object.entries(findServerless(module).resources.Resources).filter(([, resource]) => resource.Type === 'AWS::DynamoDB::Table');
 
   await Promise.all(dynamodbResources.map(async ([name]) => {
     const TableName = tables[name];
