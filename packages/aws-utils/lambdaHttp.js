@@ -7,6 +7,7 @@ const http = require('http');
 const util = require('util');
 const { findServerless, findServerlessPath } = require('./findServerless');
 const path = require('path');
+const debug = require('debug')('aws-utils:lambdaHttp');
 
 function drainStream(stream) {
   return new Promise((accept, reject) => {
@@ -120,6 +121,7 @@ function createHandler(functions) {
 
       // eslint-disable-next-line
       innerSum[resolvedPath] = innerSum[resolvedPath] || [];
+      debug('register http event', { resolvedPath, method, cors });
       innerSum[resolvedPath].push({
         method,
         handler,
@@ -130,9 +132,11 @@ function createHandler(functions) {
   }, {});
 
   return async (req, res) => {
+    debug('request', { url: req.url, method: req.method });
     const handlers = pathMapping[path.normalize(req.url)];
 
     if (!handlers) {
+      debug('no handler');
       res.writeHead(404);
       res.end();
       return;
@@ -141,6 +145,7 @@ function createHandler(functions) {
     const handler =
       handlers.find(handle => handle.method.toLowerCase() === req.method.toLowerCase());
     if (!handler) {
+      debug('no handler for method', { url: req.url, method: req.method });
       res.writeHead(404);
       res.end();
       return;
@@ -152,6 +157,7 @@ function createHandler(functions) {
       statusCode = 200,
       headers = {},
     } = await util.promisify(handler.handler)(event, {});
+    debug('set response', { body, statusCode, headers });
 
     Object.entries(headers).forEach(([key, value]) => {
       res.setHeader(key, value);
@@ -173,6 +179,7 @@ const lambdaHttp = () => {
     result.server.listen(0);
     await e2p(result.server, 'listening');
     const { port } = result.server.address();
+    debug('listening on port', port);
     result.urls = Object.keys(functions).reduce((sum, key) => {
       const func = functions[key];
       // XXX: We only support a single http event per function.
