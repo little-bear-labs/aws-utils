@@ -103,33 +103,35 @@ function setCorsHeaders(res) {
 function createHandler(functions) {
   const serverlessRoot = findServerlessPath(module.parent);
   const pathMapping = Object.values(functions).reduce((sum, func) => {
-    const httpEvent = (func.events || []).find(event => 'http' in event);
-    if (!httpEvent) {
+    const httpEvents = (func.events || []).filter(event => 'http' in event);
+    if (!httpEvents.length) {
       return sum;
     }
 
-    const {
-      http: { path: httpPath, method, cors = false },
-    } = httpEvent;
-    const [handlerPath, handlerExport] = func.handler.split('.');
-    // eslint-disable-next-line
-    const handlerModule = require(path.join(serverlessRoot, handlerPath));
-    const handler = handlerModule[handlerExport];
-    const resolvedPath = path.join('/', httpPath);
+    return httpEvents.reduce((innerSum, httpEvent) => {
+      const {
+        http: { path: httpPath, method, cors = false },
+      } = httpEvent;
+      const [handlerPath, handlerExport] = func.handler.split('.');
+      // eslint-disable-next-line
+      const handlerModule = require(path.join(serverlessRoot, handlerPath));
+      const handler = handlerModule[handlerExport];
+      const resolvedPath = path.join('/', httpPath);
 
-    // eslint-disable-next-line
-    sum[resolvedPath] = sum[resolvedPath] || [];
-    sum[resolvedPath].push({
-      method,
-      handler,
-      cors,
-    });
-
-    return sum;
+      // eslint-disable-next-line
+      innerSum[resolvedPath] = innerSum[resolvedPath] || [];
+      innerSum[resolvedPath].push({
+        method,
+        handler,
+        cors,
+      });
+      return innerSum;
+    }, sum);
   }, {});
 
   return async (req, res) => {
     const handlers = pathMapping[path.normalize(req.url)];
+
     if (!handlers) {
       res.writeHead(404);
       res.end();
@@ -156,7 +158,7 @@ function createHandler(functions) {
     });
     if (handler.cors) setCorsHeaders(res);
     res.writeHead(statusCode);
-    res.end(body);
+    res.end(typeof body === 'object' ? JSON.stringify(body) : body);
   };
 }
 
