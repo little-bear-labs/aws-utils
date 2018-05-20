@@ -51,7 +51,7 @@ describe('@conduitvc/graphql-scope-acl', () => {
     expect(failure.errors[0].message).toContain('foo::call::bar');
   });
 
-  it.only('should validate input objects', async () => {
+  it('should validate input objects', async () => {
     const typeDefs = `
       input InputMe @acl(resource: "foo", action: "call", idArg: "personId") {
         personId: ID!
