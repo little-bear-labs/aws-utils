@@ -1,4 +1,5 @@
 const aws = require('aws-sdk');
+const debug = require('debug')('aws-utils:index');
 const { findServerless } = require('./findServerless');
 
 const AwsDefaultConfig = {
@@ -28,6 +29,7 @@ const bootstrapAWS = async ({ tables, dynamodb = defaultDynamoDB } = {}) => {
 
     await dynamodb.createTable(params).promise();
     await dynamodb.waitFor('tableExists', { TableName }).promise();
+    debug('created table', { TableName, name });
   }));
 
   return { dynamodb };
@@ -43,6 +45,7 @@ const resetAWS = async ({ tables, dynamodb = defaultDynamoDB } = {}) => {
     }
     await dynamodb.deleteTable({ TableName }).promise();
     await dynamodb.waitFor('tableNotExists', { TableName }).promise();
+    debug('deleted table', { name, TableName });
   }));
 };
 
