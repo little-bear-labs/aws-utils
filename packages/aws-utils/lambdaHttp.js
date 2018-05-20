@@ -89,7 +89,7 @@ async function convertRequestToLambdaRequest(req) {
       },
       apiId: 'mr1ssm7ne1',
     },
-    body,
+    body: JSON.parse(body),
     isBase64Encoded: false,
   };
 }
