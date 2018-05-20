@@ -94,6 +94,12 @@ async function convertRequestToLambdaRequest(req) {
   };
 }
 
+function setCorsHeaders(res) {
+  res.setHeader('Access-Control-Allow-Methods', '*');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+}
+
 function createHandler(functions) {
   const serverlessRoot = findServerlessPath(module.parent);
   const pathMapping = Object.values(functions).reduce((sum, func) => {
@@ -103,7 +109,7 @@ function createHandler(functions) {
     }
 
     const {
-      http: { path: httpPath, method },
+      http: { path: httpPath, method, cors = false },
     } = httpEvent;
     const [handlerPath, handlerExport] = func.handler.split('.');
     // eslint-disable-next-line
@@ -116,6 +122,7 @@ function createHandler(functions) {
     sum[resolvedPath].push({
       method,
       handler,
+      cors,
     });
 
     return sum;
@@ -147,6 +154,7 @@ function createHandler(functions) {
     Object.entries(headers).forEach(([key, value]) => {
       res.setHeader(key, value);
     });
+    if (handler.cors) setCorsHeaders(res);
     res.writeHead(statusCode);
     res.end(body);
   };
