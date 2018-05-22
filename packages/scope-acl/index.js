@@ -1,5 +1,6 @@
 const assert = require('assert');
 const aws = require('aws-sdk');
+const debug = require('debug')('@conduitvc-scope-acl');
 
 // <resource>::<action>::<id>
 const ScopeRegex = /^([a-zA-Z0-9./]+)::([a-zA-Z0-9*./]+)::(.*)$/;
@@ -22,15 +23,18 @@ function parseScope(input) {
 }
 
 function matchesScope(toCheckScopeStr, scopeStringArray) {
+  debug('check scope', toCheckScopeStr);
   const { resource, action, id } = parseScope(toCheckScopeStr);
   const scopes = scopeStringArray.map(str => parseScope(str));
   return !!scopes.find((scope) => {
+    debug('attempting to match scope', toCheckScopeStr, scope);
     // check the resource
     if (resource !== scope.resource) return false;
     // check the action
     if (scope.action !== AllowAllChar && scope.action !== action) return false;
     // check the id
     if (scope.id !== AllowAllChar && scope.id !== id) return false;
+    debug('scope match', { toCheckScopeStr, scope });
     return true;
   });
 }
@@ -44,12 +48,14 @@ function processScope(scope) {
 
 class Manager {
   constructor(table, dynamodb) {
+    assert(table, 'must pass table name');
     this.table = table;
     this.dynamodb = dynamodb;
     this.doc = new aws.DynamoDB.DocumentClient({ service: dynamodb });
   }
 
   async addScope(id, scope) {
+    debug('add scope', { id, scope });
     // eslint-disable-next-line no-param-reassign
     scope = processScope(scope);
     assert(scope);
@@ -96,6 +102,7 @@ class Manager {
   }
 
   async checkScope(id, scopeToCheck) {
+    debug('check scope', { id, scopeToCheck });
     // eslint-disable-next-line no-param-reassign
     scopeToCheck = processScope(scopeToCheck);
     assert(id);
