@@ -51,9 +51,9 @@ describe('@conduitvc/graphql-scope-acl', () => {
     expect(failure.errors[0].message).toContain('foo::call::bar');
   });
 
-  it('should validate input objects', async () => {
+  it('should allow using a function to identify manager', async () => {
     const typeDefs = `
-      input InputMe @acl(resource: "foo", action: "call", idArg: "personId") {
+      input InputMe @acl(resource: "foo", action: "call", idArg: "personId", module: "__test__/aclParam") {
         personId: ID!
       }
 
@@ -65,7 +65,7 @@ describe('@conduitvc/graphql-scope-acl', () => {
     let checkScopes = true;
     let ranCheckScope = false;
     const Vistor = inputDirective(
-      {
+      () => ({
         async checkScope(id, scope) {
           ranCheckScope = true;
           expect(scope).toEqual({
@@ -75,8 +75,8 @@ describe('@conduitvc/graphql-scope-acl', () => {
           });
           return checkScopes;
         },
-      },
-      (value) => {
+      }),
+      ({ root: value }) => {
         expect(value).toMatchObject({ personId: 'person' });
         return 'foo';
       },
