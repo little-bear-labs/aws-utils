@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 const fs = require('mz/fs')
 const YAML = require('yamljs');
+var yaml = require('write-yaml');
 
 const createConfig = require('@conduitvc/config');
 const config = createConfig(module.parent);
@@ -73,10 +74,10 @@ const deriveDataSources = config => {
   const dataSources = config.entities.map(entity => ({
     type: 'AMAZON_DYNAMODB',
     name: entity.name,
-    description: entity.description,
+    description: entity.description || `${entity.name} description`,
     config: {
       tableName: entity.name,
-      serviceRoleArn: "arn:aws:iam::${self:custom.accountId}:role/Dynamo-${self:custom.appSync.serviceRole}",
+      serviceRoleArn: `"arn:aws:iam::\${self:custom.accountId}:role/Dynamo-\${self:custom.appSync.serviceRole}"`,
     },
   }));
 
@@ -86,7 +87,7 @@ const deriveDataSources = config => {
       name: 'SubscriberPassthrough',
       description: 'Non-datasource datasource',
       config: {
-        serviceRoleArn: "arn:aws:iam::${self:custom.accountId}:role/Dynamo-${self:custom.appSync.serviceRole}"
+        serviceRoleArn: `"arn:aws:iam::\${self:custom.accountId}:role/Dynamo-\${self:custom.appSync.serviceRole}"`,
       }
     })
   }
@@ -94,15 +95,14 @@ const deriveDataSources = config => {
 }
 
 const custom = {
-  accountId: config.accountId,
   appSync: {
     accountId: "${env:AWS_ACCOUNT_ID}",
     name: config.name,
-    apiId: config.apiId || undefined,
+    apiId: config.apiId || "",
     authenticationType: 'AMAZON_COGNITO_USER_POOLS',
     userPoolConfig: {
       ...config.userPool,
-      userPoolId: "${env:USER_POOL_ID}"
+      userPoolId: '${env:USER_POOL_ID}'
     },
     region: config.region,
     mappingTemplates: deriveMappingTemplates(config),
@@ -189,17 +189,35 @@ async function main() {
     input = process.cwd();
   }
 
+	/*
   const serverlessYml = fs.createWriteStream(input + '/serverless.yml');
+  
+  serverlessYml.on('error', e => {
+    console.error(e);
+    process.exit(1);
+  });
+
+  serverlessYml.on('finish', () => {
+    console.log('(⌐■_■) Great Job! (⌐■_■)');
+    process.exit(0);
+  });
 
   serverlessYml.write(`service: ${config.name}` + newline(2));
   serverlessYml.write(`frameworkVersion: ">=1.21.0 <2.0.0"` + newline(2));
-  serverlessYml.write(YAML.stringify(provider, 2) + newline(2))
-  serverlessYml.write(YAML.stringify(plugins, 2) + newline(2));
-  serverlessYml.write(YAML.stringify(custom, 2) + newline(1));
-  serverlessYml.end(YAML.stringify(deriveResources(config), 2) + newline(1));
+  serverlessYml.write(YAML.stringify(provider, 10, 2) + newline(2))
+  serverlessYml.write(YAML.stringify(plugins, 10, 2) + newline(2));
+  serverlessYml.write(YAML.stringify(custom, 10, 2) + newline(1));
+  serverlessYml.end(YAML.stringify(deriveResources(config), 10, 2) + newline(1));
+  */
 
-  console.log('(⌐■_■) Great Job! (⌐■_■)');
-  process.exit(0);
+  yaml.sync(input + '/serverless.yml', {
+    service: config.name,
+    frameworkVersion: ">=1.21.0 <2.0.0",
+    provider,
+    plugins,
+    custom,
+    resources: deriveResources(config),
+  });
 }
 
 main().catch((err) => {
