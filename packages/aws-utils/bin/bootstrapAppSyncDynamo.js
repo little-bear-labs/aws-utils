@@ -1,5 +1,6 @@
 #! /usr/bin/env node
 const fs = require('fs')
+const { promises: fsPromises } = fs;
 const YAML = require('yamljs');
 var yaml = require('write-yaml');
 
@@ -182,6 +183,85 @@ const deriveResources = config => {
   return resources;
 }
 
+const writeGraphqlSchema = (dir,config) => {
+  const { entities } = config;
+  const writeStream = fs.createWriteStream(`${dir}/schema.graphql`);
+
+  return new Promise((resolve,reject) => {
+    writeStream.on('error', e => {
+      console.error(e);
+      process.exit(1);
+    });
+
+    writeStream.on('finish', resolve);
+
+    const writeType = type => writeStream.write(`\ntype ${type} {\n`);
+    const writeEnd = () => writeStream.write(`}\n`);
+
+    writeStream.write('schema {\n');
+    writeStream.write('  query: Query\n');
+    writeStream.write('  mutation: Mutation\n');
+    if( entities.some(entity => entity.subscriptions) ) {
+      writeStream.write('  subscription: Subscription\n');
+    }
+    writeEnd();
+
+    writeType('Query');
+    entities.forEach(entity => {
+      const type = entity.name;
+      writeStream.write(`  ${type}byId(id: ID!): ${type}\n`);
+      writeStream.write(`  ${type}(query: [AttributeFilter]): [${type}]!\n`);
+    })
+    writeEnd();
+
+    writeType('Mutation');
+    entities.forEach(entity => {
+      const name = entity.name;
+      writeStream.write(`  put${name}(id: ID, input: ${name}Input!): ${name}!\n`)
+      writeStream.write(`  update${name}(id: ID!, input: ${name}Input!): ${name}!\n`)
+      writeStream.write(`  delete${name}(id: ID!): Boolean\n`)
+    })
+    writeEnd();
+
+    if( entities.some(entity => entity.subscriptions) ) {
+      writeType('Subscription');
+
+      entities
+        .filter(entity => entity.subscriptions)
+        .forEach(entity => {
+          const name = entity.name;
+          entity.subscriptions.forEach(subscription => {
+            writeStream.write(`  subscribeTo${capitalize(subscription)}${name}: ${name}!\n`);
+            writeStream.write(`  @aws_subscribe(mutations: ["${subscription}${name}"])\n`);
+          })
+        })
+      writeEnd();
+    }
+
+    entities.forEach(entity => {
+      const { attributes, name } = entity;
+
+      writeType(name);
+      writeStream.write(`  id: ID!\n`) 
+      writeStream.write(attributes.map(attribute => `  ${attribute.name}: ${attribute.type}`).join('\n'))
+      writeEnd();
+      
+      writeType(name + 'Input');
+      writeStream.write(attributes.map(attribute => `  ${attribute.name}: ${attribute.type}`).join('\n'))
+      writeEnd();
+    })
+
+    writeType('AttributeFilter');
+    writeStream.write(`  expression: String!\n`);
+    writeStream.write(`  expressionName: String!\n`);
+    writeStream.write(`  expressionNumberValue: Float\n`);
+    writeStream.write(`  expressionStringValue: Float\n`);
+    writeEnd();
+
+    writeStream.end();
+  })
+}
+
 async function main() {
   let input = process.argv[2];
 
@@ -189,6 +269,7 @@ async function main() {
     input = process.cwd();
   }
 
+  console.log('(；一_一)   Writing serverless.yml');
   yaml.sync(input + '/serverless.yml', {
     service: config.name,
     frameworkVersion: ">=1.21.0 <2.0.0",
@@ -198,12 +279,34 @@ async function main() {
     resources: deriveResources(config),
   });
 
+  console.log('(ﾉ◕ヮ◕)ﾉ    Copying mapping templates');
+  const fileList = [
+    "byId-request.txt",
+    "result-response.txt",
+    "scan-request.txt",
+    "resultItems-response.txt",
+    "put-request.txt",
+    "update-request.txt",
+    "delete-request.txt",
+    "subscribePassthrough-request.txt",
+  ];
+
   const mappingTemplatesDir = input + '/mapping-templates';
-  if(!fs.exists(mappingTemplatesDir) {
+  if(!fs.existsSync(mappingTemplatesDir)) {
     fs.mkdirSync(mappingTemplatesDir);
   }
+
+  await fileList.map( filename =>
+    fsPromises.copyFile(
+      `${__dirname}/../mapping-templates/${filename}`,
+      `${mappingTemplatesDir}/${filename}`
+    )
+  )
+
+  console.log('Ѱζ༼ᴼل͜ᴼ༽ᶘѰ    Writing schema.graphql');
+  await writeGraphqlSchema(input, config);
   
-  console.log('(⌐■_■) Great Job! (⌐■_■)');
+  console.log('(⌐■_■) Complete! (⌐■_■)');
   process.exit(0);
 }
 
