@@ -1,5 +1,5 @@
 #! /usr/bin/env node
-const fs = require('mz/fs')
+const fs = require('fs')
 const YAML = require('yamljs');
 var yaml = require('write-yaml');
 
@@ -34,7 +34,7 @@ const deriveMappingTemplates = config => {
       dataSource: entity.name,
       type: 'Query',
       field: entity.name,
-      request: "byId-request.txt",
+      request: "scan-request.txt",
       response: "resultItems-response.txt",
     },{
       dataSource: entity.name,
@@ -62,7 +62,7 @@ const deriveMappingTemplates = config => {
           type: 'Subscription',
           field: 'subscribeTo' + capitalize(subscription) + entity.name,
           request: "subscribePassthrough-request.txt",
-          response: "subscribePassthrough-response.txt",
+          response: "result-response.txt",
         })
       })
     }
@@ -185,30 +185,9 @@ const deriveResources = config => {
 async function main() {
   let input = process.argv[2];
 
-  if(!input || !(await fs.exists(input))) {
+  if(!input || !fs.existsSync(input)) {
     input = process.cwd();
   }
-
-	/*
-  const serverlessYml = fs.createWriteStream(input + '/serverless.yml');
-  
-  serverlessYml.on('error', e => {
-    console.error(e);
-    process.exit(1);
-  });
-
-  serverlessYml.on('finish', () => {
-    console.log('(⌐■_■) Great Job! (⌐■_■)');
-    process.exit(0);
-  });
-
-  serverlessYml.write(`service: ${config.name}` + newline(2));
-  serverlessYml.write(`frameworkVersion: ">=1.21.0 <2.0.0"` + newline(2));
-  serverlessYml.write(YAML.stringify(provider, 10, 2) + newline(2))
-  serverlessYml.write(YAML.stringify(plugins, 10, 2) + newline(2));
-  serverlessYml.write(YAML.stringify(custom, 10, 2) + newline(1));
-  serverlessYml.end(YAML.stringify(deriveResources(config), 10, 2) + newline(1));
-  */
 
   yaml.sync(input + '/serverless.yml', {
     service: config.name,
@@ -218,6 +197,14 @@ async function main() {
     custom,
     resources: deriveResources(config),
   });
+
+  const mappingTemplatesDir = input + '/mapping-templates';
+  if(!fs.exists(mappingTemplatesDir) {
+    fs.mkdirSync(mappingTemplatesDir);
+  }
+  
+  console.log('(⌐■_■) Great Job! (⌐■_■)');
+  process.exit(0);
 }
 
 main().catch((err) => {

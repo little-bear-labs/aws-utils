@@ -1,0 +1,24 @@
+#set($expressionValues = { ":modifyDate": $util.dynamodb.toDynamoDB($util.time.nowEpochMilliSeconds())})
+#set($expressionNames = {"#modifyDate": "modifyDate"})
+#foreach( $item in $ctx.args.input )
+  #set( $values = $expressionNames.put("#$item.get('expressionName')", $item.get('expressionName')) )
+  #if($item.get("expressionStringValue"))
+    #set( $value =  $item.get("expressionStringValue") ) 
+  #else
+    #set( $value =  $item.get("expressionNumberValue") ) 
+  #end
+  #set( $values = $expressionValues.put(":$item.get('expressionName')", $util.dynamodb.toDynamoDB($value)) )
+  #end
+#end
+{
+  "version" : "2017-02-28",
+  "operation" : "UpdateItem",
+  "key" : {
+			"id" : { "S" : "${ctx.args.id}" }
+	},
+  "update": {
+    "expression": "${ctx.args.expression} AND SET #modifyDate = :modifyDate",
+    "expressionNames" : $utils.toJson($expressionNames),
+    "expressionValues" : $utils.toJson($expressionValues),
+  },
+}
