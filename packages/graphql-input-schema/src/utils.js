@@ -20,7 +20,9 @@ function extractArgumentValue(arg) {
   const { kind, value } = arg.value;
   switch (kind) {
     case 'ListValue':
-      return arg.value.values.map(subArg => extractArgumentValue({ value: subArg }));
+      return arg.value.values.map(subArg =>
+        extractArgumentValue({ value: subArg }),
+      );
     case 'IntValue':
       return parseInt(value, 10);
     case 'FloatValue':

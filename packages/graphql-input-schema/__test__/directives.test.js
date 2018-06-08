@@ -11,24 +11,26 @@ describe('transformers', () => {
     },
     Query: {},
   };
-  const executeArray = (schema, variables) => graphql({
-    schema,
-    source: `
+  const executeArray = (schema, variables) =>
+    graphql({
+      schema,
+      source: `
         mutation test($input: [Input]!) {
           test(input: $input)
         }
       `,
-    variableValues: variables,
-  });
-  const execute = (schema, variables) => graphql({
-    schema,
-    source: `
+      variableValues: variables,
+    });
+  const execute = (schema, variables) =>
+    graphql({
+      schema,
+      source: `
         mutation test($input: Input!) {
           test(input: $input)
         }
       `,
-    variableValues: variables,
-  });
+      variableValues: variables,
+    });
 
   const hasError = (result, message) => {
     expect(result.errors).toBeTruthy();
@@ -153,9 +155,7 @@ describe('transformers', () => {
       args: 'max: 2',
       message: '2',
     },
-  ].forEach(({
-    method, valid, invalid, message, args,
-  }) => {
+  ].forEach(({ method, valid, invalid, message, args }) => {
     describe(method, () => {
       const schema = makeExecutableSchema({
         typeDefs: gql`

@@ -1,7 +1,9 @@
 const { graphql } = require('graphql');
 const { makeExecutableSchema } = require('graphql-tools');
 const { typeDirective, inputDirective } = require('..');
-const { makeExecutableSchema: inputExecSchema } = require('@conduitvc/graphql-input-schema');
+const {
+  makeExecutableSchema: inputExecSchema,
+} = require('@conduitvc/graphql-input-schema');
 
 describe('@conduitvc/graphql-scope-acl', () => {
   it('should validate fields', async () => {
@@ -95,20 +97,32 @@ describe('@conduitvc/graphql-scope-acl', () => {
       },
     });
 
-    const success = await graphql(schema, 'query($foo: InputMe!) { foo(obj: $foo) }', null, null, {
-      foo: {
-        personId: 'person',
+    const success = await graphql(
+      schema,
+      'query($foo: InputMe!) { foo(obj: $foo) }',
+      null,
+      null,
+      {
+        foo: {
+          personId: 'person',
+        },
       },
-    });
+    );
     expect(success.errors).toBeFalsy();
     expect(ranCheckScope).toBe(true);
 
     checkScopes = false;
-    const failure = await graphql(schema, 'query($foo: InputMe!) { foo(obj: $foo) }', null, null, {
-      foo: {
-        personId: 'person',
+    const failure = await graphql(
+      schema,
+      'query($foo: InputMe!) { foo(obj: $foo) }',
+      null,
+      null,
+      {
+        foo: {
+          personId: 'person',
+        },
       },
-    });
+    );
     expect(failure.errors).toBeTruthy();
     expect(failure.errors[0].message).toContain('foo::call::person');
   });
