@@ -26,7 +26,7 @@ function matchesScope(toCheckScopeStr, scopeStringArray) {
   debug('check scope', toCheckScopeStr);
   const { resource, action, id } = parseScope(toCheckScopeStr);
   const scopes = scopeStringArray.map(str => parseScope(str));
-  return !!scopes.find((scope) => {
+  return !!scopes.find(scope => {
     debug('attempting to match scope', toCheckScopeStr, scope);
     // check the resource
     if (resource !== scope.resource) return false;

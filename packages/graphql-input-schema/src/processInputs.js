@@ -2,7 +2,13 @@ const { visit } = require('graphql/language');
 const { extractName, extractArguments, typeInfo } = require('./utils');
 const debug = require('debug')('graphql-input-schema:inputs');
 
-async function reduceDirectives(input, value, requestConfig, inputDirectives, config) {
+async function reduceDirectives(
+  input,
+  value,
+  requestConfig,
+  inputDirectives,
+  config,
+) {
   for (const transformer of inputDirectives) {
     // eslint-disable-next-line
     value = await transformer.function(value, transformer.args, {
@@ -33,7 +39,13 @@ function createFieldTransformer(name, fields, config) {
 
 function createObjectTransformer(input, config) {
   return async (object, requestConfig) =>
-    reduceDirectives(input, object, requestConfig, input.objectValidators, config);
+    reduceDirectives(
+      input,
+      object,
+      requestConfig,
+      input.objectValidators,
+      config,
+    );
 }
 
 function processFieldDirective(source, field, node, { inputDirectives }) {
@@ -136,60 +148,71 @@ function processInput(source, doc, config) {
     },
   });
 
-  const inputs = Object.entries(inputMapping).reduce((sum, [inputName, input]) => {
-    // resolve any outstanding references to input types in the transformers.
-    const inputFieldMap = {};
-    Object.values(input.fields)
-      // eslint-disable-next-line no-shadow
-      .map((field) => {
-        const { type, isCustomType } = field;
-        // if it's not some kind of custom input type then move on.
-        if (isCustomType === false) {
+  const inputs = Object.entries(inputMapping).reduce(
+    (sum, [inputName, input]) => {
+      // resolve any outstanding references to input types in the transformers.
+      const inputFieldMap = {};
+      Object.values(input.fields)
+        // eslint-disable-next-line no-shadow
+        .map(field => {
+          const { type, isCustomType } = field;
+          // if it's not some kind of custom input type then move on.
+          if (isCustomType === false) {
+            return field;
+          }
+
+          // must be both a custom type and input type for us to apply the object validation.
+          const inputType = inputMapping[type];
+          if (!inputType) {
+            return field;
+          }
+
+          // XXX: Note how this is modified by reference. This is very intentional
+          // because field transformers may reference other input field transformers which
+          // have not been fully resolved yet. Once this entire loop is finished _then_
+          // the validator will be ready to be called.
+          debug('create nested validator', field.type, field.name);
+          field.inputDirectives.push({
+            name: 'nested',
+            function: createFieldTransformer(
+              inputType,
+              inputMapping[inputType.name].fields,
+              config,
+            ),
+            args: {},
+          });
+
           return field;
-        }
+        })
+        // eslint-disable-next-line no-shadow
+        .reduce((sum, field) => {
+          // eslint-disable-next-line no-param-reassign
+          sum[field.name] = field;
+          return sum;
+        }, inputFieldMap);
 
-        // must be both a custom type and input type for us to apply the object validation.
-        const inputType = inputMapping[type];
-        if (!inputType) {
-          return field;
-        }
+      const objectTransformer = createObjectTransformer(input, config);
+      const fieldsTransformer = createFieldTransformer(
+        inputName,
+        inputFieldMap,
+        config,
+      );
 
-        // XXX: Note how this is modified by reference. This is very intentional
-        // because field transformers may reference other input field transformers which
-        // have not been fully resolved yet. Once this entire loop is finished _then_
-        // the validator will be ready to be called.
-        debug('create nested validator', field.type, field.name);
-        field.inputDirectives.push({
-          name: 'nested',
-          function: createFieldTransformer(inputType, inputMapping[inputType.name].fields, config),
-          args: {},
-        });
+      const transformer = async (value, requestConfig) => {
+        const fieldValue = await fieldsTransformer(value, requestConfig);
+        return objectTransformer(fieldValue, requestConfig);
+      };
 
-        return field;
-      })
-      // eslint-disable-next-line no-shadow
-      .reduce((sum, field) => {
-        // eslint-disable-next-line no-param-reassign
-        sum[field.name] = field;
-        return sum;
-      }, inputFieldMap);
+      // eslint-disable-next-line no-param-reassign
+      sum[inputName] = {
+        ...input,
+        transformer,
+      };
 
-    const objectTransformer = createObjectTransformer(input, config);
-    const fieldsTransformer = createFieldTransformer(inputName, inputFieldMap, config);
-
-    const transformer = async (value, requestConfig) => {
-      const fieldValue = await fieldsTransformer(value, requestConfig);
-      return objectTransformer(fieldValue, requestConfig);
-    };
-
-    // eslint-disable-next-line no-param-reassign
-    sum[inputName] = {
-      ...input,
-      transformer,
-    };
-
-    return sum;
-  }, {});
+      return sum;
+    },
+    {},
+  );
 
   return [inputAST, inputs];
 }

@@ -47,7 +47,7 @@ const createUser = async (cognito, { userPoolId, username, password }) => {
       onSuccess: () => {
         accept(user);
       },
-      onFailure: (err) => {
+      onFailure: err => {
         reject(err);
       },
       newPasswordRequired: () => {
@@ -94,7 +94,7 @@ async function main() {
   console.log();
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.error('Something went wrong', err.stack);
   process.exit(1);
 });

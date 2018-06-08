@@ -38,7 +38,9 @@ function fieldToResolver(typeName, resolvers, field, inputTypes) {
   const fieldName = extractName(field);
   const resolver = resolverType[fieldName];
   if (!resolver && field.arguments.length) {
-    throw new Error(`Resolver type ${typeName}.${extractName(field)} is unhandled`);
+    throw new Error(
+      `Resolver type ${typeName}.${extractName(field)} is unhandled`,
+    );
   }
 
   // convert arguments into argument preprocessors
@@ -58,7 +60,10 @@ function fieldToResolver(typeName, resolvers, field, inputTypes) {
     const parsedArgs = {};
 
     for (const [key, value] of Object.entries(args)) {
-      assert(argHandlers[key], 'missing argument handler this should never happen!');
+      assert(
+        argHandlers[key],
+        'missing argument handler this should never happen!',
+      );
       // XXX: These could run in parallel
       parsedArgs[key] = await argHandlers[key](value, {
         context: ctx,
@@ -97,11 +102,16 @@ function makeExecutableSchema({
   // build the resolvers
   const topLevelResolvers = doc.definitions
     .filter(({ kind }) => kind === 'ObjectTypeDefinition')
-    .map((node) => {
+    .map(node => {
       const name = extractName(node);
       const fieldResolvers = node.fields.reduce(
         (sum, field) => ({
-          [extractName(field)]: fieldToResolver(name, resolvers, field, inputTypes),
+          [extractName(field)]: fieldToResolver(
+            name,
+            resolvers,
+            field,
+            inputTypes,
+          ),
           ...sum,
         }),
         {},

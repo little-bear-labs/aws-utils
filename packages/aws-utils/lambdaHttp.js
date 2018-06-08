@@ -57,7 +57,8 @@ async function convertRequestToLambdaRequest(req) {
           event_id: '92903e4b-5b83-11e8-a2bb-0b82a536e450',
           token_use: 'id',
           auth_time: '1526748129',
-          iss: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_27WcML9k8',
+          iss:
+            'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_27WcML9k8',
           'cognito:username': 'd9aeaadc-e677-4c65-9d69-a4d6f3a7df86',
           exp: 'Sat May 19 21:59:13 UTC 2018',
           iat: 'Sat May 19 20:59:13 UTC 2018',
@@ -142,8 +143,9 @@ function createHandler(functions) {
       return;
     }
 
-    const handler =
-      handlers.find(handle => handle.method.toLowerCase() === req.method.toLowerCase());
+    const handler = handlers.find(
+      handle => handle.method.toLowerCase() === req.method.toLowerCase(),
+    );
     if (!handler) {
       debug('no handler for method', { url: req.url, method: req.method });
       res.writeHead(404);
@@ -152,11 +154,9 @@ function createHandler(functions) {
     }
 
     const event = await convertRequestToLambdaRequest(req);
-    const {
-      body = '',
-      statusCode = 200,
-      headers = {},
-    } = await util.promisify(handler.handler)(event, {});
+    const { body = '', statusCode = 200, headers = {} } = await util.promisify(
+      handler.handler,
+    )(event, {});
     debug('set response', { body, statusCode, headers });
 
     Object.entries(headers).forEach(([key, value]) => {

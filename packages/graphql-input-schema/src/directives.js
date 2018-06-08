@@ -44,7 +44,10 @@ const runValidatorSingleValue = (method, meta, value, args, err) => {
     return runValidator(method, value, args, err);
   }
 
-  return value.reduce((sum, toValidate) => runValidator(method, toValidate, args, err), value);
+  return value.reduce(
+    (sum, toValidate) => runValidator(method, toValidate, args, err),
+    value,
+  );
 };
 
 function validateIsIn(value, { in: inputs }, meta) {
@@ -138,7 +141,14 @@ module.exports = {
   class: classDirective,
 };
 
-SIMPLE_SINGLE.forEach((method) => {
+SIMPLE_SINGLE.forEach(method => {
   const name = `validate${method[0].toUpperCase()}${method.slice(1)}`;
-  module.exports[name] = (value, _, meta) => runValidatorSingleValue(method, meta, value, [], () => `value fails pattern ${name}`);
+  module.exports[name] = (value, _, meta) =>
+    runValidatorSingleValue(
+      method,
+      meta,
+      value,
+      [],
+      () => `value fails pattern ${name}`,
+    );
 });
