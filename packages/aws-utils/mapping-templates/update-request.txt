@@ -14,7 +14,7 @@
   "version" : "2017-02-28",
   "operation" : "UpdateItem",
   "key" : {
-			"id" : { "S" : "${ctx.args.id}" }
+    "id" : { "S" : "${ctx.args.id}" }
 	},
   "update": {
     "expression": "${ctx.args.expression} AND SET #modifyDate = :modifyDate",

@@ -9,21 +9,14 @@
   },
   "dependencies": {
     "@conduitvc/config": "^1.0.0",
-    "add": "^2.0.6",
     "amazon-cognito-identity-js": "^2.0.6",
     "aws-sdk": "^2.238.1",
     "debug": "^3.1.0",
     "event-to-promise": "^0.8.0",
     "js-yaml": "^3.11.0",
-    "mz": "^2.7.0",
     "node-fetch": "^2.1.2",
     "pkg-up": "^2.0.0",
     "uuid": "^3.2.1",
-    "write-yaml": "^1.0.0",
-    "yamljs": "^0.3.0",
-    "yarn": "^1.7.0"
-  },
-  "devDependencies": {
-    "json2yaml": "^1.1.0"
+    "write-yaml": "^1.0.0"
   }
 }

@@ -1,10 +1,9 @@
 #! /usr/bin/env node
+const createConfig = require('@conduitvc/config');
 const fs = require('fs');
+const yaml = require('write-yaml');
 
 const { promises: fsPromises } = fs;
-const yaml = require('write-yaml');
-const createConfig = require('@conduitvc/config');
-
 const capitalize = val => val.charAt(0).toUpperCase() + val.slice(1);
 const config = createConfig(module.parent);
 
