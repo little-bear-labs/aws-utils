@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "bin": {
-    "./bin/createCognitoUser.js": "createCognitoUser"
+    "./bin/createCognitoUser.js": "createCognitoUser",
+    "./bin/bootstrapAppSyncDynamo.js": "bootstrapAppSyncDynamo"
   },
   "dependencies": {
     "@conduitvc/config": "^1.0.0",
