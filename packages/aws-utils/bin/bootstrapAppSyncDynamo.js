@@ -67,7 +67,7 @@ const deriveDataSources = () => {
 
   if (config.entities.some(entity => entity.subscriptions)) {
     dataSources.push({
-      type: 'None',
+      type: 'NONE',
       name: 'SubscriberPassthrough',
       description: 'Non-datasource datasource',
       config: {
@@ -160,6 +160,7 @@ const writeGraphqlSchema = (dir) => {
 
     writeStream.on('finish', resolve);
 
+    const writeInput = type => writeStream.write(`\ninput ${type} {\n`);
     const writeType = type => writeStream.write(`\ntype ${type} {\n`);
     const writeEnd = () => writeStream.write('}\n');
 
@@ -174,7 +175,7 @@ const writeGraphqlSchema = (dir) => {
     writeType('Query');
     entities.forEach((entity) => {
       const type = entity.name;
-      writeStream.write(`  ${type}byId(id: ID!): ${type}\n`);
+      writeStream.write(`  ${type}ById(id: ID!): ${type}\n`);
       writeStream.write(`  ${type}(query: [AttributeFilter]): [${type}]!\n`);
     });
     writeEnd();
@@ -211,12 +212,12 @@ const writeGraphqlSchema = (dir) => {
       writeStream.write(`${attributes.map(attribute => `  ${attribute.name}: ${attribute.type}`).join('\n')}\n`);
       writeEnd();
 
-      writeType(`${name}Input`);
+      writeInput(`${name}Input`);
       writeStream.write(`${attributes.map(attribute => `  ${attribute.name}: ${attribute.type}`).join('\n')}\n`);
       writeEnd();
     });
 
-    writeType('AttributeFilter');
+    writeInput('AttributeFilter', true);
     writeStream.write('  expression: String!\n');
     writeStream.write('  expressionName: String!\n');
     writeStream.write('  expressionNumberValue: Float\n');
@@ -242,14 +243,14 @@ const writeServerless = (input) => {
       'serverless-appsync-plugin',
     ],
     custom: {
+      accountId: '${opt:AWS_ACCOUNT_ID}',
       appSync: {
-        accountId: '${env:AWS_ACCOUNT_ID}',
         name: config.name,
         apiId: config.apiId || '',
         authenticationType: 'AMAZON_COGNITO_USER_POOLS',
         userPoolConfig: {
           ...config.userPool,
-          userPoolId: '${env:USER_POOL_ID}',
+          userPoolId: '${opt:USER_POOL_ID}',
         },
         region: config.region,
         mappingTemplates: deriveMappingTemplates(),
