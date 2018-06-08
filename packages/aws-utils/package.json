@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "bin": {
-    "./bin/createCognitoUser.js": "createCognitoUser"
+    "./bin/createCognitoUser.js": "createCognitoUser",
+    "./bin/bootstrapAppSyncDynamo.js": "bootstrapAppSyncDynamo"
   },
   "dependencies": {
     "@conduitvc/config": "^1.0.0",
@@ -15,6 +16,7 @@
     "js-yaml": "^3.11.0",
     "node-fetch": "^2.1.2",
     "pkg-up": "^2.0.0",
-    "uuid": "^3.2.1"
+    "uuid": "^3.2.1",
+    "write-yaml": "^1.0.0"
   }
 }
