@@ -8,7 +8,10 @@ const findServerlessPath = ({ parent: { filename } } = module) =>
   path.dirname(pkgUp.sync(filename));
 
 const findServerless = (mod = module) => {
-  const serverlessPath = path.join(findServerlessPath(mod), 'serverless.yml');
+  const serverlessPath =
+    typeof mod === 'string'
+      ? mod
+      : path.join(findServerlessPath(mod), 'serverless.yml');
   if (GlobalCache[serverlessPath]) {
     return GlobalCache[serverlessPath];
   }

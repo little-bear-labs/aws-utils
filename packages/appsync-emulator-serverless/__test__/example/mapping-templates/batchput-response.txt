@@ -1,0 +1,10 @@
+## there was an error let's mark the entire field
+## as failed and do not return any data back in the response
+#if ($ctx.error)
+    $util.error($ctx.error.message, $ctx.error.type, null, $ctx.result.data.unprocessedKeys)
+#end
+
+{
+  "request": $util.toJson($ctx.result.data["QuoteRequest-emulator"][0]),
+  "response": $util.toJson($ctx.result.data["QuoteResponse-emulator"][0]),
+}

@@ -1,0 +1,233 @@
+service: appsync-bootstrap-test
+frameworkVersion: '>=1.21.0 <2.0.0'
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: us-east-1
+package:
+  exclude:
+    - node_modules/**
+plugins:
+  - serverless-appsync-plugin
+custom:
+  accountId: 229055845648
+  appSync:
+    name: appsync-bootstrap-test
+    authenticationType: AMAZON_COGNITO_USER_POOLS
+    userPoolConfig:
+      awsRegion: us-east-1
+      defaultAction: ALLOW
+      userPoolId: us-east-1_27WcML9k8
+    region: us-east-2
+    mappingTemplates:
+      - dataSource: QuoteRequest
+        type: Query
+        field: error
+        request: error-request.txt
+        response: result-response.txt
+      - dataSource: QuoteRequest
+        type: Query
+        field: QuoteRequestById
+        request: byId-request.txt
+        response: result-response.txt
+      - dataSource: QuoteRequest
+        type: Query
+        field: QuoteRequest
+        request: scan-request.txt
+        response: resultItems-response.txt
+      - dataSource: QuoteRequest
+        type: Mutation
+        field: putQuoteRequest
+        request: put-request.txt
+        response: result-response.txt
+      - dataSource: QuoteRequest
+        type: Mutation
+        field: batchPutQuotes
+        request: batchput-request.txt
+        response: batchput-response.txt
+      - dataSource: QuoteRequest
+        type: Mutation
+        field: badBatchPutQuotes
+        request: badbatchput-request.txt
+        response: batchput-response.txt
+      - dataSource: QuoteRequest
+        type: Mutation
+        field: updateQuoteRequest
+        request: update-request.txt
+        response: result-response.txt
+      - dataSource: QuoteRequest
+        type: Mutation
+        field: deleteQuoteRequest
+        request: delete-request.txt
+        response: result-response.txt
+      - dataSource: SubscriberPassthrough
+        type: Subscription
+        field: subscribeToPutQuoteRequest
+        request: subscribePassthrough-request.txt
+        response: result-response.txt
+      - dataSource: SubscriberPassthrough
+        type: Subscription
+        field: neverNotify
+        request: subscribePassthrough-request.txt
+        response: null-response.txt
+      - dataSource: QuoteResponse
+        type: Query
+        field: QuoteResponseById
+        request: byId-request.txt
+        response: result-response.txt
+      - dataSource: QuoteResponse
+        type: Query
+        field: QuoteResponse
+        request: scan-request.txt
+        response: resultItems-response.txt
+      - dataSource: QuoteResponse
+        type: Mutation
+        field: putQuoteResponse
+        request: put-request.txt
+        response: result-response.txt
+      - dataSource: QuoteResponse
+        type: Mutation
+        field: updateQuoteResponse
+        request: update-request.txt
+        response: result-response.txt
+      - dataSource: QuoteResponse
+        type: Mutation
+        field: deleteQuoteResponse
+        request: delete-request.txt
+        response: result-response.txt
+      - dataSource: SubscriberPassthrough
+        type: Subscription
+        field: subscribeToPutQuoteResponse
+        request: subscribePassthrough-request.txt
+        response: result-response.txt
+      - dataSource: SubscriberPassthrough
+        type: Query
+        field: cognitoInfo
+        request: subscribePassthrough-request.txt
+        response: cognito-response.txt
+      - dataSource: TestLambda
+        field: lambda
+        type: Query
+        request: lambda-request.vtl
+        response: result-response.txt
+    serviceRole: "AppSyncServiceRole"
+    dataSources:
+      - type: AMAZON_DYNAMODB
+        name: QuoteRequest
+        description: QuoteRequest description
+        config:
+          tableName: QuoteRequest-emulator
+          serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
+      - type: AMAZON_DYNAMODB
+        name: QuoteResponse
+        description: QuoteResponse description
+        config:
+          tableName: QuoteResponse-emulator
+          serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
+      - type: NONE
+        name: SubscriberPassthrough
+        description: Non-datasource datasource
+        config:
+          serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
+      - type: AWS_LAMBDA
+        name: TestLambda
+        description: 'Lambda DataSource'
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+          functionName: graphql
+functions:
+    graphql:
+        handler: handler.graphql
+resources:
+  Resources:
+    QuoteRequestTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: QuoteRequest-emulator
+    QuoteResponseTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: QuoteResponse-emulator
+    AppSyncLambdaServiceRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: Lambda-${self:custom.appSync.serviceRole}-${self:service}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            -
+              Effect: "Allow"
+              Principal:
+                Service:
+                  - "appsync.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
+        Policies:
+          -
+            PolicyName: "Lambda-${self:custom.appSync.serviceRole}-Policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                -
+                  Effect: "Allow"
+                  Action:
+                    - "lambda:invokeFunction"
+                  Resource:
+                    - { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
+
+    AppSyncDynamoDBServiceRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: "Dynamo-${self:custom.appSync.serviceRole}-${self:service}"
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            -
+              Effect: "Allow"
+              Principal:
+                Service:
+                  - "appsync.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
+        Policies:
+          -
+            PolicyName: "Dynamo-${self:custom.appSync.serviceRole}-${self:service}-Policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                -
+                  Effect: "Allow"
+                  Action:
+                    - "dynamodb:Query"
+                    - "dynamodb:BatchGetItem"
+                    - "dynamodb:BatchWriteItem"
+                    - "dynamodb:GetItem"
+                    - "dynamodb:DeleteItem"
+                    - "dynamodb:PutItem"
+                    - "dynamodb:Scan"
+                    - "dynamodb:UpdateItem"
+                  Resource:
+                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteResponse-emulator"
+                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteResponse-emulator/*"
+                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteRequest-emulator"
+                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteRequest-emulator/*"

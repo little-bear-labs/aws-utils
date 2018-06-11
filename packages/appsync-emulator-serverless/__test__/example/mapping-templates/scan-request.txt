@@ -1,0 +1,27 @@
+#set($expression = "")
+#set($expressionValues = {})
+#set($expressionNames = {})
+#foreach( $filter in $context.arguments.query )
+  #set( $expression = "${expression} $filter.expression" )
+  #set( $values = $expressionNames.put("#$filter.get('expressionName')", $filter.get('expressionName')) )
+  #if($filter.get("expressionStringValue"))
+    #set( $value =  $filter.get("expressionStringValue") )
+  #else
+    #set( $value =  $filter.get("expressionNumberValue") )
+  #end
+  #set( $values = $expressionValues.put(":$filter.get('expressionName')", $util.dynamodb.toDynamoDB($value)) )
+  #if ( $foreach.hasNext )
+  #set( $expression = "${expression} AND" )
+  #end
+#end
+{
+  "version" : "2017-02-28",
+  "operation" : "Scan",
+  "filter" : {
+    "expression": "${expression}",
+    "expressionNames" : $utils.toJson($expressionNames),
+    "expressionValues" : $utils.toJson($expressionValues),
+  },
+  "limit": #if($context.arguments.limit) $context.arguments.limit #else 10 #end,
+  "nextToken": #if($context.arguments.nextToken) "$context.arguments.nextToken" #else null #end
+}

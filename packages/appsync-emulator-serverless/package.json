@@ -1,0 +1,40 @@
+{
+  "name": "@conduitvc/appsync-emulator-serverless",
+  "version": "0.3.2",
+  "main": "schema.js",
+  "license": "MIT",
+  "bin": {
+    "appsync-emulator": "./bin/server.js"
+  },
+  "dependencies": {
+    "@conduitvc/aws-utils": "^1.2.0",
+    "argparse": "^1.0.10",
+    "aws-sdk": "^2.254.1",
+    "consola": "^1.4.1",
+    "cors": "^2.8.4",
+    "dateformat": "^3.0.3",
+    "event-to-promise": "^0.8.0",
+    "express": "^4.16.3",
+    "graphql": "0.13.2",
+    "graphql-subscriptions": "^0.5.8",
+    "graphql-tag": "^2.9.2",
+    "graphql-tools": "^3.0.2",
+    "js-string-escape": "^1.0.1",
+    "json5": "^1.0.1",
+    "jwt-decode": "^2.2.0",
+    "logdown": "^3.2.3",
+    "mosca": "^2.8.2",
+    "ngrok": "^3.0.1",
+    "node-fetch": "^2.1.2",
+    "paho-mqtt": "^1.0.4",
+    "pkg-up": "^2.0.0",
+    "serverless": "^1.27.3",
+    "uuid": "^3.2.1",
+    "velocityjs": "lightsofapollo/velocity.js#allow-own-keyset"
+  },
+  "devDependencies": {
+    "apollo-boost": "^0.1.7",
+    "aws-appsync": "ConduitVC/aws-appsync",
+    "websocket": "^1.0.26"
+  }
+}
