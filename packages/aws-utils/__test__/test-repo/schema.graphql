@@ -1,0 +1,39 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type Query {
+  BazById(id: ID!): Baz
+  Baz(query: [AttributeFilter]): [Baz]!
+}
+
+type Mutation {
+  putBaz(id: ID, input: BazInput!): Baz!
+  updateBaz(id: ID!, input: BazInput!): Baz!
+  deleteBaz(id: ID!): Boolean
+}
+
+type Subscription {
+  subscribeToPutBaz: Baz!
+  @aws_subscribe(mutations: ["putBaz"])
+}
+
+type Baz {
+  id: ID!
+  foo: String
+  bar: Float
+}
+
+input BazInput {
+  foo: String
+  bar: Float
+}
+
+input AttributeFilter {
+  expression: String!
+  expressionName: String!
+  expressionNumberValue: Float
+  expressionStringValue: Float
+}

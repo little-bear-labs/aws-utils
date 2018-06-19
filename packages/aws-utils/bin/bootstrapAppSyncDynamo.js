@@ -5,7 +5,7 @@ const yaml = require('write-yaml');
 
 const { promises: fsPromises } = fs;
 const capitalize = val => val.charAt(0).toUpperCase() + val.slice(1);
-const config = createConfig(module.parent);
+const config = createConfig(module.parent)
 
 const deriveMappingTemplates = () =>
   config.entities.reduce((sum, entity) => {
@@ -61,7 +61,7 @@ const deriveDataSources = () => {
     description: entity.description || `${entity.name} description`,
     config: {
       tableName: entity.name,
-      serviceRoleArn: '"arn:aws:iam::${self:custom.accountId}:role/Dynamo-${self:custom.appSync.serviceRole}"',
+      serviceRoleArn: '"arn:aws:iam::${self:custom.accountId}:role/Dynamo-${self:custom.appSync.serviceRole}"', // eslint-disable-line no-template-curly-in-string
     },
   }));
 
@@ -71,7 +71,8 @@ const deriveDataSources = () => {
       name: 'SubscriberPassthrough',
       description: 'Non-datasource datasource',
       config: {
-        serviceRoleArn: '"arn:aws:iam::${self:custom.accountId}:role/Dynamo-${self:custom.appSync.serviceRole}"',
+        serviceRoleArn: '"arn:aws:iam::${self:custom.accountId}:role/Dynamo-${self:custom.appSync.serviceRole}"', // eslint-disable-line no-template-curly-in-string
+
       },
     });
   }
@@ -243,18 +244,18 @@ const writeServerless = (input) => {
       'serverless-appsync-plugin',
     ],
     custom: {
-      accountId: '${opt:AWS_ACCOUNT_ID}',
+      accountId: '${opt:AWS_ACCOUNT_ID}', // eslint-disable-line no-template-curly-in-string
       appSync: {
         name: config.name,
         apiId: config.apiId || '',
         authenticationType: 'AMAZON_COGNITO_USER_POOLS',
         userPoolConfig: {
           ...config.userPool,
-          userPoolId: '${opt:USER_POOL_ID}',
+          userPoolId: '${opt:USER_POOL_ID}', // eslint-disable-line no-template-curly-in-string
         },
         region: config.region,
         mappingTemplates: deriveMappingTemplates(),
-        serviceRole: 'AppSyncServiceRole',
+        serviceRole: AppSyncServiceRole,
         dataSources: deriveDataSources(),
       },
     },

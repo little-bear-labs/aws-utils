@@ -18,5 +18,9 @@
     "pkg-up": "^2.0.0",
     "uuid": "^3.2.1",
     "write-yaml": "^1.0.0"
+  },
+  "devDependencies": {
+    "del": "^3.0.0",
+    "serverless-appsync-plugin": "^1.0.0"
   }
 }

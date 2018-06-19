@@ -1,0 +1,111 @@
+service: bootstrap-appsync-dynamo-test
+frameworkVersion: '>=1.21.0 <2.0.0'
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: dev
+  region: us-east-2
+plugins:
+  - serverless-appsync-plugin
+custom:
+  accountId: '${opt:AWS_ACCOUNT_ID}'
+  appSync:
+    name: bootstrap-appsync-dynamo-test
+    apiId: ''
+    authenticationType: AMAZON_COGNITO_USER_POOLS
+    userPoolConfig:
+      awsRegion: us-east-2
+      defaultAction: ALLOW
+      userPoolId: '${opt:USER_POOL_ID}'
+    region: us-east-2
+    mappingTemplates:
+      - dataSource: Baz
+        type: Query
+        field: BazById
+        request: byId-request.txt
+        response: result-response.txt
+      - dataSource: Baz
+        type: Query
+        field: Baz
+        request: scan-request.txt
+        response: resultItems-response.txt
+      - dataSource: Baz
+        type: Mutation
+        field: putBaz
+        request: put-request.txt
+        response: result-response.txt
+      - dataSource: Baz
+        type: Mutation
+        field: updateBaz
+        request: update-request.txt
+        response: result-response.txt
+      - dataSource: Baz
+        type: Mutation
+        field: deleteBaz
+        request: delete-request.txt
+        response: result-response.txt
+      - dataSource: SubscriberPassthrough
+        type: Subscription
+        field: subscribeToPutBaz
+        request: subscribePassthrough-request.txt
+        response: result-response.txt
+    serviceRole: "AppSyncServiceRole"
+    dataSources:
+      - type: AMAZON_DYNAMODB
+        name: Baz
+        description: Baz description
+        config:
+          tableName: Baz
+          serviceRoleArn: >-
+            "arn:aws:iam::${self:custom.accountId}:role/Dynamo-${self:custom.appSync.serviceRole}"
+      - type: NONE
+        name: SubscriberPassthrough
+        description: Non-datasource datasource
+        config:
+          serviceRoleArn: >-
+            "arn:aws:iam::${self:custom.accountId}:role/Dynamo-${self:custom.appSync.serviceRole}"
+resources:
+  Resources:
+    BazTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
+        TableName: Baz
+    AppSyncServiceRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: "Dynamo-AppSyncServiceRole"
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "appsync.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
+        Policies:
+          - PolicyName: "Dynamo-AppSyncServiceRole-Policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "dynamodb:Query"
+                    - "dynamodb:BatchWriteItem"
+                    - "dynamodb:GetItem"
+                    - "dynamodb:DeleteItem"
+                    - "dynamodb:PutItem"
+                    - "dynamodb:Scan"
+                    - "dynamodb:UpdateItem"
+                  Resource:
+                    - "arn:aws:dynamodb:us-east-2:*:table/Baz"
+                    - "arn:aws:dynamodb:us-east-2:*:table/Baz/*"
