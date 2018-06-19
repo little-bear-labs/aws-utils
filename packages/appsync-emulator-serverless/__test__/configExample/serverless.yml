@@ -1,0 +1,59 @@
+service: ${self:custom.service}
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: us-east-2
+
+custom:
+  service: file-service
+  assetPutRequestsTable: ${self:custom.service}-AssetPutRequests-${opt:stage, 'dev'}
+  assetsTable: ${self:custom.service}-Assets-${opt:stage, 'dev'}
+
+resources:
+ Resources:
+    AssetsTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.assetsTable}
+    AssetPutRequestsTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.assetPutRequestsTable}
+    UserScopesTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: UserScopes
