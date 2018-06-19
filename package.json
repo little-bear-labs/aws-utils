@@ -4,9 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "private": true,
-  "workspaces": [
-    "packages/**/*"
-  ],
+  "workspaces": ["packages/**/*"],
   "dependencies": {
     "babel-eslint": "^8.2.3",
     "eslint": "^4.19.1",
@@ -17,7 +15,7 @@
     "prettier": "^1.12.1"
   },
   "scripts": {
-    "test": "yarn jest --coverage",
+    "test": "yarn jest --coverage --forceExit",
     "lint": "yarn eslint ."
   },
   "devDependencies": {

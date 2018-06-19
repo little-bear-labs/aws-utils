@@ -1,0 +1,12 @@
+$util.qr($ctx.arguments.request.put('id', $util.autoId()))
+$util.qr($ctx.arguments.response.put('id', $util.autoId()))
+#set($requests = [$util.dynamodb.toMapValues($ctx.arguments.request)])
+#set($responses = [$util.dynamodb.toMapValues($ctx.arguments.response)])
+{
+    "version" : "2018-05-29",
+    "operation" : "BatchPutItem",
+    "tables": {
+    	"QuoteRequest-emulator": $util.toJson($requests),
+        "QuoteResponse-emulator": $util.toJson($responses),
+    }
+}
