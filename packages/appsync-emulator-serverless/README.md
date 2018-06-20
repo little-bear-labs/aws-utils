@@ -4,6 +4,17 @@ This module provides emulation and testing helpers for use with AWS AppSync. Cur
 
 It is possible to use this emulator without serverless by mirroring the structure defined there. In the future we will provide other methods of configuring the emulator.
 
+## AppSync Features
+
+We aim to support the majority of appsync features (as we use all of them except elastic search).
+
+ - Lambda source (only tested with serverless functions)
+ - DynamoDB source (batch operations, all single table operations, etc.)
+ - NONE source
+ - Full VTL support ($util) and compatibility with Java stdlib
+ - Support for use with cognito credentials
+ - Subscriptions
+
 ## Usage
 
 NOTE: Everything below requires dynamodb to be available on a specific port. We recommend using localstack for dynamodb emulation (though you can use the emulator directly).
