@@ -12,7 +12,7 @@ const { javaify, vtl } = require('./vtl');
 const dynamodbSource = require('./dynamodbSource');
 const lambdaSource = require('./lambdaSource');
 const log = require('logdown')('appsync-emulator:schema');
-const consola = require('consola');
+const consola = require('./log');
 const { inspect } = require('util');
 
 const vtlMacros = {

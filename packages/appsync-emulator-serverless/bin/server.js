@@ -1,5 +1,8 @@
 #! /usr/bin/env node
 
+// XXX: Hack to enable logging for the cli but not tests.
+process.env.APPSYNC_EMULATOR_LOG = 1;
+
 const fs = require('fs');
 const path = require('path');
 const pkgUp = require('pkg-up');
