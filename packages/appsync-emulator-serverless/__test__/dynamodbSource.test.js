@@ -1,18 +1,23 @@
 const { DynamoDB } = require('aws-sdk');
 const uuid = require('uuid/v4');
 const subject = require('../dynamodbSource');
-
-const dynamodb = new DynamoDB({
-  endpoint: 'http://localhost:61023',
-  accessKeyId: 'fake',
-  secretAccessKey: 'fake',
-  region: 'fake',
-});
-
-const docClient = new DynamoDB.DocumentClient({ service: dynamodb });
+const dynamodbEmulator = require('@conduitvc/dynamodb-emulator');
 
 describe('dynamodbSource', () => {
   let tableName;
+  let emulator;
+  let docClient;
+  let dynamodb;
+
+  beforeAll(async () => {
+    emulator = await dynamodbEmulator.launch();
+    dynamodb = dynamodbEmulator.getClient(emulator);
+    docClient = new DynamoDB.DocumentClient({ service: dynamodb });
+  });
+
+  afterAll(async () => {
+    await emulator.terminate();
+  });
 
   beforeEach(async () => {
     tableName = uuid();

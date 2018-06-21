@@ -17,9 +17,7 @@ We aim to support the majority of appsync features (as we use all of them except
 
 ## Usage
 
-NOTE: Everything below requires dynamodb to be available on a specific port. We recommend using localstack for dynamodb emulation (though you can use the emulator directly).
-
-See [here](https://github.com/ConduitVC/appsync-serverless-emulator-example/blob/master/docker-compose.yml) for a `docker-compose` setup to get started.
+This package will download and run the dynamodb emulator as part of it's appsync emulation features. DynamoDB data is preserved between emulator runs and is stored in `.dynamodb` in the same directory that `package.json` would be in.
 
 ### As a CLI
 
