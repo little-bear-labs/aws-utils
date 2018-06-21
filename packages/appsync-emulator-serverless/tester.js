@@ -2,8 +2,26 @@ const assert = require('assert');
 const { createSchema } = require('./schemaTest');
 const createServerCore = require('./serverCore');
 const testJWT = require('./testJWT');
+const dynamoEmulator = require('@conduitvc/dynamodb-emulator');
+
+let GLOBAL_EMULATOR = null;
+
+async function emulatorSingleton() {
+  if (GLOBAL_EMULATOR) {
+    return GLOBAL_EMULATOR;
+  }
+  const emulator = await dynamoEmulator.launch();
+  GLOBAL_EMULATOR = emulator;
+  return emulator;
+}
 
 const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
+  // For performance we leverage a single emulator instance per process.
+  // To keep things unqiue between runs we use table names which are specific
+  // to each invocation of 'create'
+  const emulator = await emulatorSingleton();
+  const dynamodb = dynamoEmulator.getClient(emulator);
+
   const {
     pubusb,
     subscriptions,
@@ -12,6 +30,7 @@ const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
   } = await createSchema({
     serverless,
     schemaPath,
+    dynamodb,
   });
   const { url, mqttServer, mqttURL, server } = await createServerCore({
     port,
@@ -21,9 +40,9 @@ const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
   });
 
   const close = () => {
-    mqttServer.close();
     server.close();
-    return schemaClose();
+    // schema deletes tables so we must close the emulator after.
+    return schemaClose().then(() => emulator.terminate());
   };
 
   return {

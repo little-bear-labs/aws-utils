@@ -5,17 +5,9 @@ const {
 const { PubSub } = require('graphql-subscriptions');
 const fs = require('fs');
 const path = require('path');
-const { DynamoDB } = require('aws-sdk');
 const { createSchema: createSchemaCore } = require('./schema');
 const createServerCore = require('./serverCore');
 const log = require('logdown')('appsync-emulator:server');
-
-const DynamoDBDefaultConfig = {
-  endpoint: 'http://localhost:61023',
-  accessKeyId: 'fake',
-  secretAccessKey: 'fake',
-  region: 'fake',
-};
 
 const ensureDynamodbTables = async (
   dynamodb,
@@ -50,7 +42,12 @@ const ensureDynamodbTables = async (
   );
 };
 
-const createSchema = async ({ serverless, schemaPath = null, pubsub } = {}) => {
+const createSchema = async ({
+  serverless,
+  schemaPath = null,
+  pubsub,
+  dynamodb,
+} = {}) => {
   const serverlessConfig = findServerless(serverless);
   const serverlessDirectory =
     typeof serverless === 'string'
@@ -65,7 +62,6 @@ const createSchema = async ({ serverless, schemaPath = null, pubsub } = {}) => {
 
   const graphqlSchema = fs.readFileSync(schemaPath, 'utf8');
   const { custom: { appSync: appSyncConfig } = {} } = serverlessConfig;
-  const dynamodb = new DynamoDB(DynamoDBDefaultConfig);
   const dynamodbTables = await ensureDynamodbTables(
     dynamodb,
     serverlessConfig,
@@ -82,10 +78,11 @@ const createSchema = async ({ serverless, schemaPath = null, pubsub } = {}) => {
   });
 };
 
-const createServer = async ({ port, ...createSchemaOpts }) => {
+const createServer = async ({ port, dynamodb, ...createSchemaOpts }) => {
   const pubsub = new PubSub();
   const { schema, subscriptions } = await createSchema({
     ...createSchemaOpts,
+    dynamodb,
     pubsub,
   });
 
