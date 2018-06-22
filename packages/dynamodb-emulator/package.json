@@ -1,6 +1,6 @@
 {
   "name": "@conduitvc/dynamodb-emulator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "DynamoDB emulator nodejs wrapper",
   "main": "index.js",
   "author": "James Lal [:lightsofapollo]",
