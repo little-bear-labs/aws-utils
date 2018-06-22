@@ -3,16 +3,28 @@ const { graphql } = require('graphql');
 const { subscribe } = require('graphql/subscription');
 const gql = require('graphql-tag');
 const { decoded: jwt } = require('../testJWT');
+const dynamodbEmulator = require('@conduitvc/dynamodb-emulator');
 
 describe('creates executable schema', () => {
   const serverless = `${__dirname}/example/serverless.yml`;
   const schemaPath = `${__dirname}/example/schema.graphql`;
   let contextValue;
 
+  let emulator;
+  let dynamodb;
+  beforeAll(async () => {
+    jest.setTimeout(10 * 1000);
+    emulator = await dynamodbEmulator.launch();
+    dynamodb = dynamodbEmulator.getClient(emulator);
+  });
+
+  afterAll(async () => {
+    await emulator.terminate();
+  });
   // eslint-disable-next-line
   let schema, close;
   beforeEach(async () => {
-    const result = await createSchema({ serverless, schemaPath });
+    const result = await createSchema({ serverless, schemaPath, dynamodb });
     // eslint-disable-next-line
     schema = result.schema;
     // eslint-disable-next-line

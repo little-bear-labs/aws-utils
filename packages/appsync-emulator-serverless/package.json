@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@conduitvc/aws-utils": "^1.2.0",
+    "@conduitvc/dynamodb-emulator": "^0.1.0",
     "argparse": "^1.0.10",
     "aws-sdk": "^2.254.1",
     "consola": "^1.4.1",

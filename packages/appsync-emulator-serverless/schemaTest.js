@@ -2,17 +2,9 @@ const { loadServerlessConfig } = require('./loadServerlessConfig');
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { DynamoDB } = require('aws-sdk');
 const uuid = require('uuid/v4');
 const { createSchema: createSchemaCore } = require('./schema');
 const { PubSub } = require('graphql-subscriptions');
-
-const DynamoDBDefaultConfig = {
-  endpoint: 'http://localhost:61023',
-  accessKeyId: 'fake',
-  secretAccessKey: 'fake',
-  region: 'fake',
-};
 
 const setupDocumentDB = async (serverlessConfig, appSyncConfig, dynamodb) => {
   const {
@@ -55,7 +47,11 @@ const setupDocumentDB = async (serverlessConfig, appSyncConfig, dynamodb) => {
   );
 };
 
-const createSchema = async ({ serverless, schemaPath = null } = {}) => {
+const createSchema = async ({
+  serverless,
+  schemaPath = null,
+  dynamodb,
+} = {}) => {
   const {
     config: serverlessConfig,
     directory: serverlessDirectory,
@@ -71,7 +67,7 @@ const createSchema = async ({ serverless, schemaPath = null } = {}) => {
 
   const graphqlSchema = fs.readFileSync(schemaPath, 'utf8');
   const { custom: { appSync: appSyncConfig } = {} } = serverlessConfig;
-  const dynamodb = new DynamoDB(DynamoDBDefaultConfig);
+
   const dynamodbTables = await setupDocumentDB(
     serverlessConfig,
     appSyncConfig,
