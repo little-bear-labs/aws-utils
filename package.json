@@ -15,7 +15,7 @@
     "prettier": "^1.12.1"
   },
   "scripts": {
-    "test": "yarn jest --coverage",
+    "test": "yarn jest --coverage --detectOpenHandles",
     "lint": "yarn eslint ."
   },
   "devDependencies": {
