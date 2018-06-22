@@ -4,12 +4,25 @@ const gql = require('graphql-tag');
 const createMQTTClient = require('./mqttClient');
 const createServer = require('../server');
 const { default: ApolloClient } = require('apollo-boost');
+const dynamodbEmulator = require('@conduitvc/dynamodb-emulator');
 
 global.fetch = fetch;
 
 describe('subscriptionServer', () => {
   // eslint-disable-next-line
   const serverless = __dirname + '/example/serverless.yml';
+  let emulator;
+  let dynamodb;
+
+  beforeAll(async () => {
+    jest.setTimeout(10 * 1000);
+    emulator = await dynamodbEmulator.launch();
+    dynamodb = dynamodbEmulator.getClient(emulator);
+  });
+
+  afterAll(async () => {
+    await emulator.terminate();
+  });
 
   const createClient = url =>
     new ApolloClient({
@@ -58,7 +71,10 @@ describe('subscriptionServer', () => {
   let server;
   let url;
   beforeEach(async () => {
-    const { url: _url, server: _server } = await createServer({ serverless });
+    const { url: _url, server: _server } = await createServer({
+      serverless,
+      dynamodb,
+    });
     server = _server;
     url = _url;
   });

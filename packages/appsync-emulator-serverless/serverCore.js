@@ -12,7 +12,7 @@ const {
   specifiedRules,
 } = require('graphql');
 const log = require('logdown')('appsync-emulator:serverCore');
-const consola = require('consola');
+const consola = require('./log');
 const { inspect } = require('util');
 
 const TopicExpires = 1000 * 60 * 100;
