@@ -261,7 +261,8 @@ const createServer = async ({ port = 0, pubsub, schema, subscriptions }) => {
   const { port: boundPort } = server.address();
 
   server.once('close', () => {
-    mqttServer.close();
+    // ensure that the mqtt server is fully closed.
+    mqttServer.close(() => mqttHTTP.close());
   });
 
   return {

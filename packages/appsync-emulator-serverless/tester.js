@@ -10,9 +10,11 @@ async function emulatorSingleton() {
   if (GLOBAL_EMULATOR) {
     return GLOBAL_EMULATOR;
   }
-  const emulator = await dynamoEmulator.launch();
-  GLOBAL_EMULATOR = emulator;
-  return emulator;
+  // by saving it as a promise it ensures that multiple calls
+  // to emulatorSingleton while the emulator is booting does
+  // not result in multiple emulators starting.
+  GLOBAL_EMULATOR = dynamoEmulator.launch();
+  return GLOBAL_EMULATOR;
 }
 
 const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
@@ -42,11 +44,14 @@ const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
   const close = () => {
     server.close();
     // schema deletes tables so we must close the emulator after.
-    return schemaClose().then(() => emulator.terminate());
+    return schemaClose();
   };
+
+  const terminate = () => emulator.terminate();
 
   return {
     close,
+    terminate,
     url,
     mqttServer,
     mqttURL,

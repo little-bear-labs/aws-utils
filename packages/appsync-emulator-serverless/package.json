@@ -37,5 +37,8 @@
     "apollo-boost": "^0.1.7",
     "aws-appsync": "ConduitVC/aws-appsync",
     "websocket": "^1.0.26"
+  },
+  "peerDependencies": {
+    "aws-appsync": ">= 1"
   }
 }
