@@ -10,6 +10,7 @@ describe('dynamodbSource', () => {
   let dynamodb;
 
   beforeAll(async () => {
+    jest.setTimeout(10 * 1000);
     emulator = await dynamodbEmulator.launch();
     dynamodb = dynamodbEmulator.getClient(emulator);
     docClient = new DynamoDB.DocumentClient({ service: dynamodb });
