@@ -4,24 +4,11 @@ const createServerCore = require('./serverCore');
 const testJWT = require('./testJWT');
 const dynamoEmulator = require('@conduitvc/dynamodb-emulator/client');
 
-let GLOBAL_EMULATOR = null;
-
-async function emulatorSingleton() {
-  if (GLOBAL_EMULATOR) {
-    return GLOBAL_EMULATOR;
-  }
-  // by saving it as a promise it ensures that multiple calls
-  // to emulatorSingleton while the emulator is booting does
-  // not result in multiple emulators starting.
-  GLOBAL_EMULATOR = dynamoEmulator.launch();
-  return GLOBAL_EMULATOR;
-}
-
 const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
   // For performance we leverage a single emulator instance per process.
   // To keep things unqiue between runs we use table names which are specific
   // to each invocation of 'create'
-  const emulator = await emulatorSingleton();
+  const emulator = await dynamoEmulator.launch();
   const dynamodb = dynamoEmulator.getClient(emulator);
 
   const {
@@ -41,10 +28,10 @@ const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
     subscriptions,
   });
 
-  const close = () => {
+  const close = async () => {
     server.close();
     // schema deletes tables so we must close the emulator after.
-    return schemaClose();
+    await schemaClose();
   };
 
   const terminate = () => emulator.terminate();

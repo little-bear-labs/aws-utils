@@ -31,18 +31,28 @@ class SubscriptionServer {
     mqttServer.on('clientDisconnected', (...args) =>
       this.onClientDisconnect(...args),
     );
+
+    // XXX: Note we may need to listen to unsubscribe to end the async iterator.
+    mqttServer.on('subscribed', (...args) => this.onClientSubscribed(...args));
   }
 
+  // eslint-disable-next-line
   async onClientConnect(client) {
     const { id: clientId } = client;
-    log.info('clientConnect', { clientId });
     consola.info(`client connected to subscription server (${clientId})`);
+  }
+
+  async onClientSubscribed(topic, client) {
+    const { id: clientId } = client;
+    consola.info(`client (${clientId}) subscribed to : ${topic}`);
+    log.info(`client (${clientId}) subscribed to : ${topic}`);
     const reg = this.registrations.get(clientId);
     if (!reg) {
       console.error('No registration for clientId', clientId);
       return;
     }
     const { asyncIterator, topicId } = reg;
+    log.info('clientConnect', { clientId, topicId });
 
     while (true) {
       const { value: payload, done } = await asyncIterator.next();
