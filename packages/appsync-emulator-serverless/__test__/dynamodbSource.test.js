@@ -1,7 +1,7 @@
 const { DynamoDB } = require('aws-sdk');
 const uuid = require('uuid/v4');
 const subject = require('../dynamodbSource');
-const dynamodbEmulator = require('@conduitvc/dynamodb-emulator');
+const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
 
 describe('dynamodbSource', () => {
   let tableName;

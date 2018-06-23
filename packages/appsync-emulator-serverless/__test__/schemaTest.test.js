@@ -3,7 +3,7 @@ const { graphql } = require('graphql');
 const { subscribe } = require('graphql/subscription');
 const gql = require('graphql-tag');
 const { decoded: jwt } = require('../testJWT');
-const dynamodbEmulator = require('@conduitvc/dynamodb-emulator');
+const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
 
 describe('creates executable schema', () => {
   const serverless = `${__dirname}/example/serverless.yml`;
