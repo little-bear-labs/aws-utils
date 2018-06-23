@@ -22,13 +22,6 @@ describe('deamon', () => {
     const first = results[0];
     for (const result of results) {
       expect(result.url).toEqual(first.url);
-      await result.terminate();
     }
-
-    // after we've terminated all previous emulator requests the
-    // process should exit and this request should return a new pid.
-    const afterTerminate = await launch(opts);
-    expect(first.pid).not.toEqual(afterTerminate);
-    await afterTerminate.terminate();
   });
 });
