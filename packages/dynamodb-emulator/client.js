@@ -9,7 +9,7 @@ const { spawn } = require('child_process');
 const log = require('logdown')('dynamodb-emulator:client');
 const { getClient } = require('./index');
 
-const waitTimeout = 10 * 1000;
+const waitTimeout = 5 * 1000;
 const requestTimeout = waitTimeout;
 const deamonPath = path.join(__dirname, 'deamon.js');
 const pidPath = path.join(__dirname, '.pid');
@@ -23,7 +23,8 @@ const fsExists = file =>
   });
 const get = (unixSocket, urlpath, params = {}) =>
   new Promise((accept, reject) => {
-    log.info();
+    log.info('request', urlpath, params);
+    const start = Date.now();
     const req = http.request(
       {
         socketPath: unixSocket,
@@ -38,7 +39,10 @@ const get = (unixSocket, urlpath, params = {}) =>
         const buffers = [];
         res.once('error', reject);
         res.on('data', buffer => buffers.push(buffer));
-        res.on('end', () => accept(JSON.parse(Buffer.concat(buffers))));
+        res.on('end', () => {
+          log.info('response', urlpath, params, Date.now() - start);
+          accept(JSON.parse(Buffer.concat(buffers)));
+        });
       },
     );
     req.once('timeout', () => reject(new Error('timed out making request')));
@@ -46,17 +50,16 @@ const get = (unixSocket, urlpath, params = {}) =>
   });
 
 async function buildEmulatorHandle(unixSocketFile, options) {
-  const { url, port, pid, handle } = await get(
-    unixSocketFile,
-    'launch',
-    options,
-  );
+  const start = Date.now();
+  const { url, port, pid } = await get(unixSocketFile, 'launch', options);
+  log.info('got emulator in (ms)', Date.now() - start);
 
   return {
     url,
     port,
     pid,
-    terminate: async () => get(unixSocketFile, 'free', { handle }),
+    // for api compat with index.js emulator
+    terminate: async () => {},
   };
 }
 

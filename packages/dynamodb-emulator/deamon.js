@@ -21,8 +21,6 @@ const launchedVersion = getHash();
 let globalEmulator = null;
 let resolvedGlobalEmulator = null;
 let server = null;
-let lastHandle = 0;
-const handles = new Set();
 
 async function getEmulator(opts) {
   if (globalEmulator) {
@@ -68,32 +66,16 @@ function handleHandshake() {
 async function handleLaunch(opts) {
   const emulator = await getEmulator(opts);
   // eslint-disable-next-line
-  const handle = lastHandle++;
-  handles.add(handle);
   log.info('success', {
     url: emulator.url,
     port: emulator.port,
-    handle,
   });
   return JSON.stringify({
     status: 'success',
     pid: process.pid,
     url: emulator.url,
     port: emulator.port,
-    handle,
   });
-}
-
-async function handleFree(opts) {
-  const handle = parseInt(opts.handle, 10);
-  handles.delete(handle);
-  log.info('remaining handles', handles.size);
-  if (handles.size === 0) {
-    log.info('no handles closing server');
-    server.close(() => {
-      process.exit();
-    });
-  }
 }
 
 async function requestHandler(req, res) {
@@ -110,9 +92,6 @@ async function requestHandler(req, res) {
       return res.end(handleHandshake());
     case '/launch':
       return res.end(await handleLaunch(opts));
-    case '/free':
-      res.end(JSON.stringify(opts));
-      return handleFree(opts);
     default:
       log.error('Unknown route:', pathPart);
       return res.end(
