@@ -4,7 +4,7 @@ const gql = require('graphql-tag');
 const createMQTTClient = require('./mqttClient');
 const createServer = require('../server');
 const { default: ApolloClient } = require('apollo-boost');
-const dynamodbEmulator = require('@conduitvc/dynamodb-emulator');
+const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
 
 global.fetch = fetch;
 

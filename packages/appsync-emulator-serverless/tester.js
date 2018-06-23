@@ -2,7 +2,7 @@ const assert = require('assert');
 const { createSchema } = require('./schemaTest');
 const createServerCore = require('./serverCore');
 const testJWT = require('./testJWT');
-const dynamoEmulator = require('@conduitvc/dynamodb-emulator');
+const dynamoEmulator = require('@conduitvc/dynamodb-emulator/client');
 
 let GLOBAL_EMULATOR = null;
 

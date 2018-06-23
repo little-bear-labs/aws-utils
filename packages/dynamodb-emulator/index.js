@@ -25,19 +25,10 @@ class Emulator {
   constructor(proc, opts) {
     this.proc = proc;
     this.opts = opts;
-
-    process.on('beforeExit', () => {
-      console.log('BEFORE EXIT');
-      this.terminate();
-    });
   }
 
-  get stderr() {
-    return this.proc.stderr;
-  }
-
-  get stdout() {
-    return this.proc.stdout;
+  get pid() {
+    return this.proc.pid;
   }
 
   get port() {
