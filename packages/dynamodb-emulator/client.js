@@ -4,6 +4,7 @@ const path = require('path');
 const http = require('http');
 const fs = require('fs');
 const qs = require('querystring');
+const net = require('net');
 const { flockSync } = require('fs-ext');
 const { spawn } = require('child_process');
 const log = require('logdown')('dynamodb-emulator:client');
@@ -112,11 +113,38 @@ async function startDeamon(hash, unixSocketFile, options) {
   throw new Error('failed to start client timed out...');
 }
 
+function validateSocketPath(unixSocketFile) {
+  return new Promise((accept, reject) => {
+    const socket = net.connect(unixSocketFile);
+    socket.once('connect', () => accept(true));
+    socket.once('error', err => {
+      log.error('Error connecting to unix socket', err);
+      // we only specifically handle connection refused (file exists but no listener).
+      if (err.code === 'ECONNREFUSED') {
+        try {
+          fs.unlinkSync(unixSocketFile);
+        } catch (unlinkErr) {
+          reject(unlinkErr);
+          return;
+        }
+        accept(false);
+        return;
+      }
+      reject(err);
+    });
+  });
+}
+
 async function launch(options = {}) {
   const hash = objHash(options);
   const unixSocketFile = path.relative(process.cwd(), path.join(pidPath, hash));
   // path one the unix descriptor exists...
   if (fs.existsSync(unixSocketFile)) {
+    if (!(await validateSocketPath(unixSocketFile))) {
+      log.info('Socket file exists but is not listening to requests');
+      return startDeamon(hash, unixSocketFile, options);
+    }
+    // TODO: Ensure unix socket file exists AND the process is up.
     return requestEmulator(unixSocketFile, options);
   }
 
