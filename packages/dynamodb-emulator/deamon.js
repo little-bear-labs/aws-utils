@@ -132,6 +132,7 @@ function cleanup() {
   } catch (err) {
     // we don't care if there was an error in this case.
     // keep cleaning up!
+    log.error(err);
   }
   if (resolvedGlobalEmulator) {
     // already closed.
