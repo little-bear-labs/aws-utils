@@ -3,7 +3,6 @@ const portfinder = require('portfinder');
 const { spawn } = require('child_process');
 const e2p = require('event-to-promise');
 const fs = require('fs');
-const waitPort = require('wait-port');
 const portPid = require('port-pid');
 const log = require('logdown')('dynamodb-emulator');
 
@@ -15,6 +14,7 @@ const defaultOptions = {
   sharedDb: false,
   dbPath: null,
   startTimeout: 10 * 1000,
+  debug: false,
 };
 
 const emulatorPath = path.join(__dirname, 'emulator');
@@ -130,34 +130,38 @@ async function launch(givenOptions = {}, retry = 0, startTime = Date.now()) {
     cwd: emulatorPath,
   });
 
-  function startingTimeout() {
-    log.error('Failed to start within timeout');
-    // ensure process is halted.
-    proc.kill();
-    const err = new Error('start has timed out!');
-    err.code = 'timeout';
-    throw err;
+  if (opts.debug) {
+    proc.stdout.pipe(process.stdout);
+    proc.stderr.pipe(process.stderr);
   }
 
-  async function checkProcess() {
+  const verifyPortIsOpen = async () => {
     const portOnPID = await portPid(port);
-    // we invoke this after verifying the port we are attempting to
-    // bind has bound and we can connect. The logic here is if the
-    // port is bound but we have exited we know for sure that we need
-    // to retry starting the emulator.
-    if (
-      proc.exitCode != null ||
-      // verify that _we_ bound the port rather than another process.
-      portOnPID.all.length === 0 ||
-      portOnPID.all.indexOf(proc.pid) === -1
-    ) {
-      log.error('Port bound but by another process ... time to retry');
-      // port is open but it's not our process...
-      const err = new Error('port taken');
-      err.code = 'port_taken';
-      throw err;
-    }
-  }
+    return portOnPID.all.indexOf(proc.pid) !== -1;
+  };
+
+  const waitForPort = (timeout = opts.startTimeout) =>
+    new Promise((accept, reject) => {
+      let checkTimeout;
+      const waiter = wait(timeout);
+      waiter.promise.then(() => {
+        clearTimeout(checkTimeout);
+        proc.kill();
+        reject(new Error('timed out waiting for port'));
+      });
+
+      const invoke = async () => {
+        const success = await verifyPortIsOpen();
+        if (!success) {
+          setTimeout(invoke, 50);
+          return;
+        }
+        waiter.cancel();
+        accept();
+      };
+
+      invoke();
+    });
 
   // define this now so we can use it later to remove a listener.
   let prematureExit;
@@ -170,23 +174,8 @@ async function launch(givenOptions = {}, retry = 0, startTime = Date.now()) {
   try {
     const waiter = wait(opts.startTimeout);
     await Promise.race([
-      new Promise(accept => {
-        function readStdoutBuffer(buffer) {
-          if (buffer.toString().indexOf(opts.port) !== -1) {
-            proc.stdout.removeListener('data', readStdoutBuffer);
-            log.info('Emulator has stated but need to verify socket');
-            accept(
-              waitPort({
-                host: 'localhost',
-                port,
-                output: 'silent',
-              }).then(checkProcess),
-            );
-          }
-        }
-        proc.stdout.on('data', readStdoutBuffer);
-      }),
-      waiter.promise.then(startingTimeout),
+      waitForPort(),
+      // waiter.promise.then(startingTimeout),
       new Promise((accept, reject) => {
         prematureExit = () => {
           log.error('Emulator has prematurely exited... need to retry');
