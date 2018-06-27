@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "preinstall": "download --extract -o emulator https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.zip"
+    "preinstall": "./download.sh"
   },
   "dependencies": {
     "download-cli": "^1.1.1",
