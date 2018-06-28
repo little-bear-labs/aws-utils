@@ -126,17 +126,36 @@ const handleVTLRender = (
   throw gqlContext.appsyncErrors[0];
 };
 
-const runRequestVTL = (fullPath, graphqlInfo) => {
+const preprocessVTLTemplate = (fullPath, configs) => {
+  const {
+    serverlessConfig: {
+      custom: { appSync: { templatePreprocessor = null } } = {},
+    } = {},
+  } = configs;
+  if (!templatePreprocessor) {
+    return fs.readFileSync(fullPath, 'utf8');
+  }
+
+  const preprocessorPath = path.join(
+    configs.serverlessDirectory,
+    templatePreprocessor,
+  );
+  // eslint-disable-next-line
+  const preprocesor = require(preprocessorPath);
+  return preprocesor(fullPath);
+};
+
+const runRequestVTL = (fullPath, graphqlInfo, configs) => {
   log.info('loading request vtl', path.relative(process.cwd(), fullPath));
   const context = buildVTLContext(graphqlInfo);
-  const content = fs.readFileSync(fullPath, 'utf8');
+  const content = preprocessVTLTemplate(fullPath, configs);
   return handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo);
 };
 
-const runResponseVTL = (fullPath, graphqlInfo, result) => {
+const runResponseVTL = (fullPath, graphqlInfo, result, configs) => {
   log.info('loading response vtl', path.relative(process.cwd(), fullPath));
   const context = buildVTLContext(graphqlInfo, result);
-  const content = fs.readFileSync(fullPath, 'utf8');
+  const content = preprocessVTLTemplate(fullPath, configs);
   return handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo);
 };
 
@@ -187,7 +206,7 @@ const generateTypeResolver = (
     log.info('resolving', gqlPathAsArray(info.path));
     assert(context && context.jwt, 'must have context.jwt');
     const resolverArgs = { root, vars, context, info };
-    const request = runRequestVTL(requestPath, resolverArgs);
+    const request = runRequestVTL(requestPath, resolverArgs, configs);
     consola.info(
       'Rendered Request:\n',
       inspect(request, { depth: null, colors: true }),
@@ -199,7 +218,12 @@ const generateTypeResolver = (
       request,
     );
 
-    const response = runResponseVTL(responsePath, resolverArgs, requestResult);
+    const response = runResponseVTL(
+      responsePath,
+      resolverArgs,
+      requestResult,
+      configs,
+    );
     consola.info(
       'Rendered Response:\n',
       inspect(response, { depth: null, colors: true }),
@@ -252,7 +276,7 @@ const generateSubscriptionTypeResolver = (
         (await dispatchRequestToSource(
           source,
           configs,
-          runRequestVTL(requestPath, resolverArgs),
+          runRequestVTL(requestPath, resolverArgs, configs),
         )) || {};
 
       consola.info(
@@ -260,7 +284,12 @@ const generateSubscriptionTypeResolver = (
         inspect(request, { depth: null, colors: true }),
       );
       log.info('subscription resolver request', request);
-      const response = runResponseVTL(responsePath, resolverArgs, request);
+      const response = runResponseVTL(
+        responsePath,
+        resolverArgs,
+        request,
+        configs,
+      );
       consola.info(
         'Rendered Response:\n',
         inspect(response, { depth: null, colors: true }),

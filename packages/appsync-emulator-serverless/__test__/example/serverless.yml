@@ -20,16 +20,17 @@ custom:
       defaultAction: ALLOW
       userPoolId: us-east-1_27WcML9k8
     region: us-east-2
+    templatePreprocessor: ./preprocessor.js
     mappingTemplates:
       - dataSource: QuoteRequest
         type: Query
         field: error
-        request: error-request.txt
+        request: error-request.js
         response: result-response.txt
       - dataSource: QuoteRequest
         type: Query
         field: QuoteRequestById
-        request: byId-request.txt
+        request: byId-request.yaml
         response: result-response.txt
       - dataSource: QuoteRequest
         type: Query
@@ -74,7 +75,7 @@ custom:
       - dataSource: QuoteResponse
         type: Query
         field: QuoteResponseById
-        request: byId-request.txt
+        request: byId-request.yaml
         response: result-response.txt
       - dataSource: QuoteResponse
         type: Query

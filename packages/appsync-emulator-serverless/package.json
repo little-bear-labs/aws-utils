@@ -31,7 +31,8 @@
     "pkg-up": "^2.0.0",
     "serverless": "^1.27.3",
     "uuid": "^3.2.1",
-    "velocityjs": "lightsofapollo/velocity.js#allow-own-keyset"
+    "velocityjs": "lightsofapollo/velocity.js#allow-own-keyset",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "apollo-boost": "^0.1.7",

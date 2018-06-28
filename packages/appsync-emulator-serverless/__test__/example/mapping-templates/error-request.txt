@@ -1,2 +1,0 @@
-$utils.error("No request")
-{}
