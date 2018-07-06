@@ -23,4 +23,4 @@ XML
 zip -d DynamoDBLocal.jar log4j2.xml
 zip -u DynamoDBLocal.jar log4j2.xml
 rm log4j2.xml
-popd emulator
+popd
