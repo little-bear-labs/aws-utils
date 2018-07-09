@@ -87,6 +87,9 @@ async function requestEmulator(unixSocketFile, options) {
 }
 
 async function startDeamon(hash, unixSocketFile, options) {
+  if(!fs.existsSync(pidPath)) {
+    fs.mkdirSync(pidPath);
+  }
   // file does not exist so we will need to create one.
   const pidFile = path.join(pidPath, `${hash}.pid`);
   const fd = fs.openSync(pidFile, 'w');
