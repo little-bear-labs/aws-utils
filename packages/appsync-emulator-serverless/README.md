@@ -26,7 +26,35 @@ This package will download and run the dynamodb emulator as part of it's appsync
 yarn appsync-emulator --port 62222
 ```
 
-### For unit testing.
+## Testing
+
+### Jest
+
+We extensively use jest so bundle a jest specific helper (which likely will work for mocha as well).
+
+```js
+const gql = require("graphql-tag");
+const { AWSAppSyncClient } = require("aws-appsync");
+
+// we export a specific module for testing.
+const createAppSync = require("@conduitvc/appsync-emulator-serverless/jest");
+// required by apollo-client
+global.fetch = require("node-fetch");
+
+describe("graphql", () => {
+  const appsync = createAppSync();
+
+  it("Type.resolver", async () => {
+    await appsync.client.query({
+      query: gql`
+        ....
+      `
+    })
+  });
+});
+```
+
+### generic.
 
 (Below example is jest but any framework will work)
 
@@ -52,7 +80,10 @@ describe("graphql", () => {
     );
   });
 
+  // important to clear state.
   afterEach(async () => server.close());
+  // very important not to leave java processes lying around.
+  afterAll(async () => server.terminate());
 
   it("Type.resolver", async () => {
     await client.query({

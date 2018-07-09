@@ -14,7 +14,7 @@ const defaultOptions = {
   inMemory: true,
   sharedDb: false,
   dbPath: null,
-  startTimeout: 10 * 1000,
+  startTimeout: 20 * 1000,
 };
 
 const emulatorPath = path.join(__dirname, 'emulator');
@@ -25,19 +25,11 @@ class Emulator {
   constructor(proc, opts) {
     this.proc = proc;
     this.opts = opts;
-
-    process.on('beforeExit', () => {
-      console.log('BEFORE EXIT');
-      this.terminate();
-    });
+    return this;
   }
 
-  get stderr() {
-    return this.proc.stderr;
-  }
-
-  get stdout() {
-    return this.proc.stdout;
+  get pid() {
+    return this.proc.pid;
   }
 
   get port() {
@@ -135,6 +127,7 @@ async function launch(givenOptions = {}, retry = 0, startTime = Date.now()) {
 
   const java = await which('java');
   const args = buildArgs(opts);
+  log.info('Spawning Emulator:', { args, cwd: emulatorPath });
   const proc = spawn(java, args, {
     cwd: emulatorPath,
   });
@@ -183,7 +176,7 @@ async function launch(givenOptions = {}, retry = 0, startTime = Date.now()) {
         function readStdoutBuffer(buffer) {
           if (buffer.toString().indexOf(opts.port) !== -1) {
             proc.stdout.removeListener('data', readStdoutBuffer);
-            log.info('Emulator has stated but need to verify socket');
+            log.info('Emulator has started but need to verify socket');
             accept(
               waitPort({
                 host: 'localhost',

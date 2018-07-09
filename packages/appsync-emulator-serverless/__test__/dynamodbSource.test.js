@@ -1,7 +1,7 @@
 const { DynamoDB } = require('aws-sdk');
 const uuid = require('uuid/v4');
 const subject = require('../dynamodbSource');
-const dynamodbEmulator = require('@conduitvc/dynamodb-emulator');
+const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
 
 describe('dynamodbSource', () => {
   let tableName;
@@ -10,6 +10,7 @@ describe('dynamodbSource', () => {
   let dynamodb;
 
   beforeAll(async () => {
+    jest.setTimeout(40 * 1000);
     emulator = await dynamodbEmulator.launch();
     dynamodb = dynamodbEmulator.getClient(emulator);
     docClient = new DynamoDB.DocumentClient({ service: dynamodb });
