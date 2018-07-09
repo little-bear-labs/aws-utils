@@ -5,7 +5,7 @@ const qs = require('querystring');
 const { launch } = require('./index');
 const log = require('logdown')('dynamodb-emulator:deamon');
 
-const pidPath = path.join(__dirname, '.pid');
+const pidPath = path.join('/Users/christopherbaron', '.pid');
 // eslint-disable-next-line
 
 const getHash = () => {
@@ -39,6 +39,8 @@ async function getEmulator(opts) {
     }
   }
   resolvedGlobalEmulator = emu;
+  console.log('emu', emu);
+  console.log('resolvedGlobalEmulator', resolvedGlobalEmulator);
   emu.proc.once('exit', () => {
     server.close();
   });
@@ -79,6 +81,7 @@ async function handleLaunch(opts) {
 }
 
 async function requestHandler(req, res) {
+  console.log('request handler');
   res.writeHead(200);
   log.info('request', req.url);
 
@@ -103,6 +106,7 @@ async function requestHandler(req, res) {
 const [, , hash] = process.argv;
 
 const pidFile = path.join(pidPath, `${hash}.pid`);
+console.log(pidFile);
 try {
   fs.writeFileSync(
     pidFile,
@@ -132,7 +136,6 @@ function cleanup() {
   } catch (err) {
     // we don't care if there was an error in this case.
     // keep cleaning up!
-    log.error(err);
   }
   if (resolvedGlobalEmulator) {
     // already closed.

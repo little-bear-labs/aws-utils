@@ -11,6 +11,7 @@ const awsConfig = {
 describe('ScopeACL', () => {
   let dynamodb;
   beforeEach(async () => {
+    jest.setTimeout(30 * 1000);
     const { dynamodb: client } = await awsSetup.bootstrapAWS(awsConfig);
     dynamodb = client;
   });
