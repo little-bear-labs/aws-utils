@@ -44,7 +44,7 @@ describe('emulator operations', () => {
   let emulators;
   beforeEach(() => {
     emulators = [];
-    jest.setTimeout(10 * 1000);
+    jest.setTimeout(40 * 1000);
   });
   afterEach(() => Promise.all(emulators.map(emu => emu.terminate())));
 
