@@ -4,8 +4,9 @@ const http = require('http');
 const qs = require('querystring');
 const { launch } = require('./index');
 const log = require('logdown')('dynamodb-emulator:deamon');
+const { homedir } = require('os');
 
-const pidPath = path.join('/Users/christopherbaron', '.pid');
+const pidPath = path.join(homedir(), '.pid');
 // eslint-disable-next-line
 
 const getHash = () => {
