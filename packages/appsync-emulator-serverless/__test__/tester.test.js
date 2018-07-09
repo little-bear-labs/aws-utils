@@ -11,6 +11,7 @@ global.fetch = require('node-fetch');
 describe('appasync-emulator-serverless/tester', () => {
   let serverSetup;
   beforeEach(async () => {
+    jest.setTimeout(60 * 1000);
     serverSetup = await createTestServer({
       serverless: `${__dirname}/example/serverless.yml`,
     });
