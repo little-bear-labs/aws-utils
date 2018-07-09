@@ -1,7 +1,7 @@
 const { launch } = require('../client');
 
 describe('deamon', () => {
-  beforeEach(() => jest.setTimeout(40 * 1000));
+  beforeEach(() => jest.setTimeout(60 * 1000));
   it('should allow parallel launches with single emulator', async () => {
     // intentionally using unknown option for unique emulator instance.
     const opts = { supertest: true };
