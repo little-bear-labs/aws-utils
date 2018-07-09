@@ -6,6 +6,8 @@ const { launch } = require('./index');
 const log = require('logdown')('dynamodb-emulator:deamon');
 const { homedir } = require('os');
 
+// XXX: Very important to use short path here to not exceed max path
+// limits for unix socket bind.
 const pidPath = path.join(homedir(), '.pid');
 // eslint-disable-next-line
 
@@ -40,8 +42,6 @@ async function getEmulator(opts) {
     }
   }
   resolvedGlobalEmulator = emu;
-  console.log('emu', emu);
-  console.log('resolvedGlobalEmulator', resolvedGlobalEmulator);
   emu.proc.once('exit', () => {
     server.close();
   });
@@ -82,7 +82,6 @@ async function handleLaunch(opts) {
 }
 
 async function requestHandler(req, res) {
-  console.log('request handler');
   res.writeHead(200);
   log.info('request', req.url);
 
@@ -107,7 +106,6 @@ async function requestHandler(req, res) {
 const [, , hash] = process.argv;
 
 const pidFile = path.join(pidPath, `${hash}.pid`);
-console.log(pidFile);
 try {
   fs.writeFileSync(
     pidFile,
@@ -121,9 +119,7 @@ try {
   console.error(err);
   process.exit();
 }
-// XXX: Very important to use relative here to not exceed max path
-// limits for unix socket bind.
-const unixSocket = path.relative(process.cwd(), path.join(pidPath, hash));
+const unixSocket = path.join(pidPath, hash);
 server = http.createServer();
 server.on('request', requestHandler);
 server.listen(unixSocket);

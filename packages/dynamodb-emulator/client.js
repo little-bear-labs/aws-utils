@@ -14,6 +14,8 @@ const homeDir = homedir();
 const waitTimeout = 30 * 1000;
 const requestTimeout = waitTimeout;
 const deamonPath = path.join(__dirname, 'deamon.js');
+
+// putting socket in homedir due to socket filepath length restrictions
 const pidPath = path.join(homeDir, '.pid');
 const wait = ms =>
   new Promise(accept => {
@@ -132,9 +134,8 @@ async function startDeamon(hash, unixSocketFile, options) {
 
 async function launch(options = {}) {
   const hash = objHash(options);
-  // const unixSocketFile = path.relative(process.cwd(), path.join(pidPath, hash));
   const unixSocketFile = `${homeDir}/.pid/${hash}`;
-  // path one the unix descriptor exists...
+  // path on the unix descriptor exists...
   if (fs.existsSync(unixSocketFile)) {
     return requestEmulator(unixSocketFile, options);
   }
