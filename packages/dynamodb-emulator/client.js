@@ -40,19 +40,14 @@ const get = (unixSocket, urlpath, params = {}) =>
         },
       },
       res => {
-        res.setEncoding('utf8');
         const buffers = [];
         res.once('error', reject);
         res.on('data', buffer => {
-          if (typeof buffer === 'string') {
-            buffers.push([buffer]);
-          } else {
-            buffers.push(buffer);
-          }
+          buffers.push(buffer);
         });
         res.on('end', () => {
           log.info('response', urlpath, params, Date.now() - start);
-          accept(JSON.parse(Buffer.from(buffers.toString())));
+          accept(JSON.parse(Buffer.concat(buffers)));
         });
       },
     );
