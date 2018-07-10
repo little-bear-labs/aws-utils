@@ -94,7 +94,7 @@ async function startDeamon(hash, unixSocketFile, options) {
     // ensure nobody else is writing to this file.
     flockSync(fd, 'sh');
   } catch (err) {
-    console.error(err.stack, '<<< failed flock');
+    log.error(err.stack, '<<< failed flock');
   }
   const proc = spawn(process.argv0, [deamonPath, hash], {
     detached: true,

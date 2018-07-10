@@ -53,9 +53,15 @@ class SubscriptionServer {
     const { id: clientId } = client;
     consola.info(`client (${clientId}) subscribed to : ${topic}`);
     log.info(`client (${clientId}) subscribed to : ${topic}`);
+<<<<<<< HEAD
     const regs = this.registrations.get(clientId);
     if (!regs) {
       console.error('No registration for clientId', clientId);
+=======
+    const reg = this.registrations.get(clientId);
+    if (!reg) {
+      log.error('No registration for clientId', clientId);
+>>>>>>> 5bd5bfc... switched to logdown instead of console.log, rid ourselves of eslint warnings
       return;
     }
 
@@ -85,6 +91,7 @@ class SubscriptionServer {
     const { asyncIterator, topicId } = reg;
     log.info('clientConnect', { clientId, topicId });
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const { value: payload, done } = await asyncIterator.next();
       if (done) break;
@@ -145,7 +152,12 @@ class SubscriptionServer {
     consola.info(`client disconnected to subscription server (${clientId})`);
     const reg = this.registrations.get(clientId);
     if (!reg) {
+<<<<<<< HEAD
       console.warn('Disconnecting client with unknown id', clientId);
+=======
+      log.warn('Disconnecting client with unknown id', clientId);
+      return;
+>>>>>>> 5bd5bfc... switched to logdown instead of console.log, rid ourselves of eslint warnings
     }
   }
 
@@ -327,7 +339,7 @@ const createServer = async ({ port = 0, pubsub, schema, subscriptions }) => {
     try {
       await handler(req, res);
     } catch (err) {
-      console.error('Error handling request:', err);
+      log.error('Error handling request:', err);
       res.send(500);
     }
   });
