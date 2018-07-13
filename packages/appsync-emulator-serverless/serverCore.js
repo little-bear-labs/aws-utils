@@ -117,20 +117,21 @@ class SubscriptionServer {
     log.info(`client (${clientId}) unsubscribed to : ${topic}`);
     const regs = this.registrations.get(clientId);
     if (!regs) {
-      console.warn('Unsubscribe topic from client with unknown id', clientId);
+      console.warn(`Unsubscribe topic: ${topic} from client with unknown id`, clientId);
       return;
     }
 
     const reg = regs.find(({ topicId }) => topicId === topic);
     if (!reg) {
       console.warn(
-        'Unsubscribe topic from client without existing subscription',
+        `Unsubscribe unregistered topic ${topic} from client`,
         clientId,
       );
       return;
     }
 
-    // this.registrations.set(clientId, regs.filter(({topicId}) => topicId !== topic))
+    // turn off subscription, but keep registration so client
+    // can resubscribe
     reg.asyncIterator.return();
     reg.isRegistered = false;
   }
@@ -143,8 +144,6 @@ class SubscriptionServer {
     if (!reg) {
       console.warn('Disconnecting client with unknown id', clientId);
     }
-    // this.registrations.delete(clientId);
-    // reg.asyncIterator.return();
   }
 
   async register({ documentAST, variables, jwt }) {
@@ -160,14 +159,6 @@ class SubscriptionServer {
       topicId,
     };
     const asyncIterator = await this.subscribeToGraphQL(registration);
-    /* 
-    const asyncIterator = await subscribe({
-      schema: this.schema,
-      document: documentAST,
-      variableValues: variables,
-      contextValue: context,
-    });
-    */
 
     if (asyncIterator.errors) {
       return {
