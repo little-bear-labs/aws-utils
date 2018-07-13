@@ -117,7 +117,10 @@ class SubscriptionServer {
     log.info(`client (${clientId}) unsubscribed to : ${topic}`);
     const regs = this.registrations.get(clientId);
     if (!regs) {
-      console.warn(`Unsubscribe topic: ${topic} from client with unknown id`, clientId);
+      console.warn(
+        `Unsubscribe topic: ${topic} from client with unknown id`,
+        clientId,
+      );
       return;
     }
 
