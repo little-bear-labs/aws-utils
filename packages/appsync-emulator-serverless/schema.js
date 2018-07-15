@@ -162,7 +162,12 @@ const dispatchRequestToSource = async (
       );
     case 'AWS_LAMBDA':
       return lambdaSource(
-        { serverlessDirectory, serverlessConfig },
+        {
+          serverlessDirectory,
+          serverlessConfig,
+          dynamodbEndpoint: dynamodb.endpoint.href,
+          dynamodbTables,
+        },
         source.config.functionName,
         request,
       );
