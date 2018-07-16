@@ -50,6 +50,7 @@ const main = async () => {
     });
   });
   const dynamodb = dynamoEmulator.getClient(emulator);
+  console.log('dynamodb endpoint:', dynamodb.endpoint.href);
 
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
   const server = await createServer({ serverless, port, dynamodb });
