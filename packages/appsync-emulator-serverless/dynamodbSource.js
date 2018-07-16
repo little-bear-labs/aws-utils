@@ -148,7 +148,7 @@ const scan = async (
   db,
   table,
   {
-    filter = {},
+    filter,
     index,
     limit,
     consistentRead = false,
@@ -160,13 +160,6 @@ const scan = async (
 ) => {
   const params = {
     TableName: table,
-    FilterExpression: filter.expression,
-    ExpressionAttributeNames: {
-      ...(filter.expressionNames || {}),
-    },
-    ExpressionAttributeValues: {
-      ...(filter.expressionValues || {}),
-    },
     // XXX: need to validate that this works ...
     ExclusiveStartKey: nextToken,
     IndexName: index,
@@ -176,6 +169,17 @@ const scan = async (
     Segment: segment,
     TotalSegments: totalSegments,
   };
+  if(filter) {
+    Object.assign(params, {
+      FilterExpression: filter.expression,
+      ExpressionAttributeNames: {
+        ...(filter.expressionNames || undefined),
+      },
+      ExpressionAttributeValues: {
+        ...(filter.expressionValues || undefined),
+      },
+    })
+  }
   const {
     Items: items,
     ScannedCount: scannedCount,
