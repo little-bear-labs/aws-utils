@@ -1,4 +1,4 @@
-scalar JSON
+scalar AWSJSON
 
 schema {
   query: Query
@@ -14,7 +14,7 @@ type Query {
   cognitoInfo: CognitoInfo!
   lambda: LambdaInfo!
   error: Boolean
-  jsonTest: JSON
+  jsonTest: AWSJSON
 }
 
 type Mutation {

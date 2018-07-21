@@ -314,7 +314,7 @@ const generateResolvers = (cwd, config, configs) => {
       };
     },
     {
-      JSON: GraphQLJSON,
+      AWSJSON: GraphQLJSON,
     },
   );
 };
