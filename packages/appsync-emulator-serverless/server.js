@@ -68,8 +68,6 @@ const createSchema = async ({
     appSyncConfig,
   );
 
-  console.log(dynamodbTables);
-
   return createSchemaCore({
     dynamodb,
     dynamodbTables,

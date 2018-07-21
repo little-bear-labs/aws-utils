@@ -111,6 +111,11 @@ custom:
         type: Query
         request: lambda-request.vtl
         response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: jsonTest
+        request: lambda-request.vtl
+        response: result-response.txt
     serviceRole: "AppSyncServiceRole"
     dataSources:
       - type: AMAZON_DYNAMODB
