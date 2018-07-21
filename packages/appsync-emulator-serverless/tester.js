@@ -36,7 +36,7 @@ const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
   };
 
   const terminate = () => emulator.terminate();
-  
+
   return {
     close,
     terminate,

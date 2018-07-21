@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const json5 = require('json5');
 const { GraphQLError } = require('graphql');
+const GraphQLJSON = require('graphql-type-json');
 const { create: createUtils } = require('./util');
 const { javaify, vtl } = require('./vtl');
 const dynamodbSource = require('./dynamodbSource');
@@ -312,7 +313,9 @@ const generateResolvers = (cwd, config, configs) => {
         },
       };
     },
-    {},
+    {
+      JSON: GraphQLJSON,
+    },
   );
 };
 

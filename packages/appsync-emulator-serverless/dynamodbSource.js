@@ -195,7 +195,7 @@ const scan = async (
     Segment: segment,
     TotalSegments: totalSegments,
   };
-  if(filter) {
+  if (filter) {
     Object.assign(params, {
       FilterExpression: filter.expression,
       ExpressionAttributeNames: {
@@ -204,7 +204,7 @@ const scan = async (
       ExpressionAttributeValues: {
         ...(filter.expressionValues || undefined),
       },
-    })
+    });
   }
   const {
     Items: items,
