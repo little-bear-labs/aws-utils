@@ -32,25 +32,56 @@ class SubscriptionServer {
       this.onClientDisconnect(...args),
     );
 
-    // XXX: Note we may need to listen to unsubscribe to end the async iterator.
     mqttServer.on('subscribed', (...args) => this.onClientSubscribed(...args));
+
+    mqttServer.on('unsubscribed', (...args) =>
+      this.onClientUnsubscribed(...args),
+    );
   }
 
   // eslint-disable-next-line
   async onClientConnect(client) {
     const { id: clientId } = client;
     consola.info(`client connected to subscription server (${clientId})`);
+    const timeout = this.iteratorTimeout.get(client.id);
+    if (timeout) {
+      clearTimeout(timeout);
+    }
   }
 
   async onClientSubscribed(topic, client) {
     const { id: clientId } = client;
     consola.info(`client (${clientId}) subscribed to : ${topic}`);
     log.info(`client (${clientId}) subscribed to : ${topic}`);
-    const reg = this.registrations.get(clientId);
-    if (!reg) {
+    const regs = this.registrations.get(clientId);
+    if (!regs) {
       console.error('No registration for clientId', clientId);
       return;
     }
+
+    const reg = regs.find(({ topicId }) => topicId === topic);
+    if (!reg) {
+      console.error(
+        `Not subscribed to topicId: ${topic} for clientId`,
+        clientId,
+      );
+      return;
+    }
+
+    if (!reg.isRegistered) {
+      const asyncIterator = await this.subscribeToGraphQL(reg);
+
+      if (asyncIterator.errors) {
+        console.error('Error(s) subcribing via graphql', asyncIterator.errors);
+        return;
+      }
+
+      Object.assign(reg, {
+        asyncIterator,
+        isRegistered: true,
+      });
+    }
+
     const { asyncIterator, topicId } = reg;
     log.info('clientConnect', { clientId, topicId });
 
@@ -80,6 +111,34 @@ class SubscriptionServer {
     }
   }
 
+  onClientUnsubscribed(topic, client) {
+    const { id: clientId } = client;
+    consola.info(`client (${clientId}) unsubscribed to : ${topic}`);
+    log.info(`client (${clientId}) unsubscribed to : ${topic}`);
+    const regs = this.registrations.get(clientId);
+    if (!regs) {
+      console.warn(
+        `Unsubscribe topic: ${topic} from client with unknown id`,
+        clientId,
+      );
+      return;
+    }
+
+    const reg = regs.find(({ topicId }) => topicId === topic);
+    if (!reg) {
+      console.warn(
+        `Unsubscribe unregistered topic ${topic} from client`,
+        clientId,
+      );
+      return;
+    }
+
+    // turn off subscription, but keep registration so client
+    // can resubscribe
+    reg.asyncIterator.return();
+    reg.isRegistered = false;
+  }
+
   onClientDisconnect(client) {
     const { id: clientId } = client;
     log.info('clientDisconnect', { clientId });
@@ -87,24 +146,22 @@ class SubscriptionServer {
     const reg = this.registrations.get(clientId);
     if (!reg) {
       console.warn('Disconnecting client with unknown id', clientId);
-      return;
     }
-    this.registrations.delete(clientId);
-    reg.asyncIterator.return();
   }
 
   async register({ documentAST, variables, jwt }) {
-    const clientId = uuid();
+    const clientId = jwt.sub;
     const topicId = uuid();
     log.info('register', { clientId, topicId });
 
     const context = { jwt };
-    const asyncIterator = await subscribe({
-      schema: this.schema,
-      document: documentAST,
-      variableValues: variables,
-      contextValue: { jwt },
-    });
+    const registration = {
+      context,
+      documentAST,
+      variables,
+      topicId,
+    };
+    const asyncIterator = await this.subscribeToGraphQL(registration);
 
     if (asyncIterator.errors) {
       return {
@@ -113,12 +170,15 @@ class SubscriptionServer {
       };
     }
 
-    this.registrations.set(clientId, {
-      documentAST,
-      variables,
-      topicId,
+    Object.assign(registration, {
       asyncIterator,
+      isRegistered: true,
     });
+
+    const currentRegistrations = this.registrations.get(clientId) || [];
+    currentRegistrations.push(registration);
+
+    this.registrations.set(clientId, currentRegistrations);
 
     // if client does not connect within this amount of time then end iterator.
     this.iteratorTimeout.set(
@@ -143,7 +203,7 @@ class SubscriptionServer {
           mqttConnections: [
             {
               url: this.mqttURL,
-              topics: [topicId],
+              topics: currentRegistrations.map(reg => reg.topicId),
               client: clientId,
             },
           ],
@@ -158,6 +218,15 @@ class SubscriptionServer {
       data: null,
       errors: null,
     };
+  }
+
+  subscribeToGraphQL(registration) {
+    return subscribe({
+      schema: this.schema,
+      document: registration.documentAST,
+      variableValues: registration.variables,
+      contextValue: registration.context,
+    });
   }
 }
 
