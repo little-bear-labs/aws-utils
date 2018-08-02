@@ -4,6 +4,32 @@ const {
 
 const nullIfEmpty = obj => (Object.keys(obj).length === 0 ? null : obj);
 
+const unmarshall = (raw, isRaw = true) => {
+  const content = isRaw ? Converter.unmarshall(raw) : raw;
+
+  // because of the funky set type used in the aws-sdk we need to further unwrap
+  // to find if there is a set that needs to be unpacked into an array.
+  if (content && typeof content === 'object' && content.wrapperName === 'Set') {
+    return content.values;
+  }
+
+  if (content && typeof content === 'object') {
+    return Object.entries(content).reduce(
+      (sum, [key, value]) => ({
+        ...sum,
+        [key]: unmarshall(value, false),
+      }),
+      {},
+    );
+  }
+
+  if (Array.isArray(content)) {
+    return content.map(value => unmarshall(value, false));
+  }
+
+  return content;
+};
+
 const getItem = async (db, table, { key, consistentRead = false }) => {
   const result = await db
     .getItem({
@@ -14,7 +40,7 @@ const getItem = async (db, table, { key, consistentRead = false }) => {
     .promise();
 
   if (!result.Item) return null;
-  return Converter.unmarshall(result.Item);
+  return unmarshall(result.Item);
 };
 
 const putItem = async (
@@ -71,7 +97,7 @@ const updateItem = async (
   };
 
   const { Attributes: updated } = await db.updateItem(params).promise();
-  return Converter.unmarshall(updated);
+  return unmarshall(updated);
 };
 const deleteItem = async (
   db,
@@ -138,7 +164,7 @@ const query = async (
   } = await db.query(params).promise();
 
   return {
-    items: items.map(item => Converter.unmarshall(item)),
+    items: items.map(item => unmarshall(item)),
     scannedCount,
     nextToken: resultNextToken,
   };
@@ -179,7 +205,7 @@ const scan = async (
   } = await db.scan(params).promise();
 
   return {
-    items: items.map(item => Converter.unmarshall(item)),
+    items: items.map(item => unmarshall(item)),
     scannedCount,
     nextToken: resultNextToken,
   };
@@ -217,9 +243,7 @@ const batchGetItem = async (db, dynamodbTables, { tables }) => {
   const data = Object.entries(byTable).reduce(
     (sum, [table, results]) => ({
       ...sum,
-      [reverseTableAlias[table]]: results.map(item =>
-        Converter.unmarshall(item),
-      ),
+      [reverseTableAlias[table]]: results.map(item => unmarshall(item)),
     }),
     {
       unprocessedKeys,
@@ -266,7 +290,7 @@ const getItemsFromBatch = async (db, dynamodbTables, batch) => {
             return null;
           }
 
-          return Converter.unmarshall(Item);
+          return unmarshall(Item);
         }),
       );
       return { table, records };

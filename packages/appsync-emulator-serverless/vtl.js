@@ -193,9 +193,11 @@ class JavaMap {
 
 const vtl = (str, context, macros = {}) => {
   log.info('render\n', str);
-  return velocity.render(str, context, macros, {
+  const output = velocity.render(str, context, macros, {
     valueMapper: javaify,
   });
+  log.info('render output\n', output);
+  return output;
 };
 
 module.exports = { vtl, javaify, toJSON };
