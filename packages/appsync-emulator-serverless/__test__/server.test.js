@@ -56,6 +56,26 @@ describe('subscriptionServer', () => {
       },
     });
 
+  const anotherMutate = (client, id) =>
+    client.mutate({
+      mutation: gql`
+        mutation test($id: ID!, $input: QuoteResponseInput!) {
+          putQuoteResponse(id: $id, input: $input) {
+            id
+            offer
+            expires
+          }
+        }
+      `,
+      variables: {
+        id,
+        input: {
+          offer: 5,
+          expires: 10,
+        },
+      },
+    });
+
   const request = async (url, payload) => {
     const req = await fetch(url, {
       method: 'POST',
@@ -133,15 +153,31 @@ describe('subscriptionServer', () => {
       variables: {},
     };
 
+    const secondSubscribePayload = {
+      operationName: 'test2',
+      query: `
+      subscription quoteRequest {
+        subscribeToPutQuoteResponse {
+          id
+          offer
+          expires
+        }
+      }
+      `,
+      variables: {},
+    };
+
     const client = createClient(url);
-    const subscribe = await request(url, subscribePayload);
+    await request(url, subscribePayload);
+    const secondSubscribe = await request(url, secondSubscribePayload);
+
     const {
       extensions: {
         subscription: {
           mqttConnections: [connectionParams],
         },
       },
-    } = subscribe;
+    } = secondSubscribe;
 
     const mqttClient = await createMQTTClient(
       connectionParams.url,
@@ -151,7 +187,8 @@ describe('subscriptionServer', () => {
       connectionParams.topics.map(topic => mqttClient.subscribe(topic)),
     );
     const msgPromise = e2p(mqttClient, 'message');
-    await mutate(client);
+    const mutateOutput = await mutate(client);
+
     const { payloadString: msg } = await msgPromise;
     const msgContent = JSON.parse(msg);
     expect(msgContent).toHaveProperty('data');
@@ -160,6 +197,20 @@ describe('subscriptionServer', () => {
         subscribeToPutQuoteRequest: {
           commodity: 'foo',
           amount: 100.5,
+        },
+      },
+    });
+
+    const secondMsgPromise = e2p(mqttClient, 'message');
+    await anotherMutate(client, mutateOutput.data.putQuoteRequest.id);
+    const { payloadString: secondMsg } = await secondMsgPromise;
+    const secondMsgContent = JSON.parse(secondMsg);
+    expect(secondMsgContent).toHaveProperty('data');
+    expect(secondMsgContent).toMatchObject({
+      data: {
+        subscribeToPutQuoteResponse: {
+          offer: '5',
+          expires: 10,
         },
       },
     });
