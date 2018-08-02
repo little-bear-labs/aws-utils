@@ -161,12 +161,8 @@ const scan = async (
   const params = {
     TableName: table,
     FilterExpression: filter.expression,
-    ExpressionAttributeNames: {
-      ...(filter.expressionNames || {}),
-    },
-    ExpressionAttributeValues: {
-      ...(filter.expressionValues || {}),
-    },
+    ExpressionAttributeNames: filter.expressionNames,
+    ExpressionAttributeValues: filter.expressionValues,
     // XXX: need to validate that this works ...
     ExclusiveStartKey: nextToken,
     IndexName: index,
