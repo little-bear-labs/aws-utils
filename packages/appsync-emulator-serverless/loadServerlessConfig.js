@@ -45,6 +45,36 @@ class ConfigServerless extends Serverless {
   }
 }
 
+const normalizeResources = config => {
+  if (!config.resources) {
+    return config.resources;
+  }
+
+  if (!config.resources.Resources) {
+    return {};
+  }
+
+  if (!Array.isArray(config.resources.Resources)) {
+    return config.resources;
+  }
+
+  const newResources = config.resources.Resources.reduce(
+    (sum, { Resources, Outputs = {} }) => ({
+      ...sum,
+      ...Resources,
+      Outputs: {
+        ...(sum.Outputs || {}),
+        ...Outputs,
+      },
+    }),
+    {},
+  );
+
+  return {
+    Resources: newResources,
+  };
+};
+
 const loadServerlessConfig = async (cwd = process.cwd()) => {
   const stat = fs.statSync(cwd);
   if (!stat.isDirectory()) {
@@ -59,7 +89,7 @@ const loadServerlessConfig = async (cwd = process.cwd()) => {
   await serverless.getConfig(cwd);
   const { service: config } = serverless;
   const output = {
-    config: { ...config },
+    config: { ...config, resources: normalizeResources(config) },
     directory: cwd,
   };
   GlobalCache.set(cwd, output);

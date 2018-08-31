@@ -241,7 +241,7 @@ const create = (errors = [], now = new Date()) => ({
       return JSON.stringify(this.toNull());
     },
     toList(value) {
-      return this.toDynamoDB([].concat(value));
+      return this.toDynamoDB(value);
     },
     toListJson(value) {
       return JSON.stringify(this.toList(value));
