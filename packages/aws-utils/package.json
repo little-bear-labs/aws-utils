@@ -1,11 +1,8 @@
 {
   "name": "@conduitvc/aws-utils",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "index.js",
   "license": "MIT",
-  "bin": {
-    "./bin/createCognitoUser.js": "createCognitoUser"
-  },
   "dependencies": {
     "@conduitvc/config": "^1.0.0",
     "amazon-cognito-identity-js": "^2.0.6",
