@@ -1,13 +1,13 @@
 {
   "name": "@conduitvc/dynamodb-emulator",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "DynamoDB emulator nodejs wrapper",
   "main": "index.js",
   "author": "James Lal [:lightsofapollo]",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "preinstall": "./download.sh"
+    "install": "./download.sh"
   },
   "dependencies": {
     "download-cli": "^1.1.1",
