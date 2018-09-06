@@ -5,7 +5,7 @@ const path = require('path');
 const uuid = require('uuid/v4');
 const { createSchema: createSchemaCore } = require('./schema');
 const { PubSub } = require('graphql-subscriptions');
-const schemaWrapper = require('./schemaWrapper');
+const { wrapSchema } = require('./schemaWrapper');
 
 const setupDocumentDB = async (serverlessConfig, appSyncConfig, dynamodb) => {
   const {
@@ -66,9 +66,7 @@ const createSchema = async ({
     throw new Error(`schema file: ${schemaPath} must exist`);
   }
 
-  const graphqlSchema = schemaWrapper.wrapSchema(
-    fs.readFileSync(schemaPath, 'utf8'),
-  );
+  const graphqlSchema = wrapSchema(fs.readFileSync(schemaPath, 'utf8'));
   const { custom: { appSync: appSyncConfig } = {} } = serverlessConfig;
 
   const dynamodbTables = await setupDocumentDB(

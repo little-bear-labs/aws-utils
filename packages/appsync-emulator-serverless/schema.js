@@ -7,7 +7,6 @@ const fs = require('fs');
 const path = require('path');
 const json5 = require('json5');
 const { GraphQLError } = require('graphql');
-const GraphQLJSON = require('graphql-type-json');
 const { create: createUtils } = require('./util');
 const { javaify, vtl } = require('./vtl');
 const dynamodbSource = require('./dynamodbSource');
@@ -15,6 +14,7 @@ const lambdaSource = require('./lambdaSource');
 const log = require('logdown')('appsync-emulator:schema');
 const consola = require('./log');
 const { inspect } = require('util');
+const { scalars } = require('./schemaWrapper');
 
 const vtlMacros = {
   console: (...args) => {
@@ -313,9 +313,7 @@ const generateResolvers = (cwd, config, configs) => {
         },
       };
     },
-    {
-      AWSJSON: GraphQLJSON,
-    },
+    { ...scalars },
   );
 };
 
