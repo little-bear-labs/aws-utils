@@ -1,5 +1,3 @@
-scalar AWSJSON
-
 schema {
   query: Query
   mutation: Mutation
