@@ -8,7 +8,7 @@ const path = require('path');
 const { createSchema: createSchemaCore } = require('./schema');
 const createServerCore = require('./serverCore');
 const log = require('logdown')('appsync-emulator:server');
-const schemaWrapper = require('./schemaWrapper');
+const { wrapSchema } = require('./schemaWrapper');
 
 const ensureDynamodbTables = async (
   dynamodb,
@@ -61,9 +61,7 @@ const createSchema = async ({
     throw new Error(`schema file: ${schemaPath} must exist`);
   }
 
-  const graphqlSchema = schemaWrapper.wrapSchema(
-    fs.readFileSync(schemaPath, 'utf8'),
-  );
+  const graphqlSchema = wrapSchema(fs.readFileSync(schemaPath, 'utf8'));
   const { custom: { appSync: appSyncConfig } = {} } = serverlessConfig;
   const dynamodbTables = await ensureDynamodbTables(
     dynamodb,
