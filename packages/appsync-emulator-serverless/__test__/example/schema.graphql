@@ -12,6 +12,7 @@ type Query {
   cognitoInfo: CognitoInfo!
   lambda: LambdaInfo!
   error: Boolean
+  jsonTest: AWSJSON
 }
 
 type Mutation {

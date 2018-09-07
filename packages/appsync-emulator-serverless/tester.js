@@ -16,6 +16,7 @@ const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
     subscriptions,
     schema,
     close: schemaClose,
+    tables,
   } = await createSchema({
     serverless,
     schemaPath,
@@ -44,6 +45,8 @@ const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
     mqttURL,
     schema,
     server,
+    dynamoEndpoint: dynamodb.endpoint.href,
+    tables,
   };
 };
 

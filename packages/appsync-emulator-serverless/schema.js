@@ -14,6 +14,7 @@ const lambdaSource = require('./lambdaSource');
 const log = require('logdown')('appsync-emulator:schema');
 const consola = require('./log');
 const { inspect } = require('util');
+const { scalars } = require('./schemaWrapper');
 
 const vtlMacros = {
   console: (...args) => {
@@ -162,7 +163,12 @@ const dispatchRequestToSource = async (
       );
     case 'AWS_LAMBDA':
       return lambdaSource(
-        { serverlessDirectory, serverlessConfig },
+        {
+          serverlessDirectory,
+          serverlessConfig,
+          dynamodbEndpoint: dynamodb.endpoint.href,
+          dynamodbTables,
+        },
         source.config.functionName,
         request,
       );
@@ -307,7 +313,7 @@ const generateResolvers = (cwd, config, configs) => {
         },
       };
     },
-    {},
+    { ...scalars },
   );
 };
 

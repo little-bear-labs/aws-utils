@@ -298,4 +298,20 @@ describe('creates executable schema', () => {
       message: 'No request',
     });
   });
+
+  it('json support', async () => {
+    const source = `
+      query {
+        jsonTest
+      }
+    `;
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expect(result).toMatchObject({ data: { jsonTest: { test: 'yup' } } });
+  });
 });
