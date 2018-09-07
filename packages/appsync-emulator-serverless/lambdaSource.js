@@ -5,7 +5,12 @@ const e2p = require('event-to-promise');
 const Runner = path.join(__dirname, 'lambdaRunner');
 
 const lambdaSource = async (
-  { serverlessConfig: { functions }, serverlessDirectory },
+  {
+    dynamodbEndpoint,
+    dynamodbTables,
+    serverlessConfig: { functions },
+    serverlessDirectory,
+  },
   fn,
   { payload },
 ) => {
@@ -16,8 +21,19 @@ const lambdaSource = async (
 
   const [handlerPath, handlerMethod] = fnConfig.handler.split('.');
   const fullPath = path.join(serverlessDirectory, handlerPath);
+  const dynamodbTableAliases = Object.entries(dynamodbTables).reduce(
+    (sum, [alias, tableName]) => ({
+      ...sum,
+      [`DYNAMODB_TABLE_${alias}`]: tableName,
+    }),
+    {},
+  );
 
   const child = fork(Runner, [], {
+    env: {
+      ...dynamodbTableAliases,
+      DYNAMODB_ENDPOINT: dynamodbEndpoint,
+    },
     stdio: [0, 1, 2, 'ipc'],
   });
   child.send({
