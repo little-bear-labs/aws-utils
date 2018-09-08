@@ -12,6 +12,7 @@ plugins:
   - serverless-appsync-plugin
 custom:
   accountId: 229055845648
+  quote: Quote
   appSync:
     name: appsync-bootstrap-test
     authenticationType: AMAZON_COGNITO_USER_POOLS
@@ -116,7 +117,7 @@ custom:
         field: jsonTest
         request: lambda-request.vtl
         response: result-response.txt
-    serviceRole: "AppSyncServiceRole"
+    serviceRole: 'AppSyncServiceRole'
     dataSources:
       - type: AMAZON_DYNAMODB
         name: QuoteRequest
@@ -125,7 +126,7 @@ custom:
           tableName: QuoteRequest-emulator
           serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
       - type: AMAZON_DYNAMODB
-        name: QuoteResponse
+        name: ${self:custom.quote}Response
         description: QuoteResponse description
         config:
           tableName: QuoteResponse-emulator
@@ -143,8 +144,8 @@ custom:
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: graphql
 functions:
-    graphql:
-        handler: handler.graphql
+  graphql:
+    handler: handler.graphql
 resources:
   Resources:
     QuoteRequestTable:
@@ -174,65 +175,59 @@ resources:
           WriteCapacityUnits: 1
         TableName: QuoteResponse-emulator
     AppSyncLambdaServiceRole:
-      Type: "AWS::IAM::Role"
+      Type: 'AWS::IAM::Role'
       Properties:
         RoleName: Lambda-${self:custom.appSync.serviceRole}-${self:service}
         AssumeRolePolicyDocument:
-          Version: "2012-10-17"
+          Version: '2012-10-17'
           Statement:
-            -
-              Effect: "Allow"
+            - Effect: 'Allow'
               Principal:
                 Service:
-                  - "appsync.amazonaws.com"
+                  - 'appsync.amazonaws.com'
               Action:
-                - "sts:AssumeRole"
+                - 'sts:AssumeRole'
         Policies:
-          -
-            PolicyName: "Lambda-${self:custom.appSync.serviceRole}-Policy"
+          - PolicyName: 'Lambda-${self:custom.appSync.serviceRole}-Policy'
             PolicyDocument:
-              Version: "2012-10-17"
+              Version: '2012-10-17'
               Statement:
-                -
-                  Effect: "Allow"
+                - Effect: 'Allow'
                   Action:
-                    - "lambda:invokeFunction"
+                    - 'lambda:invokeFunction'
                   Resource:
                     - { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
 
     AppSyncDynamoDBServiceRole:
-      Type: "AWS::IAM::Role"
+      Type: 'AWS::IAM::Role'
       Properties:
-        RoleName: "Dynamo-${self:custom.appSync.serviceRole}-${self:service}"
+        RoleName: 'Dynamo-${self:custom.appSync.serviceRole}-${self:service}'
         AssumeRolePolicyDocument:
-          Version: "2012-10-17"
+          Version: '2012-10-17'
           Statement:
-            -
-              Effect: "Allow"
+            - Effect: 'Allow'
               Principal:
                 Service:
-                  - "appsync.amazonaws.com"
+                  - 'appsync.amazonaws.com'
               Action:
-                - "sts:AssumeRole"
+                - 'sts:AssumeRole'
         Policies:
-          -
-            PolicyName: "Dynamo-${self:custom.appSync.serviceRole}-${self:service}-Policy"
+          - PolicyName: 'Dynamo-${self:custom.appSync.serviceRole}-${self:service}-Policy'
             PolicyDocument:
-              Version: "2012-10-17"
+              Version: '2012-10-17'
               Statement:
-                -
-                  Effect: "Allow"
+                - Effect: 'Allow'
                   Action:
-                    - "dynamodb:Query"
-                    - "dynamodb:BatchGetItem"
-                    - "dynamodb:BatchWriteItem"
-                    - "dynamodb:GetItem"
-                    - "dynamodb:DeleteItem"
-                    - "dynamodb:PutItem"
-                    - "dynamodb:Scan"
-                    - "dynamodb:UpdateItem"
+                    - 'dynamodb:Query'
+                    - 'dynamodb:BatchGetItem'
+                    - 'dynamodb:BatchWriteItem'
+                    - 'dynamodb:GetItem'
+                    - 'dynamodb:DeleteItem'
+                    - 'dynamodb:PutItem'
+                    - 'dynamodb:Scan'
+                    - 'dynamodb:UpdateItem'
                   Resource:
-                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteResponse-emulator"
-                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteResponse-emulator/*"
-                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteRequest-emulator"
-                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteRequest-emulator/*"
+                    - 'arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteResponse-emulator'
+                    - 'arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteResponse-emulator/*'
+                    - 'arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteRequest-emulator'
+                    - 'arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/QuoteRequest-emulator/*'

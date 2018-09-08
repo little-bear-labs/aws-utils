@@ -1,7 +1,5 @@
-const {
-  findServerless,
-  findServerlessPath,
-} = require('@conduitvc/aws-utils/findServerless');
+const { findServerlessPath } = require('@conduitvc/aws-utils/findServerless');
+const { loadServerlessConfig } = require('./loadServerlessConfig');
 const { PubSub } = require('graphql-subscriptions');
 const fs = require('fs');
 const path = require('path');
@@ -49,11 +47,13 @@ const createSchema = async ({
   pubsub,
   dynamodb,
 } = {}) => {
-  const serverlessConfig = findServerless(serverless);
   const serverlessDirectory =
     typeof serverless === 'string'
       ? path.dirname(serverless)
       : findServerlessPath();
+  const { config: serverlessConfig } = await loadServerlessConfig(
+    serverlessDirectory,
+  );
 
   // eslint-disable-next-line
   schemaPath = schemaPath || path.join(serverlessDirectory, 'schema.graphql');
