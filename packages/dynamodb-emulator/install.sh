@@ -1,7 +1,5 @@
 #! /bin/bash -ex
 
-./node_modules/.bin/download --extract -o emulator https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.zip
-
 pushd emulator
 cat > log4j2.xml <<- XML
 <?xml version="1.0" encoding="UTF-8"?>
