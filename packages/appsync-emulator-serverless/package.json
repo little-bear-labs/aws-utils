@@ -25,7 +25,7 @@
     "json5": "^1.0.1",
     "jwt-decode": "^2.2.0",
     "logdown": "^3.2.3",
-    "mosca": "^2.8.2",
+    "@conduitvc/mosca": "^2.8.2",
     "ngrok": "^3.0.1",
     "node-fetch": "^2.1.2",
     "paho-mqtt": "^1.0.4",
