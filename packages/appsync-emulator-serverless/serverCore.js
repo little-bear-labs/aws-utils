@@ -2,7 +2,7 @@ const http = require('http');
 const express = require('express');
 const jwtDecode = require('jwt-decode');
 const e2p = require('event-to-promise');
-const mosca = require('mosca');
+const mosca = require('@conduitvc/mosca');
 const uuid = require('uuid');
 const {
   parse,
