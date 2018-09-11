@@ -95,3 +95,32 @@ describe("graphql", () => {
 });
 
 ```
+
+
+### Lambda <> DynamoDB
+
+If you need your lambda functions to interact with the local dynamoDB emulator:
+
+```js
+const { DynamoDB } = require('aws-sdk');
+
+const dynamodb = new DynamoDB({
+  endpoint: process.env.DYNAMODB_ENDPOINT,
+  region: 'us-fake-1',
+  accessKeyId: 'fake',
+  secretAccessKey: 'fake',
+});
+const client = new DynamoDB.DocumentClient({ service: dynamodb });
+
+module.exports.myFn = async (event, context, callback) => {
+  const TableName = process.env[`DYNAMODB_TABLE_${YOURTABLENAME}`];
+  const { id } = event.arguments;
+  const dynamoResult = await client
+  .get({
+    TableName,
+    Key: { id },
+  }).promise();
+  
+  return dynamoResult;
+}
+```
