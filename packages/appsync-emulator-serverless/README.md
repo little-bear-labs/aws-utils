@@ -32,8 +32,9 @@ optional start dynamodb at a fixed port - e.g. 8000
 # NOTE unless you assign a specific port for dynamodb a random one will be chosen.
 yarn appsync-emulator --port 62222 --dynamodb-port 8000
 ```
-to access the dynamodb instance you need to use the following configuration:
+to access the dynamodb instance using javascript you need to use the following configuration:
 ```
+const { DynamoDB } = require('aws-sdk');
 const dynamodb = new DynamoDB({
   endpoint: 'http://localhost:8000',
   region: 'us-fake-1',

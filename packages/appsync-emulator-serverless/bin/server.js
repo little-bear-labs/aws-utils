@@ -39,16 +39,16 @@ const main = async () => {
     type: 'int',
   });
 
-  let { port, path: serverlessPath, dynamodb_port } = parser.parseArgs();
+  let { port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
-  dynamodb_port = dynamodb_port || null;
+  dynamodbPort = dynamodbPort || null;
 
   // start the dynamodb emulator
   const pkgPath = pkgUp.sync(serverlessPath);
   const emulator = await dynamoEmulator.launch({
     dbPath: path.join(path.dirname(pkgPath), '.dynamodb'),
-    port: dynamodb_port
+    port: dynamodbPort
   });
   process.on('SIGINT', () => {
     // _ensure_ we do not leave java processes lying around.
