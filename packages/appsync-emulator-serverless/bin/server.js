@@ -54,6 +54,7 @@ const main = async () => {
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
   const server = await createServer({ serverless, port, dynamodb });
   console.log('started at url:', server.url);
+  console.log('dynamodb endpoint:', dynamodb.endpoint.href);
 };
 
 main().catch(err => {
