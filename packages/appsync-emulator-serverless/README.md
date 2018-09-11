@@ -25,6 +25,24 @@ This package will download and run the dynamodb emulator as part of it's appsync
 # NOTE unless you assign a specific port a random one will be chosen.
 yarn appsync-emulator --port 62222
 ```
+#### dynamodb with fixed port
+
+optional start dynamodb at a fixed port - e.g. 8000
+```sh
+# NOTE unless you assign a specific port for dynamodb a random one will be chosen.
+yarn appsync-emulator --port 62222 --dynamodb-port 8000
+```
+to access the dynamodb instance you need to use the following configuration:
+```
+const dynamodb = new DynamoDB({
+  endpoint: 'http://localhost:8000',
+  region: 'us-fake-1',
+  accessKeyId: 'fake',
+  secretAccessKey: 'fake',
+});
+const client = new DynamoDB.DocumentClient({ service: dynamodb });
+```
+
 
 ## Testing
 
