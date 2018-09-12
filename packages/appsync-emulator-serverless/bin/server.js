@@ -66,7 +66,7 @@ const main = async () => {
   dynamodb_port && console.log(
     `dynamodb config:
     {
-      endpoint: 'http://localhost:${dynamodb_port}',
+      endpoint: 'http://localhost:${dynamodbPort}',
       region: 'us-fake-1',
       accessKeyId: 'fake',
       secretAccessKey: 'fake',
