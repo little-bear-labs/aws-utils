@@ -34,14 +34,23 @@ const main = async () => {
     type: 'int',
   });
 
-  let { port, path: serverlessPath } = parser.parseArgs();
+  parser.addArgument(['--dynamodb-port'], {
+    help: 'Port to bind the dynamodb to (default is any free port)',
+    type: 'int',
+  });
+  // argparse converts any argument with a dash to underscores
+  // eslint-disable-next-line
+  let { port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
+
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
+  dynamodbPort = dynamodbPort || null;
 
   // start the dynamodb emulator
   const pkgPath = pkgUp.sync(serverlessPath);
   const emulator = await dynamoEmulator.launch({
     dbPath: path.join(path.dirname(pkgPath), '.dynamodb'),
+    port: dynamodbPort,
   });
   process.on('SIGINT', () => {
     // _ensure_ we do not leave java processes lying around.
@@ -53,7 +62,20 @@ const main = async () => {
 
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
   const server = await createServer({ serverless, port, dynamodb });
+  /* eslint-disable no-console */
   console.log('started at url:', server.url);
+  if (dynamodbPort) {
+    /* eslint-disable no-console */
+    console.log(
+      `dynamodb config:
+    {
+      endpoint: 'http://localhost:${dynamodbPort}',
+      region: 'us-fake-1',
+      accessKeyId: 'fake',
+      secretAccessKey: 'fake',
+    }`,
+    );
+  }
 };
 
 main().catch(err => {
