@@ -50,7 +50,7 @@ const main = async () => {
   const pkgPath = pkgUp.sync(serverlessPath);
   const emulator = await dynamoEmulator.launch({
     dbPath: path.join(path.dirname(pkgPath), '.dynamodb'),
-    port: dynamodbPort
+    port: dynamodbPort,
   });
   process.on('SIGINT', () => {
     // _ensure_ we do not leave java processes lying around.
@@ -63,15 +63,16 @@ const main = async () => {
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
   const server = await createServer({ serverless, port, dynamodb });
   console.log('started at url:', server.url);
-  dynamodb_port && console.log(
-    `dynamodb config:
+  if (dynamodbPort)
+    console.log(
+      `dynamodb config:
     {
       endpoint: 'http://localhost:${dynamodbPort}',
       region: 'us-fake-1',
       accessKeyId: 'fake',
       secretAccessKey: 'fake',
-    }`
-  );
+    }`,
+    );
 };
 
 main().catch(err => {
