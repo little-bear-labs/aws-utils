@@ -39,9 +39,9 @@ const main = async () => {
     type: 'int',
   });
   // argparse converts any argument with a dash to underscores
-  /* eslint-disable camelcase */
+  // eslint-disable-next-line
   let { port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
-  /* eslint-enable camelcase */
+
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
   dynamodbPort = dynamodbPort || null;
