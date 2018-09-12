@@ -38,10 +38,10 @@ const main = async () => {
     help: 'Port to bind the dynamodb to (default is any free port)',
     type: 'int',
   });
-  /*eslint-disable camelcase*/
   // argparse converts any argument with a dash to underscores
+  /* eslint camelcase: ["error", {ignoreDestructuring: true}] */
   let { port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
-  /*eslint-enable camelcase*/
+
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
   dynamodbPort = dynamodbPort || null;
