@@ -62,8 +62,10 @@ const main = async () => {
 
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
   const server = await createServer({ serverless, port, dynamodb });
+  /* eslint-disable no-console */
   console.log('started at url:', server.url);
-  if (dynamodbPort)
+  if (dynamodbPort) {
+    /* eslint-disable no-console */
     console.log(
       `dynamodb config:
     {
@@ -73,6 +75,7 @@ const main = async () => {
       secretAccessKey: 'fake',
     }`,
     );
+  }
 };
 
 main().catch(err => {
