@@ -6,15 +6,21 @@ const {
   GraphQLDateTime,
 } = require('graphql-iso-date');
 
-const { EmailAddress, PhoneNumber, URL } = require('@okgrow/graphql-scalars');
+const {
+  EmailAddress,
+  RegularExpression,
+  URL,
+} = require('@okgrow/graphql-scalars');
+
+const GraphQLPhone = new RegularExpression('GraphQLPhone', /^.*$/);
 
 const scalars = {
   AWSJSON: GraphQLJSON,
   AWSDate: GraphQLDate,
   AWSTime: GraphQLTime,
   AWSDateTime: GraphQLDateTime,
+  AWSPhone: GraphQLPhone,
   AWSEmail: EmailAddress,
-  AWSPhone: PhoneNumber,
   AWSURL: URL,
 };
 
