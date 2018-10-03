@@ -139,6 +139,10 @@ const runResponseVTL = (fullPath, graphqlInfo, result) => {
   log.info('loading response vtl', path.relative(process.cwd(), fullPath));
   const context = buildVTLContext(graphqlInfo, result);
   const content = fs.readFileSync(fullPath, 'utf8');
+  consola.info(
+    'context',
+    inspect({ context }),
+  );
   return handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo);
 };
 
@@ -150,10 +154,6 @@ const dispatchRequestToSource = async (
   consola.info(
     'Dispatch to source',
     inspect({ name: source.name, type: source.type }),
-  );
-  consola.info(
-    'Request',
-    inspect({ request }),
   );
   log.info('resolving with source: ', source.name, source.type);
   switch (source.type) {
