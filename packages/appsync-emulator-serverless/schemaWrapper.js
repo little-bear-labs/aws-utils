@@ -3,14 +3,10 @@ const GraphQLJSON = require('graphql-type-json');
 const {
   GraphQLDate,
   GraphQLTime,
-  GraphQLDateTime
+  GraphQLDateTime,
 } = require('graphql-iso-date');
 
-const {
-  EmailAddress,
-  PhoneNumber,
-  URL
-} = require('@okgrow/graphql-scalars');
+const { EmailAddress, PhoneNumber, URL } = require('@okgrow/graphql-scalars');
 
 const scalars = {
   AWSJSON: GraphQLJSON,
@@ -19,7 +15,7 @@ const scalars = {
   AWSDateTime: GraphQLDateTime,
   AWSEmail: EmailAddress,
   AWSPhone: PhoneNumber,
-  AWSURL: URL
+  AWSURL: URL,
 };
 
 const wrapSchema = schemaString => {
