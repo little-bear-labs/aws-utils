@@ -11,6 +11,7 @@ const { create: createUtils } = require('./util');
 const { javaify, vtl } = require('./vtl');
 const dynamodbSource = require('./dynamodbSource');
 const lambdaSource = require('./lambdaSource');
+const httpSource = require('./httpSource');
 const log = require('logdown')('appsync-emulator:schema');
 const consola = require('./log');
 const { inspect } = require('util');
@@ -59,7 +60,7 @@ const buildVTLContext = ({ root, vars, context, info }, result = null) => {
       defaultAuthStrategy: 'ALLOW',
       claims: context.jwt,
     }),
-    source: {},
+    source: root ? root : {},
     result: javaify(result),
   };
   return {
@@ -150,6 +151,10 @@ const dispatchRequestToSource = async (
     'Dispatch to source',
     inspect({ name: source.name, type: source.type }),
   );
+  consola.info(
+    'Request',
+    inspect({ request }),
+  );
   log.info('resolving with source: ', source.name, source.type);
   switch (source.type) {
     case 'AMAZON_DYNAMODB':
@@ -170,6 +175,11 @@ const dispatchRequestToSource = async (
           dynamodbTables,
         },
         source.config.functionName,
+        request,
+      );
+    case 'HTTP':
+      return httpSource(
+        source.config.endpoint,
         request,
       );
     case 'NONE':
