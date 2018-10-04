@@ -13,6 +13,11 @@ type Query {
   lambda: LambdaInfo!
   error: Boolean
   jsonTest: AWSJSON
+  httpUsers: [httpUser]
+}
+
+type httpUser {
+  name: String
 }
 
 type Mutation {

@@ -117,6 +117,11 @@ custom:
         field: jsonTest
         request: lambda-request.vtl
         response: result-response.txt
+      - dataSource: TestHTTP
+        type: Query
+        field: httpUsers
+        request: httpUsers-request.vtl
+        response: httpUsers-response.vtl
     serviceRole: 'AppSyncServiceRole'
     dataSources:
       - type: AMAZON_DYNAMODB
@@ -143,6 +148,11 @@ custom:
           lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: graphql
+      - type: HTTP
+        name: TestHTTP
+        description: 'Test HTTP endpoint'
+        config:
+          endpoint: 'http://localhost:3000'
 functions:
   graphql:
     handler: handler.graphql
