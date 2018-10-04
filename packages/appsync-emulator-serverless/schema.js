@@ -281,7 +281,8 @@ const generateSubscriptionTypeResolver = (
 };
 
 const generateResolvers = (cwd, config, configs) => {
-  const mappingTemplates = path.join(cwd, 'mapping-templates');
+  const { mappingTemplatesLocation = 'mapping-templates' } = config;
+  const mappingTemplates = path.join(cwd, mappingTemplatesLocation);
   const dataSourceByName = config.dataSources.reduce(
     (sum, value) => ({
       ...sum,
