@@ -3,6 +3,7 @@ const { graphql } = require('graphql');
 const { subscribe } = require('graphql/subscription');
 const gql = require('graphql-tag');
 const { decoded: jwt } = require('../testJWT');
+const nock = require('nock');
 const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
 
 describe('creates executable schema', () => {
@@ -30,6 +31,12 @@ describe('creates executable schema', () => {
     // eslint-disable-next-line
     close = result.close;
     contextValue = { jwt };
+
+    nock('http://localhost:3000')
+      .get('/api/users')
+      .reply(200, {
+        data: [{ name: 'Name1' }, { name: 'Name2' }],
+      });
   });
   afterEach(async () => close());
 
@@ -104,6 +111,26 @@ describe('creates executable schema', () => {
       `,
     });
     expect(result).toMatchObject({ data: { lambda: { test: 'yup' } } });
+  });
+
+  it('should allow querying http', async () => {
+    const source = `
+      query {
+        httpUsers {
+          name
+        }
+      }
+    `;
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expect(result).toMatchObject({
+      data: { httpUsers: [{ name: 'Name1' }, { name: 'Name2' }] },
+    });
   });
 
   it('should have identity with jwt contextValue', async () => {
