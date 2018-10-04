@@ -122,6 +122,11 @@ custom:
         field: httpUsers
         request: httpUsers-request.vtl
         response: httpUsers-response.vtl
+      - dataSource: TestHTTP
+        type: httpUser
+        field: posts
+        request: httpUsers-posts-request.vtl
+        response: httpUsers-posts-response.vtl
     serviceRole: 'AppSyncServiceRole'
     dataSources:
       - type: AMAZON_DYNAMODB

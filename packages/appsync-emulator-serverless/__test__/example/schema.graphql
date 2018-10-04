@@ -18,6 +18,11 @@ type Query {
 
 type httpUser {
   name: String
+  posts: [Post]
+}
+
+type Post {
+  title: String
 }
 
 type Mutation {
