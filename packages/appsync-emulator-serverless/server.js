@@ -14,9 +14,7 @@ const ensureDynamodbTables = async (
   appSyncConfig,
 ) => {
   const { dataSources } = appSyncConfig;
-  const {
-    resources: { Resources: resources = {} } = {},
-  } = serverlessConfig;
+  const { resources: { Resources: resources = {} } = {} } = serverlessConfig;
 
   await Promise.all(
     Object.values(resources)
