@@ -391,9 +391,28 @@ describe('creates executable schema', () => {
     expect(result).toMatchObject({ data: { [field]: val } });
   });
 
-  it('AWSPhone scalar', async () => {
+  it('AWSPhone scalar - US', async () => {
     const field = 'phoneTest';
     const val = '123-123-1234';
+
+    const source = `
+      query {
+        ${field}(${field}: "${val}")
+      }
+    `;
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expect(result).toMatchObject({ data: { [field]: val } });
+  });
+
+  it('AWSPhone scalar - International', async () => {
+    const field = 'phoneTest';
+    const val = '+44 8984 1234';
 
     const source = `
       query {
