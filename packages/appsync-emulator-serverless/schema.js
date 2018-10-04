@@ -60,7 +60,7 @@ const buildVTLContext = ({ root, vars, context, info }, result = null) => {
       defaultAuthStrategy: 'ALLOW',
       claims: context.jwt,
     }),
-    source: root ? root : {},
+    source: root || {},
     result: javaify(result),
   };
   return {
@@ -174,10 +174,7 @@ const dispatchRequestToSource = async (
         request,
       );
     case 'HTTP':
-      return httpSource(
-        source.config.endpoint,
-        request,
-      );
+      return httpSource(source.config.endpoint, request);
     case 'NONE':
       return request.payload;
     default:
