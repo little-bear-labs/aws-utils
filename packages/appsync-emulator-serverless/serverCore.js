@@ -53,24 +53,15 @@ class SubscriptionServer {
     const { id: clientId } = client;
     consola.info(`client (${clientId}) subscribed to : ${topic}`);
     log.info(`client (${clientId}) subscribed to : ${topic}`);
-<<<<<<< HEAD
     const regs = this.registrations.get(clientId);
     if (!regs) {
-      console.error('No registration for clientId', clientId);
-=======
-    const reg = this.registrations.get(clientId);
-    if (!reg) {
       log.error('No registration for clientId', clientId);
->>>>>>> 5bd5bfc... switched to logdown instead of console.log, rid ourselves of eslint warnings
       return;
     }
 
     const reg = regs.find(({ topicId }) => topicId === topic);
     if (!reg) {
-      console.error(
-        `Not subscribed to topicId: ${topic} for clientId`,
-        clientId,
-      );
+      log.error(`Not subscribed to topicId: ${topic} for clientId`, clientId);
       return;
     }
 
@@ -78,7 +69,7 @@ class SubscriptionServer {
       const asyncIterator = await this.subscribeToGraphQL(reg);
 
       if (asyncIterator.errors) {
-        console.error('Error(s) subcribing via graphql', asyncIterator.errors);
+        log.error('Error(s) subcribing via graphql', asyncIterator.errors);
         return;
       }
 
@@ -124,7 +115,7 @@ class SubscriptionServer {
     log.info(`client (${clientId}) unsubscribed to : ${topic}`);
     const regs = this.registrations.get(clientId);
     if (!regs) {
-      console.warn(
+      log.warn(
         `Unsubscribe topic: ${topic} from client with unknown id`,
         clientId,
       );
@@ -133,10 +124,7 @@ class SubscriptionServer {
 
     const reg = regs.find(({ topicId }) => topicId === topic);
     if (!reg) {
-      console.warn(
-        `Unsubscribe unregistered topic ${topic} from client`,
-        clientId,
-      );
+      log.warn(`Unsubscribe unregistered topic ${topic} from client`, clientId);
       return;
     }
 
@@ -152,12 +140,7 @@ class SubscriptionServer {
     consola.info(`client disconnected to subscription server (${clientId})`);
     const reg = this.registrations.get(clientId);
     if (!reg) {
-<<<<<<< HEAD
-      console.warn('Disconnecting client with unknown id', clientId);
-=======
       log.warn('Disconnecting client with unknown id', clientId);
-      return;
->>>>>>> 5bd5bfc... switched to logdown instead of console.log, rid ourselves of eslint warnings
     }
   }
 
