@@ -315,38 +315,117 @@ describe('creates executable schema', () => {
     expect(result).toMatchObject({ data: { jsonTest: { test: 'yup' } } });
   });
 
-  it('custom scalar support', async () => {
-    async function asyncForEach(array, callback) {
-      for (let index = 0; index < array.length; index += 1) {
-        await callback(array[index], index, array);
+  it('AWSDate scalar', async () => {
+    const field = 'dateTest';
+    const val = new Date('05 October 2011').toISOString().split('T')[0];
+
+    const source = `
+      query {
+        ${field}(${field}: "${val}")
       }
-    }
+    `;
 
-    const scalars = [
-      ['dateTest', new Date('05 October 2011').toISOString().split('T')[0]],
-      ['timeTest', new Date('05 October 2011').toISOString().split('T')[1]],
-      ['dateTimeTest', new Date('05 October 2011').toISOString()],
-      ['emailTest', 'foobar@example.com'],
-      ['phoneTest', '123-123-1234'],
-      ['urlTest', 'http://google.com'],
-    ];
-
-    await asyncForEach(scalars, async scalar => {
-      const [field, val] = scalar;
-
-      const source = `
-        query {
-          ${field}(${field}: "${val}")
-        }
-      `;
-
-      const result = await graphql({
-        schema,
-        contextValue,
-        source,
-      });
-
-      expect(result).toMatchObject({ data: { [field]: val } });
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
     });
+
+    expect(result).toMatchObject({ data: { [field]: val } });
+  });
+
+  it('AWSTime scalar', async () => {
+    const field = 'timeTest';
+    const val = new Date('05 October 2011').toISOString().split('T')[1];
+
+    const source = `
+      query {
+        ${field}(${field}: "${val}")
+      }
+    `;
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expect(result).toMatchObject({ data: { [field]: val } });
+  });
+
+  it('AWSDateTime scalar', async () => {
+    const field = 'dateTimeTest';
+    const val = new Date('05 October 2011').toISOString();
+
+    const source = `
+      query {
+        ${field}(${field}: "${val}")
+      }
+    `;
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expect(result).toMatchObject({ data: { [field]: val } });
+  });
+
+  it('AWSEmail scalar', async () => {
+    const field = 'emailTest';
+    const val = 'foobar@example.com';
+
+    const source = `
+      query {
+        ${field}(${field}: "${val}")
+      }
+    `;
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expect(result).toMatchObject({ data: { [field]: val } });
+  });
+
+  it('AWSPhone scalar', async () => {
+    const field = 'phoneTest';
+    const val = '123-123-1234';
+
+    const source = `
+      query {
+        ${field}(${field}: "${val}")
+      }
+    `;
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expect(result).toMatchObject({ data: { [field]: val } });
+  });
+
+  it('AWSURL scalar', async () => {
+    const field = 'urlTest';
+    const val = 'http://google.com';
+
+    const source = `
+      query {
+        ${field}(${field}: "${val}")
+      }
+    `;
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expect(result).toMatchObject({ data: { [field]: val } });
   });
 });
