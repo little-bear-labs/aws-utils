@@ -17,6 +17,20 @@ describe('creates executable schema', () => {
     jest.setTimeout(20 * 1000);
     emulator = await dynamodbEmulator.launch();
     dynamodb = dynamodbEmulator.getClient(emulator);
+  });
+
+  afterAll(async () => {
+    await emulator.terminate();
+  });
+  // eslint-disable-next-line
+  let schema, close;
+  beforeEach(async () => {
+    const result = await createSchema({ serverless, schemaPath, dynamodb });
+    // eslint-disable-next-line
+    schema = result.schema;
+    // eslint-disable-next-line
+    close = result.close;
+    contextValue = { jwt };
 
     nock('http://localhost:3000')
       .get('/api/users')
@@ -36,23 +50,38 @@ describe('creates executable schema', () => {
         data: [{ title: 'Post2' }],
       });
   });
-
-  afterAll(async () => {
-    await emulator.terminate();
-  });
-  // eslint-disable-next-line
-  let schema, close;
-  beforeEach(async () => {
-    const result = await createSchema({ serverless, schemaPath, dynamodb });
-    // eslint-disable-next-line
-    schema = result.schema;
-    // eslint-disable-next-line
-    close = result.close;
-    contextValue = { jwt };
-  });
   afterEach(async () => close());
 
   it('should allow querying http', async () => {
+    const source = `
+      query {
+        httpUsers {
+          name
+        }
+      }
+    `;
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expect(result).toMatchObject({
+      data: {
+        httpUsers: [
+          {
+            name: 'Name1',
+          },
+          {
+            name: 'Name2',
+          },
+        ],
+      },
+    });
+  });
+
+  it('it should allow using context.source', async () => {
     const source = `
       query {
         httpUsers {
