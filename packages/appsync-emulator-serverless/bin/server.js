@@ -62,7 +62,7 @@ const main = async () => {
 
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
   const server = await createServer({ serverless, port, dynamodb });
-  /* eslint-disable no-console */
+  // eslint-disable-next-line no-console
   console.log('started at url:', server.url);
   if (dynamodbPort) {
     /* eslint-disable no-console */
@@ -79,6 +79,7 @@ const main = async () => {
 };
 
 main().catch(err => {
+  // eslint-disable-next-line no-console
   console.error(err);
   process.exit(1);
 });

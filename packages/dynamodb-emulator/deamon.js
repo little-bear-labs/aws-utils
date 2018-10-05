@@ -115,8 +115,8 @@ try {
     }),
   );
 } catch (err) {
-  console.error('Failed to write to pid file');
-  console.error(err);
+  log.error('Failed to write to pid file');
+  log.error(err);
   process.exit();
 }
 const unixSocket = path.join(pidPath, hash);
