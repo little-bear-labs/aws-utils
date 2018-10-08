@@ -30,7 +30,7 @@
     "jwt-decode": "^2.2.0",
     "logdown": "^3.2.3",
     "ngrok": "^3.0.1",
-    "node-fetch": "^2.1.2",
+    "node-fetch": "^2.2.0",
     "paho-mqtt": "^1.0.4",
     "pkg-up": "^2.0.0",
     "serverless": "^1.30",
