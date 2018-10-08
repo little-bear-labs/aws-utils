@@ -2840,9 +2840,9 @@ graphql-iso-date@^3.6.1:
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/graphql-iso-date/-/graphql-iso-date-3.6.1.tgz#bd2d0dc886e0f954cbbbc496bbf1d480b57ffa96"
 
-graphql-phone-type@^0.0.2:
+"graphql-phone-type@https://github.com/pianomansam/graphql-phone-type":
   version "0.0.2"
-  resolved "https://registry.yarnpkg.com/graphql-phone-type/-/graphql-phone-type-0.0.2.tgz#2960341818b047ded5c9fcd7e80c2467bde9a19d"
+  resolved "https://github.com/pianomansam/graphql-phone-type#daaa07a9705b8a4669acd5f98a599ab443cb31d6"
   dependencies:
     libphonenumber-js "^0.4.43"
 
