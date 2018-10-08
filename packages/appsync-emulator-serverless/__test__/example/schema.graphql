@@ -23,6 +23,12 @@ type httpUser {
 
 type Post {
   title: String
+  dateTest(dateTest: String): AWSDate
+  timeTest(timeTest: String): AWSTime
+  dateTimeTest(dateTimeTest: String): AWSDateTime
+  emailTest(emailTest: String): AWSEmail
+  phoneTest(phoneTest: String): AWSPhone
+  urlTest(urlTest: String): AWSURL
 }
 
 type Mutation {

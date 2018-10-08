@@ -55,16 +55,13 @@ class SubscriptionServer {
     log.info(`client (${clientId}) subscribed to : ${topic}`);
     const regs = this.registrations.get(clientId);
     if (!regs) {
-      console.error('No registration for clientId', clientId);
+      log.error('No registration for clientId', clientId);
       return;
     }
 
     const reg = regs.find(({ topicId }) => topicId === topic);
     if (!reg) {
-      console.error(
-        `Not subscribed to topicId: ${topic} for clientId`,
-        clientId,
-      );
+      log.error(`Not subscribed to topicId: ${topic} for clientId`, clientId);
       return;
     }
 
@@ -72,7 +69,7 @@ class SubscriptionServer {
       const asyncIterator = await this.subscribeToGraphQL(reg);
 
       if (asyncIterator.errors) {
-        console.error('Error(s) subcribing via graphql', asyncIterator.errors);
+        log.error('Error(s) subcribing via graphql', asyncIterator.errors);
         return;
       }
 
@@ -85,6 +82,7 @@ class SubscriptionServer {
     const { asyncIterator, topicId } = reg;
     log.info('clientConnect', { clientId, topicId });
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const { value: payload, done } = await asyncIterator.next();
       if (done) break;
@@ -117,7 +115,7 @@ class SubscriptionServer {
     log.info(`client (${clientId}) unsubscribed to : ${topic}`);
     const regs = this.registrations.get(clientId);
     if (!regs) {
-      console.warn(
+      log.warn(
         `Unsubscribe topic: ${topic} from client with unknown id`,
         clientId,
       );
@@ -126,10 +124,7 @@ class SubscriptionServer {
 
     const reg = regs.find(({ topicId }) => topicId === topic);
     if (!reg) {
-      console.warn(
-        `Unsubscribe unregistered topic ${topic} from client`,
-        clientId,
-      );
+      log.warn(`Unsubscribe unregistered topic ${topic} from client`, clientId);
       return;
     }
 
@@ -145,7 +140,7 @@ class SubscriptionServer {
     consola.info(`client disconnected to subscription server (${clientId})`);
     const reg = this.registrations.get(clientId);
     if (!reg) {
-      console.warn('Disconnecting client with unknown id', clientId);
+      log.warn('Disconnecting client with unknown id', clientId);
     }
   }
 
@@ -327,7 +322,7 @@ const createServer = async ({ port = 0, pubsub, schema, subscriptions }) => {
     try {
       await handler(req, res);
     } catch (err) {
-      console.error('Error handling request:', err);
+      log.error('Error handling request:', err);
       res.send(500);
     }
   });

@@ -1,6 +1,7 @@
 const path = require('path');
 const { fork } = require('child_process');
 const e2p = require('event-to-promise');
+const log = require('logdown')('appsync-emulator:lambdaSource');
 
 const Runner = path.join(__dirname, 'lambdaRunner');
 
@@ -51,7 +52,7 @@ const lambdaSource = async (
     case 'success':
       return response.output;
     default:
-      console.error('unknown response type', response);
+      log.error('unknown response type', response);
       throw new Error('Unknown response type');
   }
 };

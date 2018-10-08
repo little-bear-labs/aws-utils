@@ -122,6 +122,15 @@ describe('creates executable schema', () => {
       },
     });
   });
+  
+  const getScalarSource = (field, val) => `
+    query {
+        ${field}(${field}: "${val}")
+    }
+  `;
+
+  const expectScalarResult = (result, field, val) =>
+    expect(result).toMatchObject({ data: { [field]: val } });
 
   it('put', async () => {
     const subscription = await subscribe({
@@ -403,5 +412,110 @@ describe('creates executable schema', () => {
     });
 
     expect(result).toMatchObject({ data: { jsonTest: { test: 'yup' } } });
+  });
+
+  it('AWSDate scalar', async () => {
+    const field = 'dateTest';
+    const val = new Date('05 October 2011').toISOString().split('T')[0];
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSTime scalar', async () => {
+    const field = 'timeTest';
+    const val = new Date('05 October 2011').toISOString().split('T')[1];
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSDateTime scalar', async () => {
+    const field = 'dateTimeTest';
+    const val = new Date('05 October 2011').toISOString();
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSEmail scalar', async () => {
+    const field = 'emailTest';
+    const val = 'foobar@example.com';
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSPhone scalar - US', async () => {
+    const field = 'phoneTest';
+    const val = '123-123-1234';
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSPhone scalar - International', async () => {
+    const field = 'phoneTest';
+    const val = '+44 8984 1234';
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSURL scalar', async () => {
+    const field = 'urlTest';
+    const val = 'http://google.com';
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
   });
 });
