@@ -122,7 +122,7 @@ describe('creates executable schema', () => {
       },
     });
   });
-  
+
   const getScalarSource = (field, val) => `
     query {
         ${field}(${field}: "${val}")
