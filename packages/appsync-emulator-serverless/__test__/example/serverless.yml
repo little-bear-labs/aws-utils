@@ -107,14 +107,44 @@ custom:
         field: cognitoInfo
         request: subscribePassthrough-request.txt
         response: cognito-response.txt
-      - dataSource: TestLambda
+      - dataSource: TestLambdaJSON
         field: lambda
         type: Query
         request: lambda-request.vtl
         response: result-response.txt
-      - dataSource: TestLambda
+      - dataSource: TestLambdaJSON
         type: Query
         field: jsonTest
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: dateTest
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: timeTest
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: dateTimeTest
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: emailTest
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: phoneTest
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: urlTest
         request: lambda-request.vtl
         response: result-response.txt
     serviceRole: 'AppSyncServiceRole'
@@ -143,7 +173,16 @@ custom:
           lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: graphql
+      - type: AWS_LAMBDA
+        name: TestLambdaJSON
+        description: 'Lambda JSON DataSource'
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+          functionName: graphqlJSON
 functions:
+  graphqlJSON:
+    handler: handler.graphqlJSON
   graphql:
     handler: handler.graphql
 resources:
