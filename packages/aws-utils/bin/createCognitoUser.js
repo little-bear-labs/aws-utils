@@ -85,6 +85,7 @@ async function main() {
     .getIdToken()
     .getJwtToken();
 
+  /* eslint-disable no-console */
   console.log('Created Cognito user for testing:');
   console.log();
   console.log('  Username: ', username);
@@ -92,9 +93,11 @@ async function main() {
   console.log('  JWT ID Token:');
   console.log(idKey);
   console.log();
+  /* eslint-enable no-console */
 }
 
 main().catch(err => {
+  // eslint-disable-next-line no-console
   console.error('Something went wrong', err.stack);
   process.exit(1);
 });

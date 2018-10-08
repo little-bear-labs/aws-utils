@@ -36,10 +36,10 @@ process.once('message', ({ module, handlerPath, handlerMethod, payload }) => {
 });
 
 process.on('uncaughtException', err => {
-  console.error('uncaughtException in lambda', err);
+  log.error('uncaughtException in lambda', err);
   process.exit(1);
 });
 process.on('unhandledRejection', err => {
-  console.error('unhandledRejection in lambda', err);
+  log.error('unhandledRejection in lambda', err);
   process.exit(1);
 });
