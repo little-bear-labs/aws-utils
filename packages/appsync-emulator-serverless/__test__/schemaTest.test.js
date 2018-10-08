@@ -6,6 +6,15 @@ const { decoded: jwt } = require('../testJWT');
 const nock = require('nock');
 const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
 
+const getScalarSource = (field, val) => `
+  query {
+      ${field}(${field}: "${val}")
+  }
+`;
+
+const expectScalarResult = (result, field, val) =>
+  expect(result).toMatchObject({ data: { [field]: val } });
+
 describe('creates executable schema', () => {
   const serverless = `${__dirname}/example/serverless.yml`;
   const schemaPath = `${__dirname}/example/schema.graphql`;
@@ -122,15 +131,6 @@ describe('creates executable schema', () => {
       },
     });
   });
-
-  const getScalarSource = (field, val) => `
-    query {
-        ${field}(${field}: "${val}")
-    }
-  `;
-
-  const expectScalarResult = (result, field, val) =>
-    expect(result).toMatchObject({ data: { [field]: val } });
 
   it('put', async () => {
     const subscription = await subscribe({
