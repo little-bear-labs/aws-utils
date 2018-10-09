@@ -8,7 +8,7 @@ const lambdaSource = async (
   {
     dynamodbEndpoint,
     dynamodbTables,
-    serverlessConfig: { functions, config },
+    serverlessConfig: { functions, custom },
     serverlessDirectory,
   },
   fn,
@@ -23,8 +23,8 @@ const lambdaSource = async (
   let modulePrefix = '';
 
   // Check if the modulePrefix configuration is set
-  if (config['appsync-emulator'] && config['appsync-emulator'].modulePrefix) {
-    ({ modulePrefix } = config['appsync-emulator']);
+  if (custom['appsync-emulator'] && custom['appsync-emulator'].modulePrefix) {
+    ({ modulePrefix } = custom['appsync-emulator']);
   }
 
   const [handlerPath, handlerMethod] = fnConfig.handler.split('.');
