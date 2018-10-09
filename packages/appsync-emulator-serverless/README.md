@@ -10,6 +10,7 @@ We aim to support the majority of appsync features (as we use all of them except
 
  - Lambda source (only tested with serverless functions)
  - DynamoDB source (batch operations, all single table operations, etc.)
+ - HTTP(S) source
  - NONE source
  - Full VTL support ($util) and compatibility with Java stdlib
  - Support for use with cognito credentials
