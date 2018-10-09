@@ -4,7 +4,7 @@ const { subscribe } = require('graphql/subscription');
 const gql = require('graphql-tag');
 const { decoded: jwt } = require('../testJWT');
 const nock = require('nock');
-const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
+// const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
 
 const getScalarSource = (field, val) => `
   query {
@@ -24,8 +24,15 @@ describe('creates executable schema', () => {
   let dynamodb;
   beforeAll(async () => {
     jest.setTimeout(20 * 1000);
-    emulator = await dynamodbEmulator.launch();
-    dynamodb = dynamodbEmulator.getClient(emulator);
+    // emulator = await dynamodbEmulator.launch();
+    // dynamodb = dynamodbEmulator.getClient(emulator);
+    const { DynamoDB } = require('aws-sdk');
+    dynamodb = new DynamoDB({
+      endpoint: 'http://localhost:8001',
+      region: 'us-fake-1',
+      accessKeyId: 'fake',
+      secretAccessKey: 'fake',
+    });
   });
 
   afterAll(async () => {
@@ -40,95 +47,106 @@ describe('creates executable schema', () => {
     // eslint-disable-next-line
     close = result.close;
     contextValue = { jwt };
-
-    nock('http://localhost:3000')
-      .get('/api/users')
-      .reply(200, {
-        data: [{ name: 'Name1' }, { name: 'Name2' }],
-      });
-
-    nock('http://localhost:3000')
-      .get('/api/posts/Name1')
-      .reply(200, {
-        data: [{ title: 'Post1' }],
-      });
-
-    nock('http://localhost:3000')
-      .get('/api/posts/Name2')
-      .reply(200, {
-        data: [{ title: 'Post2' }],
-      });
   });
   afterEach(async () => close());
 
-  it('should allow querying http', async () => {
-    const source = `
-      query {
-        httpUsers {
-          name
-        }
-      }
-    `;
+  describe('support http', () => {
+    beforeEach(async () => {
+      const result = await createSchema({ serverless, schemaPath, dynamodb });
+      // eslint-disable-next-line
+      schema = result.schema;
+      // eslint-disable-next-line
+      close = result.close;
+      contextValue = { jwt };
 
-    const result = await graphql({
-      schema,
-      contextValue,
-      source,
+      nock('http://localhost:3000')
+        .get('/api/users')
+        .reply(200, {
+          data: [{ name: 'Name1' }, { name: 'Name2' }],
+        });
+
+      nock('http://localhost:3000')
+        .get('/api/posts/Name1')
+        .reply(200, {
+          data: [{ title: 'Post1' }],
+        });
+
+      nock('http://localhost:3000')
+        .get('/api/posts/Name2')
+        .reply(200, {
+          data: [{ title: 'Post2' }],
+        });
     });
 
-    expect(result).toMatchObject({
-      data: {
-        httpUsers: [
-          {
-            name: 'Name1',
-          },
-          {
-            name: 'Name2',
-          },
-        ],
-      },
-    });
-  });
-
-  it('it should allow using context.source', async () => {
-    const source = `
-      query {
-        httpUsers {
-          name
-          posts {
-            title
+    it('should allow querying http', async () => {
+      const source = `
+        query {
+          httpUsers {
+            name
           }
         }
-      }
-    `;
+      `;
 
-    const result = await graphql({
-      schema,
-      contextValue,
-      source,
+      const result = await graphql({
+        schema,
+        contextValue,
+        source,
+      });
+
+      expect(result).toMatchObject({
+        data: {
+          httpUsers: [
+            {
+              name: 'Name1',
+            },
+            {
+              name: 'Name2',
+            },
+          ],
+        },
+      });
     });
 
-    expect(result).toMatchObject({
-      data: {
-        httpUsers: [
-          {
-            name: 'Name1',
-            posts: [
-              {
-                title: 'Post1',
-              },
-            ],
-          },
-          {
-            name: 'Name2',
-            posts: [
-              {
-                title: 'Post2',
-              },
-            ],
-          },
-        ],
-      },
+    it('it should allow using context.source', async () => {
+      const source = `
+        query {
+          httpUsers {
+            name
+            posts {
+              title
+            }
+          }
+        }
+      `;
+
+      const result = await graphql({
+        schema,
+        contextValue,
+        source,
+      });
+
+      expect(result).toMatchObject({
+        data: {
+          httpUsers: [
+            {
+              name: 'Name1',
+              posts: [
+                {
+                  title: 'Post1',
+                },
+              ],
+            },
+            {
+              name: 'Name2',
+              posts: [
+                {
+                  title: 'Post2',
+                },
+              ],
+            },
+          ],
+        },
+      });
     });
   });
 

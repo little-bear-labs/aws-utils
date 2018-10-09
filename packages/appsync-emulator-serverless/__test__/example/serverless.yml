@@ -116,7 +116,7 @@ custom:
         type: httpUser
         field: posts
         request: httpUsers-posts-request.vtl
-        response: httpUsers-posts-response.vtl
+        response: httpUsers-response.vtl
       - dataSource: TestLambdaJSON
         field: lambda
         type: Query
