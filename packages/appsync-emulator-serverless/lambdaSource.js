@@ -24,7 +24,7 @@ const lambdaSource = async (
 
   // Check if the modulePrefix configuration is set
   if (config['appsync-emulator'] && config['appsync-emulator'].modulePrefix) {
-    [modulePrefix] = config['appsync-emulator'].modulePrefix;
+    ({ modulePrefix } = config['appsync-emulator']);
   }
 
   const [handlerPath, handlerMethod] = fnConfig.handler.split('.');
