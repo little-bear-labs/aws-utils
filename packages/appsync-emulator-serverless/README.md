@@ -44,6 +44,18 @@ const dynamodb = new DynamoDB({
 const client = new DynamoDB.DocumentClient({ service: dynamodb });
 ```
 
+#### Custom build prefix for webpack, typescript
+For compatibility with plugins such as Serverless Webpack that alllow the usage of webpack
+you will need to add the following configuration to your project's `serverless.yml` file
+
+```
+custom:
+  appsync-offline:
+    port: $APPSYNC_OFFLINE_PORT
+    buildPrefix: $PREFIX_LOCATION
+```
+
+Where `$PREFIX_LOCATION` is your specified webpack build path i.e. `.webpack`
 
 ## Testing
 
