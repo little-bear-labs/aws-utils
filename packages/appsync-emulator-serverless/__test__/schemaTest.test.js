@@ -4,7 +4,7 @@ const { subscribe } = require('graphql/subscription');
 const gql = require('graphql-tag');
 const { decoded: jwt } = require('../testJWT');
 const nock = require('nock');
-// const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
+const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
 
 const getScalarSource = (field, val) => `
   query {
@@ -24,15 +24,8 @@ describe('creates executable schema', () => {
   let dynamodb;
   beforeAll(async () => {
     jest.setTimeout(20 * 1000);
-    // emulator = await dynamodbEmulator.launch();
-    // dynamodb = dynamodbEmulator.getClient(emulator);
-    const { DynamoDB } = require('aws-sdk');
-    dynamodb = new DynamoDB({
-      endpoint: 'http://localhost:8001',
-      region: 'us-fake-1',
-      accessKeyId: 'fake',
-      secretAccessKey: 'fake',
-    });
+    emulator = await dynamodbEmulator.launch();
+    dynamodb = dynamodbEmulator.getClient(emulator);
   });
 
   afterAll(async () => {
