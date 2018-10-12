@@ -37,6 +37,19 @@ describe('subscriptionServer', () => {
       },
     });
 
+  const createAPIClient = url =>
+    new ApolloClient({
+      uri: url,
+      request: operation => {
+        operation.setContext({
+          headers: {
+            // install our test credentials.
+            'x-api-key': '1234567890',
+          },
+        });
+      },
+    });
+
   const mutate = client =>
     client.mutate({
       mutation: gql`
@@ -242,6 +255,21 @@ describe('subscriptionServer', () => {
           sourceIp: ['0.0.0.0'],
           defaultAuthStrategy: 'ALLOW',
           __typename: 'CognitoInfo',
+        },
+      },
+    });
+  });
+
+  it('test api key authentication', async () => {
+    const client = createAPIClient(url);
+    const output = await mutate(client);
+
+    expect(output).toMatchObject({
+      data: {
+        putQuoteRequest: {
+          commodity: 'foo',
+          amount: 100.5,
+          __typename: 'QuoteRequest',
         },
       },
     });
