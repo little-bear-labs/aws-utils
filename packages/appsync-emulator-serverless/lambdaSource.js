@@ -8,7 +8,7 @@ const lambdaSource = async (
   {
     dynamodbEndpoint,
     dynamodbTables,
-    serverlessConfig: { functions, custom },
+    serverlessConfig: { functions = {}, custom = {} },
     serverlessDirectory,
   },
   fn,
