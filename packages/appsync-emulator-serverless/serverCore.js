@@ -249,13 +249,14 @@ const executeGQL = async ({ schema, documentAST, jwt, variables }) => {
 };
 
 const createGQLHandler = ({ schema, subServer }) => async (req, res) => {
-  const {
-    headers: { authorization = null },
-  } = req;
-  if (!authorization) {
+  // const { headers: { authorization = null, }, } = req;
+  const { headers } = req;
+  log.info('req', { req });
+
+  if (!headers.authorization && !headers['x-api-key']) {
     throw new Error('Must pass authorization header');
   }
-  const jwt = jwtDecode(authorization);
+  const jwt = headers.authorization ? jwtDecode(headers.authorization) : {};
   const { variables, query } = req.body;
   consola.start('graphql', query);
   log.info('request', { variables, query });
