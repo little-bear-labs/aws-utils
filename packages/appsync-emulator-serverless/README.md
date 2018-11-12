@@ -27,11 +27,11 @@ We aim to support the majority of appsync features (as we use all of them except
 
 
 ```
-npm i serverless-appsync-plugin [--no-optional]
+npm i @conduitvc/serverless-appsync-plugin [--no-optional]
 ```
 or
 ```
-yarn add serverless-appsync-plugin [--ignore-optional]
+yarn add @conduitvc/serverless-appsync-plugin [--ignore-optional]
 ```
 
 ## Usage
