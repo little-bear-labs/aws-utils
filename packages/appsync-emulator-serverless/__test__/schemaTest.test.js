@@ -23,7 +23,7 @@ describe('creates executable schema', () => {
   let emulator;
   let dynamodb;
   beforeAll(async () => {
-    jest.setTimeout(20 * 1000);
+    jest.setTimeout(40 * 1000);
     emulator = await dynamodbEmulator.launch();
     dynamodb = dynamodbEmulator.getClient(emulator);
   });
