@@ -1,0 +1,6 @@
+#set($response = $util.parseJson($context.result.body))
+#if($ctx.result.statusCode == 200)
+    $util.toJson($response.data)
+#else
+    $utils.appendError($ctx.result.body, $ctx.result.statusCode)
+#end

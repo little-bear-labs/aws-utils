@@ -15,7 +15,7 @@ describe('subscriptionServer', () => {
   let dynamodb;
 
   beforeAll(async () => {
-    jest.setTimeout(10 * 1000);
+    jest.setTimeout(40 * 1000);
     emulator = await dynamodbEmulator.launch();
     dynamodb = dynamodbEmulator.getClient(emulator);
   });
