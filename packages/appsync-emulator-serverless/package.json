@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "@conduitvc/aws-utils": "^1.2.1",
-    "@conduitvc/dynamodb-emulator": "^0.5.3",
     "@conduitvc/mosca": "^2.8.2",
     "@okgrow/graphql-scalars": "^0.4.2",
     "argparse": "^1.0.10",
@@ -44,5 +43,8 @@
   },
   "peerDependencies": {
     "aws-appsync": ">= 1"
+  },
+  "optionalDependencies": {
+    "@conduitvc/dynamodb-emulator": "^0.5.3"
   }
 }

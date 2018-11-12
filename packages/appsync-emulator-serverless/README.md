@@ -14,10 +14,29 @@ We aim to support the majority of appsync features (as we use all of them except
  - Full VTL support ($util) and compatibility with Java stdlib
  - Support for `API_KEY` and `AMAZON_COGNITO_USER_POOLS` authentication
  - Subscriptions
+ 
+## Requirements
+
+- Java*
+
+*If installing DynamoDB Local.
+
+## Installation
+
+[DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html) is an optional dependency and installed by default. If you would rather provide your own DynamoDB server, you can instruct npm/yarn not to install optional dependencies.
+
+
+```
+npm i @conduitvc/serverless-appsync-plugin [--no-optional]
+```
+or
+```
+yarn add @conduitvc/serverless-appsync-plugin [--ignore-optional]
+```
 
 ## Usage
 
-This package will download and run the dynamodb emulator as part of it's appsync emulation features. DynamoDB data is preserved between emulator runs and is stored in `.dynamodb` in the same directory that `package.json` would be in.
+If using the DynamoDB emulator, data is preserved between emulator runs and is stored in `.dynamodb` in the same directory that `package.json` would be in.
 
 ### As a CLI
 
