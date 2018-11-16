@@ -23,9 +23,9 @@ const lambdaSource = async (
   // Default to empty string, path.join will resolve this automatically
   let buildPrefix = '';
 
-  // Check if the modulePrefix configuration is set
-  if (custom['appsync-emulator'] && custom['appsync-emulator'].buildPrefix) {
-    ({ buildPrefix } = custom['appsync-emulator']);
+  // Check if the buildPrefix configuration is set
+  if (custom['appsync-offline'] && custom['appsync-offline'].buildPrefix) {
+    ({ buildPrefix } = custom['appsync-offline']);
   }
 
   const [handlerPath, handlerMethod] = fnConfig.handler.split('.');
