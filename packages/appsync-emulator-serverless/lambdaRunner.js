@@ -6,6 +6,14 @@ const sendErr = err => {
   });
 };
 
+const onResponse = (err, output) => {
+  if (err) {
+    sendErr(err);
+    return;
+  }
+  process.send({ type: 'success', output }, process.exit);
+};
+
 process.once('message', ({ module, handlerPath, handlerMethod, payload }) => {
   try {
     log.info('load', module);
@@ -21,15 +29,20 @@ process.once('message', ({ module, handlerPath, handlerMethod, payload }) => {
 
     log.info('invoke', handlerMethod);
     const context = {};
-    handlerModule[handlerMethod](payload, context, (err, output) => {
-      if (err) {
-        sendErr(err);
-        return;
-      }
-      process.send({ type: 'success', output }, () => {
-        process.exit();
+
+    Promise.resolve(handlerModule[handlerMethod](payload, context, onResponse))
+      .then(output =>
+        process.send(
+          {
+            type: 'success',
+            output,
+          },
+          process.exit,
+        ),
+      )
+      .catch(err => {
+        if (err) sendErr(err);
       });
-    });
   } catch (err) {
     sendErr(err);
   }
