@@ -70,7 +70,7 @@ you will need to add the following configuration to your project's `serverless.y
 
 ```
 custom:
-  appsync-offline:
+  appsync-emulator:
     buildPrefix: $PREFIX_LOCATION
 ```
 
