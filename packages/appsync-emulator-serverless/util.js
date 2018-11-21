@@ -101,6 +101,9 @@ const create = (errors = [], now = new Date()) => ({
     if (value instanceof Map) return value;
     return value != null && typeof value === 'object';
   },
+  isAsync(fn) {
+    return fn.constructor.name === 'AsyncFunction';
+ },
   typeOf(value) {
     if (value === null) return 'Null';
     if (this.isList(value)) return 'List';
