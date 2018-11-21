@@ -39,7 +39,7 @@ process.once(
           sendOutput(callbackOutput);
         },
       );
-      sendOutput(await promiseOutput);
+      if (promiseOutput) sendOutput(await promiseOutput);
     } catch (err) {
       sendErr(err);
     }
