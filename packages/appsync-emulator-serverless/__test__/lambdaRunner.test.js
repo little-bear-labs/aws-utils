@@ -11,7 +11,7 @@ describe('lambdaRunner', () => {
         const payload = {};
 
         run({ lambda, context, payload }, err => {
-          expect(err).toMatch('error')
+          expect(err).toMatch('error');
         });
       });
       test('The lambda returns output', async () => {
@@ -22,14 +22,16 @@ describe('lambdaRunner', () => {
         const payload = {};
 
         run({ lambda, context, payload }, (err, output) => {
-          expect(output).toBe(true)
+          expect(output).toBe(true);
         });
       });
     });
 
     describe('async', () => {
       test('The lambda throws an error', async () => {
-        const lambda = async (event, context) => { throw new Error('error'); };
+        const lambda = async () => {
+          throw new Error('error');
+        };
         const context = {};
         const payload = {};
 
@@ -40,7 +42,7 @@ describe('lambdaRunner', () => {
         }
       });
       test('The lambda returns output', async () => {
-        const lambda = async (event, context) => true
+        const lambda = async () => true;
         const context = {};
         const payload = {};
 
@@ -51,32 +53,30 @@ describe('lambdaRunner', () => {
 
     describe('promise', () => {
       test('The lambda throws an error', async () => {
-        const lambda = (event, context) => {
-          return new Promise((_, reject) => {
-            reject('error');
+        const lambda = () =>
+          new Promise((_, reject) => {
+            reject(new Error());
           });
-        }
         const context = {};
         const payload = {};
 
         try {
           await run({ lambda, context, payload });
         } catch (e) {
-          expect(e).toMatch('error');
+          expect(e).toBeInstanceOf(Error);
         }
       });
       test('The lambda returns output', async () => {
-        const lambda = (event, context) => {
-          return new Promise(resolve => {
+        const lambda = () =>
+          new Promise(resolve => {
             resolve(true);
           });
-        }
         const context = {};
         const payload = {};
 
         const output = await run({ lambda, context, payload });
         expect(output).toBe(true);
       });
-    })
+    });
   });
 });

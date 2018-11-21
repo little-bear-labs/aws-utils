@@ -105,9 +105,11 @@ const create = (errors = [], now = new Date()) => ({
     return fn.constructor.name === 'AsyncFunction';
   },
   isPromise(obj) {
-    return !!obj
-      && (typeof obj === 'object' || typeof obj === 'function')
-      && typeof obj.then === 'function';
+    return (
+      !!obj &&
+      (typeof obj === 'object' || typeof obj === 'function') &&
+      typeof obj.then === 'function'
+    );
   },
   typeOf(value) {
     if (value === null) return 'Null';
