@@ -3,7 +3,7 @@ const { run } = require('../lambdaRunner');
 describe('lambdaRunner', () => {
   describe('run', () => {
     describe('callback', () => {
-      test('The lambda throws an error', async () => {
+      it('throws an error', async () => {
         const lambda = (event, context, callback) => {
           callback('error', null);
         };
@@ -14,7 +14,7 @@ describe('lambdaRunner', () => {
           expect(err).toMatch('error');
         });
       });
-      test('The lambda returns output', async () => {
+      it('returns output', async () => {
         const lambda = (event, context, callback) => {
           callback(null, true);
         };
@@ -28,7 +28,7 @@ describe('lambdaRunner', () => {
     });
 
     describe('async', () => {
-      test('The lambda throws an error', async () => {
+      it('throws an error', async () => {
         const lambda = async () => {
           throw new Error('error');
         };
@@ -41,7 +41,7 @@ describe('lambdaRunner', () => {
           expect(e.message).toMatch('error');
         }
       });
-      test('The lambda returns output', async () => {
+      it('returns output', async () => {
         const lambda = async () => true;
         const context = {};
         const payload = {};
@@ -52,7 +52,7 @@ describe('lambdaRunner', () => {
     });
 
     describe('promise', () => {
-      test('The lambda throws an error', async () => {
+      it('throws an error', async () => {
         const lambda = () =>
           new Promise((_, reject) => {
             reject(new Error());
@@ -66,7 +66,7 @@ describe('lambdaRunner', () => {
           expect(e).toBeInstanceOf(Error);
         }
       });
-      test('The lambda returns output', async () => {
+      it('returns output', async () => {
         const lambda = () =>
           new Promise(resolve => {
             resolve(true);
