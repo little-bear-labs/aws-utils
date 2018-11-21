@@ -10,11 +10,9 @@ describe('lambdaRunner', () => {
         const context = {};
         const payload = {};
 
-        try {
-          await run({ lambda, context, payload });
-        } catch (e) {
-          expect(e).toMatch('error');
-        }
+        run({ lambda, context, payload }, err => {
+          expect(err).toMatch('error')
+        });
       });
       test('The lambda returns output', async () => {
         const lambda = (event, context, callback) => {
@@ -23,8 +21,9 @@ describe('lambdaRunner', () => {
         const context = {};
         const payload = {};
 
-        const output = await run({ lambda, context, payload });
-        expect(output).toBe(true);
+        run({ lambda, context, payload }, (err, output) => {
+          expect(output).toBe(true)
+        });
       });
     });
 
@@ -49,5 +48,35 @@ describe('lambdaRunner', () => {
         expect(output).toBe(true);
       });
     });
+
+    describe('promise', () => {
+      test('The lambda throws an error', async () => {
+        const lambda = (event, context) => {
+          return new Promise((_, reject) => {
+            reject('error');
+          });
+        }
+        const context = {};
+        const payload = {};
+
+        try {
+          await run({ lambda, context, payload });
+        } catch (e) {
+          expect(e).toMatch('error');
+        }
+      });
+      test('The lambda returns output', async () => {
+        const lambda = (event, context) => {
+          return new Promise(resolve => {
+            resolve(true);
+          });
+        }
+        const context = {};
+        const payload = {};
+
+        const output = await run({ lambda, context, payload });
+        expect(output).toBe(true);
+      });
+    })
   });
 });

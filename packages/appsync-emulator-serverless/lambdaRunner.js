@@ -9,12 +9,12 @@ const sendErr = err => {
   process.send({ type: 'error', error: err }, process.exit);
 };
 
-const run = async ({ lambda, context, payload }) => {
-  if (!createUtils().isAsync(lambda)) {
-    lambda = promisify(lambda);
+const run = async ({ lambda, context, payload }, callback) => {
+  const output = lambda(payload, context, callback)
+
+  if (createUtils().isPromise(output)) {
+    return await output;
   }
-  const output = await lambda(payload, context);
-  return output;
 }
 
 process.once('message', async ({ module, handlerPath, handlerMethod, payload }) => {
@@ -31,7 +31,9 @@ process.once('message', async ({ module, handlerPath, handlerMethod, payload }) 
     log.info('invoke', handlerMethod);
     const lambda = handlerModule[handlerMethod];
     const context = {};
-    const output = await run({ lambda, context, payload });
+    const output = await run({ lambda, context, payload }, (err, output) => {
+      err ? sendErr(err) : sendOutput(output)
+    });
     sendOutput(output);
   } catch (err) {
     sendErr(err);
