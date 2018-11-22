@@ -1,82 +1,77 @@
-const { run } = require('../lambdaRunner');
+const path = require('path');
+const { fork } = require('child_process');
+const e2p = require('event-to-promise');
+const Runner = path.join(__dirname, '../lambdaRunner');
+
+const run = ({ handlerMethod, payload = {} }) => {
+  const child = fork(Runner, [], {
+    stdio: [0, 1, 2, 'ipc'],
+  });
+
+  child.send({
+    module: './__test__/lambdaFunctions',
+    handlerPath: './__test__/lambdaFunctions',
+    handlerMethod,
+    payload,
+  });
+
+  return e2p(child, 'message');
+}
 
 describe('lambdaRunner', () => {
-  describe('run', () => {
-    describe('callback', () => {
-      it('throws an error', async () => {
-        const lambda = (event, context, callback) => {
-          callback('error', null);
-        };
-        const context = {};
-        const payload = {};
-
-        run({ lambda, context, payload }, err => {
-          expect(err).toMatch('error');
-        });
+  describe('callback', () => {
+    it('throws an error', async () => {
+      const response = await run({
+        handlerMethod: 'callbackWithError',
       });
-      it('returns output', async () => {
-        const lambda = (event, context, callback) => {
-          callback(null, true);
-        };
-        const context = {};
-        const payload = {};
 
-        run({ lambda, context, payload }, (err, output) => {
-          expect(output).toBe(true);
-        });
-      });
+      expect(response.type).toBe('error');
+      expect(response.error).toBe('error');
     });
-
-    describe('async', () => {
-      it('throws an error', async () => {
-        const lambda = async () => {
-          throw new Error('error');
-        };
-        const context = {};
-        const payload = {};
-
-        try {
-          await run({ lambda, context, payload });
-        } catch (e) {
-          expect(e.message).toMatch('error');
-        }
+    it('returns output', async () => {
+      const response = await run({
+        handlerMethod: 'callbackWithOutput',
       });
-      it('returns output', async () => {
-        const lambda = async () => true;
-        const context = {};
-        const payload = {};
-
-        const output = await run({ lambda, context, payload });
-        expect(output).toBe(true);
-      });
+      expect(response.type).toBe('success');
+      expect(response.output).toBe(true);
     });
+  });
 
-    describe('promise', () => {
-      it('throws an error', async () => {
-        const lambda = () =>
-          new Promise((_, reject) => {
-            reject(new Error());
-          });
-        const context = {};
-        const payload = {};
-
-        try {
-          await run({ lambda, context, payload });
-        } catch (e) {
-          expect(e).toBeInstanceOf(Error);
-        }
+  describe('async', () => {
+    it('throws an error', async () => {
+      const response = await run({
+        handlerMethod: 'asyncWithError'
       });
-      it('returns output', async () => {
-        const lambda = () =>
-          new Promise(resolve => {
-            resolve(true);
-          });
-        const context = {};
-        const payload = {};
 
-        const output = await run({ lambda, context, payload });
-        expect(output).toBe(true);
+      expect(response.type).toBe('error');
+      expect(response.error).toBe('error');
+    });
+    it('returns output', async () => {
+      const response = await run({
+        handlerMethod: 'asyncWithOutput'
       });
+
+      expect(response.type).toBe('success');
+      expect(response.output).toBe(true);
+    });
+  });
+
+  describe('promise', () => {
+    it('throws an error', async () => {
+      const response = await run({
+        handlerMethod: 'promiseWithError'
+      });
+
+      expect(response.type).toBe('error');
+      expect(response.error).toBe('error');
+    });
+    it('returns output', async () => {
+      const response = await run({
+        handlerMethod: 'promiseWithOutput'
+      });
+
+      expect(response.type).toBe('success');
+      expect(response.output).toBe(true);
     });
   });
 });
