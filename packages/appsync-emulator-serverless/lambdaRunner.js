@@ -1,5 +1,10 @@
 const log = require('logdown')('appsync-emulator:lambdaRunner');
-const { create: createUtils } = require('./util');
+
+const isPromise = obj => (
+  !!obj &&
+  (typeof obj === 'object' || typeof obj === 'function') &&
+  typeof obj.then === 'function'
+);
 
 const sendOutput = output => {
   process.send({ type: 'success', output }, process.exit);
@@ -8,12 +13,9 @@ const sendErr = err => {
   process.send({ type: 'error', error: err }, process.exit);
 };
 
-const run = async ({ lambda, context, payload }, callback) => {
+const run = ({ lambda, context, payload }, callback) => {
   const output = lambda(payload, context, callback);
-
-  if (!createUtils().isPromise(output)) return;
-  const promiseOutput = await output;
-  return promiseOutput;
+  return isPromise(output) ? output : undefined;
 };
 
 process.once(
@@ -32,14 +34,15 @@ process.once(
       log.info('invoke', handlerMethod);
       const lambda = handlerModule[handlerMethod];
       const context = {};
-      const promiseOutput = run(
+      const lambdaResult = run(
         { lambda, context, payload },
-        (err, callbackOutput) => {
-          if (err) sendErr(err);
-          sendOutput(callbackOutput);
+        (err, lambdaResult) => {
+          err ? sendErr(err) : sendOutput(lambdaResult);
         },
       );
-      if (promiseOutput) sendOutput(await promiseOutput);
+      if (lambdaResult instanceof Promise) {
+        sendOutput(await lambdaResult);
+      }
     } catch (err) {
       sendErr(err);
     }
