@@ -5,6 +5,9 @@ describe('httpSource', () => {
   beforeEach(() => {
     nock('http://localhost:3000')
       .get('/api/users')
+      .query({
+        foo: 'bar',
+      })
       .reply(200, {
         data: [{ name: 'Name1' }, { name: 'Name2' }],
       });
@@ -18,7 +21,11 @@ describe('httpSource', () => {
     const result = await httpSource('http://localhost:3000', {
       resourcePath: '/api/users',
       method: 'GET',
-      params: {},
+      params: {
+        query: {
+          foo: 'bar',
+        },
+      },
     });
 
     expect(result).toMatchObject({
