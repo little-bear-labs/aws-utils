@@ -3,7 +3,17 @@ const { graphql } = require('graphql');
 const { subscribe } = require('graphql/subscription');
 const gql = require('graphql-tag');
 const { decoded: jwt } = require('../testJWT');
+const nock = require('nock');
 const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
+
+const getScalarSource = (field, val) => `
+  query {
+      ${field}(${field}: "${val}")
+  }
+`;
+
+const expectScalarResult = (result, field, val) =>
+  expect(result).toMatchObject({ data: { [field]: val } });
 
 describe('creates executable schema', () => {
   const serverless = `${__dirname}/example/serverless.yml`;
@@ -13,7 +23,7 @@ describe('creates executable schema', () => {
   let emulator;
   let dynamodb;
   beforeAll(async () => {
-    jest.setTimeout(20 * 1000);
+    jest.setTimeout(40 * 1000);
     emulator = await dynamodbEmulator.launch();
     dynamodb = dynamodbEmulator.getClient(emulator);
   });
@@ -33,14 +43,105 @@ describe('creates executable schema', () => {
   });
   afterEach(async () => close());
 
-  const getScalarSource = (field, val) => `
-    query {
-        ${field}(${field}: "${val}")
-    }
-  `;
+  describe('support http', () => {
+    beforeEach(async () => {
+      const result = await createSchema({ serverless, schemaPath, dynamodb });
+      // eslint-disable-next-line
+      schema = result.schema;
+      // eslint-disable-next-line
+      close = result.close;
+      contextValue = { jwt };
 
-  const expectScalarResult = (result, field, val) =>
-    expect(result).toMatchObject({ data: { [field]: val } });
+      nock('http://localhost:3000')
+        .get('/api/users')
+        .reply(200, {
+          data: [{ name: 'Name1' }, { name: 'Name2' }],
+        });
+
+      nock('http://localhost:3000')
+        .get('/api/posts/Name1')
+        .reply(200, {
+          data: [{ title: 'Post1' }],
+        });
+
+      nock('http://localhost:3000')
+        .get('/api/posts/Name2')
+        .reply(200, {
+          data: [{ title: 'Post2' }],
+        });
+    });
+
+    it('should allow querying http', async () => {
+      const source = `
+        query {
+          httpUsers {
+            name
+          }
+        }
+      `;
+
+      const result = await graphql({
+        schema,
+        contextValue,
+        source,
+      });
+
+      expect(result).toMatchObject({
+        data: {
+          httpUsers: [
+            {
+              name: 'Name1',
+            },
+            {
+              name: 'Name2',
+            },
+          ],
+        },
+      });
+    });
+
+    it('it should allow using context.source', async () => {
+      const source = `
+        query {
+          httpUsers {
+            name
+            posts {
+              title
+            }
+          }
+        }
+      `;
+
+      const result = await graphql({
+        schema,
+        contextValue,
+        source,
+      });
+
+      expect(result).toMatchObject({
+        data: {
+          httpUsers: [
+            {
+              name: 'Name1',
+              posts: [
+                {
+                  title: 'Post1',
+                },
+              ],
+            },
+            {
+              name: 'Name2',
+              posts: [
+                {
+                  title: 'Post2',
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+  });
 
   it('put', async () => {
     const subscription = await subscribe({

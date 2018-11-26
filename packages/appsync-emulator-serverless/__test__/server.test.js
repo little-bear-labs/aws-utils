@@ -15,7 +15,7 @@ describe('subscriptionServer', () => {
   let dynamodb;
 
   beforeAll(async () => {
-    jest.setTimeout(10 * 1000);
+    jest.setTimeout(40 * 1000);
     emulator = await dynamodbEmulator.launch();
     dynamodb = dynamodbEmulator.getClient(emulator);
   });
@@ -32,6 +32,19 @@ describe('subscriptionServer', () => {
           headers: {
             // install our test credentials.
             authorization: require('../testJWT').string,
+          },
+        });
+      },
+    });
+
+  const createAPIClient = url =>
+    new ApolloClient({
+      uri: url,
+      request: operation => {
+        operation.setContext({
+          headers: {
+            // install our test credentials.
+            'x-api-key': '1234567890',
           },
         });
       },
@@ -242,6 +255,21 @@ describe('subscriptionServer', () => {
           sourceIp: ['0.0.0.0'],
           defaultAuthStrategy: 'ALLOW',
           __typename: 'CognitoInfo',
+        },
+      },
+    });
+  });
+
+  it('test api key authentication', async () => {
+    const client = createAPIClient(url);
+    const output = await mutate(client);
+
+    expect(output).toMatchObject({
+      data: {
+        putQuoteRequest: {
+          commodity: 'foo',
+          amount: 100.5,
+          __typename: 'QuoteRequest',
         },
       },
     });

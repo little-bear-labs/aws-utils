@@ -12,6 +12,7 @@ type Query {
   cognitoInfo: CognitoInfo!
   lambda: LambdaInfo!
   error: Boolean
+  httpUsers: [httpUser]
   jsonTest: AWSJSON
   dateTest(dateTest: String): AWSDate
   timeTest(timeTest: String): AWSTime
@@ -19,6 +20,15 @@ type Query {
   emailTest(emailTest: String): AWSEmail
   phoneTest(phoneTest: String): AWSPhone
   urlTest(urlTest: String): AWSURL
+}
+
+type httpUser {
+  name: String
+  posts: [Post]
+}
+
+type Post {
+  title: String
 }
 
 type Mutation {

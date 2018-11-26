@@ -107,6 +107,16 @@ custom:
         field: cognitoInfo
         request: subscribePassthrough-request.txt
         response: cognito-response.txt
+      - dataSource: TestHTTP
+        type: Query
+        field: httpUsers
+        request: httpUsers-request.vtl
+        response: httpUsers-response.vtl
+      - dataSource: TestHTTP
+        type: httpUser
+        field: posts
+        request: httpUsers-posts-request.vtl
+        response: httpUsers-response.vtl
       - dataSource: TestLambdaJSON
         field: lambda
         type: Query
@@ -180,6 +190,11 @@ custom:
           lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: graphqlJSON
+      - type: HTTP
+        name: TestHTTP
+        description: 'Test HTTP endpoint'
+        config:
+          endpoint: 'http://localhost:3000'
 functions:
   graphqlJSON:
     handler: handler.graphqlJSON

@@ -10,14 +10,34 @@ We aim to support the majority of appsync features (as we use all of them except
 
  - Lambda source (only tested with serverless functions)
  - DynamoDB source (batch operations, all single table operations, etc.)
+ - HTTP(S) source
  - NONE source
  - Full VTL support ($util) and compatibility with Java stdlib
- - Support for use with cognito credentials
+ - Support for `API_KEY` and `AMAZON_COGNITO_USER_POOLS` authentication
  - Subscriptions
+ 
+## Requirements
+
+- Java*
+
+*If installing DynamoDB Local.
+
+## Installation
+
+[DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html) is an optional dependency and installed by default. If you would rather provide your own DynamoDB server, you can instruct npm/yarn not to install optional dependencies.
+
+
+```
+npm i @conduitvc/appsync-emulator-serverless [--no-optional]
+```
+or
+```
+yarn add @conduitvc/appsync-emulator-serverless [--ignore-optional]
+```
 
 ## Usage
 
-This package will download and run the dynamodb emulator as part of it's appsync emulation features. DynamoDB data is preserved between emulator runs and is stored in `.dynamodb` in the same directory that `package.json` would be in.
+If using the DynamoDB emulator, data is preserved between emulator runs and is stored in `.dynamodb` in the same directory that `package.json` would be in.
 
 ### As a CLI
 
@@ -44,6 +64,17 @@ const dynamodb = new DynamoDB({
 const client = new DynamoDB.DocumentClient({ service: dynamodb });
 ```
 
+#### Custom build prefix for webpack, typescript
+For compatibility with plugins such as Serverless Webpack that allow the usage of webpack
+you will need to add the following configuration to your project's `serverless.yml` file.
+
+```
+custom:
+  appsync-emulator:
+    buildPrefix: $PREFIX_LOCATION
+```
+
+Where `$PREFIX_LOCATION` is your specified webpack build path i.e. `.webpack`
 
 ## Testing
 

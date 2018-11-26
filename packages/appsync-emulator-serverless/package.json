@@ -1,6 +1,6 @@
 {
   "name": "@conduitvc/appsync-emulator-serverless",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "main": "schema.js",
   "license": "MIT",
   "bin": {
@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "@conduitvc/aws-utils": "^1.2.1",
-    "@conduitvc/dynamodb-emulator": "^0.5.3",
     "@conduitvc/mosca": "^2.8.2",
     "@okgrow/graphql-scalars": "^0.4.2",
     "argparse": "^1.0.10",
@@ -30,7 +29,7 @@
     "jwt-decode": "^2.2.0",
     "logdown": "^3.2.3",
     "ngrok": "^3.0.1",
-    "node-fetch": "^2.1.2",
+    "node-fetch": "^2.2.0",
     "paho-mqtt": "^1.0.4",
     "pkg-up": "^2.0.0",
     "serverless": "^1.30",
@@ -40,9 +39,13 @@
   "devDependencies": {
     "apollo-boost": "^0.1.7",
     "aws-appsync": "ConduitVC/aws-appsync",
+    "nock": "^10.0.0",
     "websocket": "^1.0.26"
   },
   "peerDependencies": {
     "aws-appsync": ">= 1"
+  },
+  "optionalDependencies": {
+    "@conduitvc/dynamodb-emulator": "^0.5.3"
   }
 }

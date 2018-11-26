@@ -9,7 +9,7 @@ const lambdaSource = async (
   {
     dynamodbEndpoint,
     dynamodbTables,
-    serverlessConfig: { functions },
+    serverlessConfig: { functions = {}, custom = {} },
     serverlessDirectory,
   },
   fn,
@@ -20,8 +20,16 @@ const lambdaSource = async (
     throw new Error(`Cannot find function config for function : ${fn}`);
   }
 
+  // Default to empty string, path.join will resolve this automatically
+  let buildPrefix = '';
+
+  // Check if the modulePrefix configuration is set
+  if (custom['appsync-emulator'] && custom['appsync-emulator'].buildPrefix) {
+    ({ buildPrefix } = custom['appsync-emulator']);
+  }
+
   const [handlerPath, handlerMethod] = fnConfig.handler.split('.');
-  const fullPath = path.join(serverlessDirectory, handlerPath);
+  const fullPath = path.join(serverlessDirectory, buildPrefix, handlerPath);
   const dynamodbTableAliases = Object.entries(dynamodbTables).reduce(
     (sum, [alias, tableName]) => ({
       ...sum,
