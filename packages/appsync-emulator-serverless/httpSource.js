@@ -1,12 +1,11 @@
 const fetch = require('node-fetch');
 
 const httpSource = async (endpoint, { resourcePath, method, params }) => {
-  const urlParams =
-    params.query === undefined
-      ? ''
-      : `?${new URLSearchParams(Object.entries(params.query))}`;
+  const { query } = params || {};
+  const queryPath =
+    query === undefined ? '' : `?${new URLSearchParams(Object.entries(query))}`;
 
-  const response = await fetch(endpoint + resourcePath + urlParams, {
+  const response = await fetch(endpoint + resourcePath + queryPath, {
     ...params,
     method,
   });
