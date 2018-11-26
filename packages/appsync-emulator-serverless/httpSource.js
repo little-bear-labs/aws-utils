@@ -1,12 +1,9 @@
-const BackwardCompatibleURLSearchParams = require('url').URLSearchParams;
+const { URLSearchParams } = require('url');
 const fetch = require('node-fetch');
 
 const httpSource = async (endpoint, { resourcePath, method, params }) => {
   const { query } = params || {};
-  const queryPath =
-    query === undefined
-      ? ''
-      : `?${new BackwardCompatibleURLSearchParams(query)}`;
+  const queryPath = query === undefined ? '' : `?${new URLSearchParams(query)}`;
 
   const response = await fetch(endpoint + resourcePath + queryPath, {
     ...params,
