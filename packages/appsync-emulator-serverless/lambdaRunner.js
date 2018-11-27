@@ -1,10 +1,26 @@
 const log = require('logdown')('appsync-emulator:lambdaRunner');
 
+const parseErrorStack = error =>
+  error.stack
+    .replace(/at /g, '')
+    .split('\n    ')
+    .slice(1);
+
 const sendOutput = output => {
   process.send({ type: 'success', output }, process.exit);
 };
 const sendErr = err => {
-  process.send({ type: 'error', error: err.message ? err.message : err }, process.exit);
+  let error;
+  if (err.stack) {
+    error = {
+      stackTrace: parseErrorStack(err),
+      errorType: err.name,
+      errorMessage: err.message,
+    };
+  } else {
+    error = err;
+  }
+  process.send({ type: 'error', error }, process.exit);
 };
 
 process.once(
@@ -23,8 +39,12 @@ process.once(
       log.info('invoke', handlerMethod);
       const lambda = handlerModule[handlerMethod];
       const context = {};
-      const lambdaResult = lambda(payload, context, (err, lambdaResult) => {
-        err ? sendErr(err) : sendOutput(lambdaResult);
+      const lambdaResult = lambda(payload, context, (err, callbackResult) => {
+        if (err) {
+          sendErr(err);
+        } else {
+          sendOutput(callbackResult);
+        }
       });
       if (lambdaResult instanceof Promise) {
         sendOutput(await lambdaResult);

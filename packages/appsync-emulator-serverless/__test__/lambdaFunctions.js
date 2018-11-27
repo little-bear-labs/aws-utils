@@ -12,14 +12,12 @@ exports.asyncWithError = async () => {
 
 exports.asyncWithOutput = async () => true;
 
-exports.promiseWithError = () => (
+exports.promiseWithError = () =>
   new Promise((_, reject) => {
     reject(new Error('error'));
-  })
-);
+  });
 
-exports.promiseWithOutput = () => (
+exports.promiseWithOutput = () =>
   new Promise(resolve => {
     resolve(true);
-  })
-);
+  });

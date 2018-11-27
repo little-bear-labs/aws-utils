@@ -1,6 +1,7 @@
 const path = require('path');
 const { fork } = require('child_process');
 const e2p = require('event-to-promise');
+
 const Runner = path.join(__dirname, '../lambdaRunner');
 
 const run = ({ handlerMethod, payload = {} }) => {
@@ -16,7 +17,7 @@ const run = ({ handlerMethod, payload = {} }) => {
   });
 
   return e2p(child, 'message');
-}
+};
 
 describe('lambdaRunner', () => {
   describe('callback', () => {
@@ -40,15 +41,16 @@ describe('lambdaRunner', () => {
   describe('async', () => {
     it('throws an error', async () => {
       const response = await run({
-        handlerMethod: 'asyncWithError'
+        handlerMethod: 'asyncWithError',
       });
 
       expect(response.type).toBe('error');
-      expect(response.error).toBe('error');
+      expect(response.error).toHaveProperty('errorType', 'Error');
+      expect(response.error).toHaveProperty('errorMessage', 'error');
     });
     it('returns output', async () => {
       const response = await run({
-        handlerMethod: 'asyncWithOutput'
+        handlerMethod: 'asyncWithOutput',
       });
 
       expect(response.type).toBe('success');
@@ -59,15 +61,16 @@ describe('lambdaRunner', () => {
   describe('promise', () => {
     it('throws an error', async () => {
       const response = await run({
-        handlerMethod: 'promiseWithError'
+        handlerMethod: 'promiseWithError',
       });
 
       expect(response.type).toBe('error');
-      expect(response.error).toBe('error');
+      expect(response.error).toHaveProperty('errorType', 'Error');
+      expect(response.error).toHaveProperty('errorMessage', 'error');
     });
     it('returns output', async () => {
       const response = await run({
-        handlerMethod: 'promiseWithOutput'
+        handlerMethod: 'promiseWithOutput',
       });
 
       expect(response.type).toBe('success');
