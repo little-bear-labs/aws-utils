@@ -9,6 +9,9 @@ module.exports = {
     'no-restricted-syntax': 0,
     'no-await-in-loop': 0,
     'no-return-assign': 0,
-    "import/no-extraneous-dependencies": ["error", {"optionalDependencies": true}]
+    'import/no-extraneous-dependencies': [
+      'error',
+      { optionalDependencies: true },
+    ],
   },
 };
