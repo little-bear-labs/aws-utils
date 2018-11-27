@@ -11,10 +11,10 @@ const sendOutput = output => {
 };
 const sendErr = err => {
   let error;
-  if (err.stack) {
+  if (err instanceof Error) {
     error = {
       stackTrace: parseErrorStack(err),
-      errorType: err.name,
+      errorType: err.constructor.name,
       errorMessage: err.message,
     };
   } else {
