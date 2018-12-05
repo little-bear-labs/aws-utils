@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "apollo-boost": "^0.1.7",
-    "aws-appsync": "ConduitVC/aws-appsync",
+    "aws-appsync": "SET001/aws-appsync",
     "nock": "^10.0.0",
     "websocket": "^1.0.26"
   },
