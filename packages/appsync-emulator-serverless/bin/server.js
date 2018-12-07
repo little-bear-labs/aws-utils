@@ -34,7 +34,7 @@ const main = async () => {
     type: 'int',
   });
 
-  parser.addArgument(['-wsp', '--wsport'], {
+  parser.addArgument(['-wsp', '--ws-port'], {
     help: 'Port to bind emulator subscriptions',
     type: 'int',
   });
@@ -45,8 +45,7 @@ const main = async () => {
   });
   // argparse converts any argument with a dash to underscores
   // eslint-disable-next-line
-  let { wsport, port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
-
+  let { ws_port, port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
   dynamodbPort = dynamodbPort || null;
@@ -66,7 +65,7 @@ const main = async () => {
   const dynamodb = dynamoEmulator.getClient(emulator);
 
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
-  const server = await createServer({ wsport, serverless, port, dynamodb });
+  const server = await createServer({ ws_port, serverless, port, dynamodb });
   // eslint-disable-next-line no-console
   console.log('started at url:', server.url);
   if (dynamodbPort) {
