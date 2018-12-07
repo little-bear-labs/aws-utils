@@ -291,7 +291,7 @@ const createGQLHandler = ({ schema, subServer }) => async (req, res) => {
 };
 
 const createServer = async ({
-  ws_port = 0, //  eslint-disable-line camelcase
+  wsPort = 0,
   port = 0,
   pubsub,
   schema,
@@ -306,7 +306,7 @@ const createServer = async ({
   mqttServer.on('clientConnected', client => {
     log.info('client has connected', client.id);
   });
-  mqttHTTP.listen(ws_port);
+  mqttHTTP.listen(wsPort);
   await e2p(mqttServer, 'ready');
   // Trailing slash is very important. The mqtt client will not connect without it.
   const mqttURL = `ws://localhost:${mqttHTTP.address().port}/`;
