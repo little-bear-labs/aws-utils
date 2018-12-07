@@ -45,7 +45,7 @@ const main = async () => {
   });
   // argparse converts any argument with a dash to underscores
   // eslint-disable-next-line
-  let { ws_port, port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
+  let { ws_port: wsPort, port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
   dynamodbPort = dynamodbPort || null;
@@ -65,7 +65,7 @@ const main = async () => {
   const dynamodb = dynamoEmulator.getClient(emulator);
 
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
-  const server = await createServer({ ws_port, serverless, port, dynamodb });
+  const server = await createServer({ wsPort, serverless, port, dynamodb });
   // eslint-disable-next-line no-console
   console.log('started at url:', server.url);
   if (dynamodbPort) {

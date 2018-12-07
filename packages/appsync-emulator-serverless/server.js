@@ -78,7 +78,7 @@ const createSchema = async ({
 };
 
 const createServer = async ({
-  ws_port, //  eslint-disable-line camelcase
+  wsPort,
   port,
   dynamodb,
   ...createSchemaOpts
@@ -91,7 +91,7 @@ const createServer = async ({
   });
 
   return createServerCore({
-    ws_port,
+    wsPort,
     port,
     pubsub,
     schema,
