@@ -2,3 +2,4 @@ node_modules
 /coverage
 yarn-error.log
 .DS_Store
+package-lock.json

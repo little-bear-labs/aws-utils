@@ -4,7 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "private": true,
-  "workspaces": ["packages/**/*"],
+  "workspaces": [
+    "packages/**/*"
+  ],
   "dependencies": {
     "babel-eslint": "^8.2.3",
     "eslint": "^4.19.1",

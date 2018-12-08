@@ -77,7 +77,12 @@ const createSchema = async ({
   });
 };
 
-const createServer = async ({ port, dynamodb, ...createSchemaOpts }) => {
+const createServer = async ({
+  wsPort,
+  port,
+  dynamodb,
+  ...createSchemaOpts
+}) => {
   const pubsub = new PubSub();
   const { schema, subscriptions } = await createSchema({
     ...createSchemaOpts,
@@ -86,6 +91,7 @@ const createServer = async ({ port, dynamodb, ...createSchemaOpts }) => {
   });
 
   return createServerCore({
+    wsPort,
     port,
     pubsub,
     schema,

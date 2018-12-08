@@ -290,21 +290,27 @@ const createGQLHandler = ({ schema, subServer }) => async (req, res) => {
   }
 };
 
-const createServer = async ({ port = 0, pubsub, schema, subscriptions }) => {
+const createServer = async ({
+  wsPort = 0,
+  port = 0,
+  pubsub,
+  schema,
+  subscriptions,
+}) => {
   // mqtt over ws server.
   const mqttHTTP = http.createServer();
   const mqttServer = new mosca.Server({
-    port: 0,
     backend: { type: 'memory' },
   });
   mqttServer.attachHttpServer(mqttHTTP);
   mqttServer.on('clientConnected', client => {
     log.info('client has connected', client.id);
   });
-  mqttHTTP.listen(0);
+  mqttHTTP.listen(wsPort);
   await e2p(mqttServer, 'ready');
   // Trailing slash is very important. The mqtt client will not connect without it.
   const mqttURL = `ws://localhost:${mqttHTTP.address().port}/`;
+  console.log(`listening for subscriptions at: ${mqttURL}`);
   const subServer = new SubscriptionServer({
     schema,
     mqttServer,
