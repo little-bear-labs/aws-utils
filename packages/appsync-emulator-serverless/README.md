@@ -45,6 +45,14 @@ If using the DynamoDB emulator, data is preserved between emulator runs and is s
 # NOTE unless you assign a specific port a random one will be chosen.
 yarn appsync-emulator --port 62222
 ```
+
+#### subscriptions with fixed websocket port
+
+use `--ws-port` to set up a port for websocket(used for subscriptions) otherwise it will be any random free
+```sh
+yarn appsync-emulator --port 62222 --ws-port 62223
+```
+
 #### dynamodb with fixed port
 
 optional start dynamodb at a fixed port - e.g. 8000
