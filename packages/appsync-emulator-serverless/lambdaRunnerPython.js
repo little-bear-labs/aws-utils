@@ -51,7 +51,7 @@ process.once(
         })
 
         sls.on('close', function(code) {
-            sendOutput(results);
+            sendOutput(JSON.parse(results));
         });
     } catch (err) {
       sendErr(err);

@@ -137,10 +137,6 @@ const runRequestVTL = (fullPath, graphqlInfo) => {
 };
 
 const runResponseVTL = (fullPath, graphqlInfo, result) => {
-  if (typeof result === 'string') {
-      result = result.replace(/\'/g, '"');
-      result = JSON.parse(result);
-  }
   log.info('loading response vtl', path.relative(process.cwd(), fullPath));
   const context = buildVTLContext(graphqlInfo, result);
   const content = fs.readFileSync(fullPath, 'utf8');
