@@ -80,11 +80,13 @@ type QuoteRequest {
   id: ID!
   commodity: String
   amount: Float
+  tags: [String]
 }
 
 input QuoteRequestInput {
   commodity: String
   amount: Float
+  tags: [String]
 }
 
 type QuoteResponse {
