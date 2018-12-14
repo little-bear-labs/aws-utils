@@ -7,10 +7,12 @@ const parseErrorStack = error =>
     .slice(1);
 
 const sendOutput = output => {
+  console.log(output);
   process.send({ type: 'success', output }, process.exit);
 };
 const sendErr = err => {
   let error;
+  console.log(err);
   if (err instanceof Error) {
     error = {
       stackTrace: parseErrorStack(err),
@@ -35,5 +37,4 @@ function installExceptionHandlers() {
   });
 }
 
-
-module.exports = {log, sendOutput, sendErr, installExceptionHandlers};
+module.exports = { log, sendOutput, sendErr, installExceptionHandlers };

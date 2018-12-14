@@ -157,6 +157,11 @@ custom:
         field: urlTest
         request: lambda-request.vtl
         response: result-response.txt
+      - dataSource: TestPythonLambda
+        type: Query
+        field: lambdaPython
+        request: lambda-request.vtl
+        response: result-response.txt
     serviceRole: 'AppSyncServiceRole'
     dataSources:
       - type: AMAZON_DYNAMODB
@@ -195,11 +200,30 @@ custom:
         description: 'Test HTTP endpoint'
         config:
           endpoint: 'http://localhost:3000'
+      - type: AWS_LAMBDA
+        name: TestPythonLambda
+        description: 'Python Lambda DataSource'
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [PythonLambdaFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] } 
+          functionName: graphQL
 functions:
   graphqlJSON:
     handler: handler.graphqlJSON
   graphql:
     handler: handler.graphql
+  emptyJSON:
+    handler: handler.emptyJSON
+    runtime: python3.6
+  composedJSON:
+    handler: handler.composedJSON
+    runtime: python3.6
+  error:
+    handler: handler.error
+    runtime: python3.6
+  graphQL:
+    handler: handler.graphQL
+    runtime: python3.6
 resources:
   Resources:
     QuoteRequestTable:
@@ -251,6 +275,11 @@ resources:
                     - 'lambda:invokeFunction'
                   Resource:
                     - { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
+                - Effect: 'Allow'
+                  Action:
+                    - 'lambda:invokeFunction'
+                  Resource:
+                    - { Fn::GetAtt: [PythonLambdaFunction, Arn] }
 
     AppSyncDynamoDBServiceRole:
       Type: 'AWS::IAM::Role'

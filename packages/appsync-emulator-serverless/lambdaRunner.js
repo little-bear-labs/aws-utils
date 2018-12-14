@@ -1,4 +1,9 @@
-const { log, sendErr, sendOutput, installExceptionHandlers } = require('./lambda/util');
+const {
+  log,
+  sendErr,
+  sendOutput,
+  installExceptionHandlers,
+} = require('./lambda/util');
 
 process.once(
   'message',

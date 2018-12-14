@@ -39,36 +39,35 @@ const lambdaSource = async (
   );
   let child = null;
 
-  if (fnConfig.runtime == "python3.6") {
+  if (fnConfig.runtime && fnConfig.runtime.indexOf('python') >= 0) {
     child = fork(PythonRunner, [], {
-         env: {
+      env: {
         ...process.env,
         ...dynamodbTableAliases,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
-        },
-        stdio: [0, 1, 2, 'ipc'],
+      },
+      stdio: [0, 1, 2, 'ipc'],
     });
 
     child.send({
-        serverlessDirectory: serverlessDirectory,
-        handlerPath,
-        handlerMethod,
-        payload
+      serverlessDirectory,
+      handlerMethod,
+      payload,
     });
   } else {
     child = fork(Runner, [], {
-        env: {
+      env: {
         ...dynamodbTableAliases,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
-        },
-        stdio: [0, 1, 2, 'ipc'],
+      },
+      stdio: [0, 1, 2, 'ipc'],
     });
 
     child.send({
-        module: fullPath,
-        handlerPath,
-        handlerMethod,
-        payload
+      module: fullPath,
+      handlerPath,
+      handlerMethod,
+      payload,
     });
   }
 
