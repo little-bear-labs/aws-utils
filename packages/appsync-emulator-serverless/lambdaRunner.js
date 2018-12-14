@@ -1,27 +1,4 @@
-const log = require('logdown')('appsync-emulator:lambdaRunner');
-
-const parseErrorStack = error =>
-  error.stack
-    .replace(/at /g, '')
-    .split('\n    ')
-    .slice(1);
-
-const sendOutput = output => {
-  process.send({ type: 'success', output }, process.exit);
-};
-const sendErr = err => {
-  let error;
-  if (err instanceof Error) {
-    error = {
-      stackTrace: parseErrorStack(err),
-      errorType: err.constructor.name,
-      errorMessage: err.message,
-    };
-  } else {
-    error = err;
-  }
-  process.send({ type: 'error', error }, process.exit);
-};
+const { log, sendErr, sendOutput, installExceptionHandlers } = require('./lambda/util');
 
 process.once(
   'message',
@@ -55,11 +32,4 @@ process.once(
   },
 );
 
-process.on('uncaughtException', err => {
-  log.error('uncaughtException in lambda', err);
-  process.exit(1);
-});
-process.on('unhandledRejection', err => {
-  log.error('unhandledRejection in lambda', err);
-  process.exit(1);
-});
+installExceptionHandlers();
