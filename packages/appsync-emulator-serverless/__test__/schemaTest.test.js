@@ -4,7 +4,7 @@ const { subscribe } = require('graphql/subscription');
 const gql = require('graphql-tag');
 const { decoded: jwt } = require('../testJWT');
 const nock = require('nock');
-const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
+// const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
 
 const getScalarSource = (field, val) => `
   query {
@@ -12,24 +12,33 @@ const getScalarSource = (field, val) => `
   }
 `;
 
-const expectScalarResult = (result, field, val) =>
+const expectScalarResult = (result, field, val) => {
+  expect(result).not.toHaveProperty('errors');
   expect(result).toMatchObject({ data: { [field]: val } });
+};
 
 describe('creates executable schema', () => {
   const serverless = `${__dirname}/example/serverless.yml`;
   const schemaPath = `${__dirname}/example/schema.graphql`;
   let contextValue;
 
-  let emulator;
+  // let emulator;
   let dynamodb;
   beforeAll(async () => {
     jest.setTimeout(40 * 1000);
-    emulator = await dynamodbEmulator.launch();
-    dynamodb = dynamodbEmulator.getClient(emulator);
+    // emulator = await dynamodbEmulator.launch();
+    // dynamodb = dynamodbEmulator.getClient(emulator);
+    const { DynamoDB } = require('aws-sdk');
+    dynamodb = new DynamoDB({
+      endpoint: 'http://localhost:8001',
+      region: 'us-fake-1',
+      accessKeyId: 'fake',
+      secretAccessKey: 'fake',
+    });
   });
 
   afterAll(async () => {
-    await emulator.terminate();
+    // await emulator.terminate();
   });
   // eslint-disable-next-line
   let schema, close;
@@ -166,6 +175,7 @@ describe('creates executable schema', () => {
             id
             commodity
             amount
+            tags
           }
         }
       `,
@@ -173,16 +183,20 @@ describe('creates executable schema', () => {
         input: {
           commodity: 'foo',
           amount: 100.5,
+          tags: ['foo', 'bar'],
         },
       },
       contextValue,
     });
+
+    expect(insertResult).not.toHaveProperty('errors');
 
     expect(insertResult).toMatchObject({
       data: {
         putQuoteRequest: {
           commodity: 'foo',
           amount: 100.5,
+          tags: ['foo', 'bar'],
         },
       },
     });
@@ -290,6 +304,7 @@ describe('creates executable schema', () => {
         `,
         variableValues: { id },
       });
+      expect(result).not.toHaveProperty('errors');
       expect(result).toMatchObject({
         data: { QuoteRequestById: { commodity: 'foo', amount: 100.5 } },
       });
@@ -317,6 +332,7 @@ describe('creates executable schema', () => {
           ],
         },
       });
+      expect(result).not.toHaveProperty('errors');
       expect(result).toMatchObject({
         data: {
           QuoteRequest: [
@@ -350,6 +366,7 @@ describe('creates executable schema', () => {
           },
         },
       });
+      expect(result).not.toHaveProperty('errors');
       expect(result).toMatchObject({
         data: {
           updateQuoteRequest: {
