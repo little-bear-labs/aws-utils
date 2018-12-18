@@ -275,11 +275,6 @@ resources:
                     - 'lambda:invokeFunction'
                   Resource:
                     - { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
-                - Effect: 'Allow'
-                  Action:
-                    - 'lambda:invokeFunction'
-                  Resource:
-                    - { Fn::GetAtt: [PythonLambdaFunction, Arn] }
 
     AppSyncDynamoDBServiceRole:
       Type: 'AWS::IAM::Role'
