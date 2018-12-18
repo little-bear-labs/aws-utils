@@ -10,6 +10,11 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
   - docker-compose up -d localstack
   - docker-compose run wait
+  - npm install -g aws-sam-local
+  - sudo apt-get install golang
+  - go get -u github.com/aws/aws-lambda-go/lambda
+  - bash compileAll.sh
+
 services:
   - docker
 node_js:

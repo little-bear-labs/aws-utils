@@ -3,4 +3,8 @@ node_modules
 yarn-error.log
 .DS_Store
 package-lock.json
-/packages/appsync-emulator-serverless/__test__/example/__pycache__
+packages/appsync-emulator-serverless/__test__/example/__pycache__
+packages/appsync-emulator-serverless/__test__/example/gocomposedjson/gocomposedjson
+packages/appsync-emulator-serverless/__test__/example/goemptyjson/goemptyjson
+packages/appsync-emulator-serverless/__test__/example/goerror/goerror
+packages/appsync-emulator-serverless/__test__/example/gographql/gographql
