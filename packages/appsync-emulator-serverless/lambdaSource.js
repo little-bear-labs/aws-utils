@@ -4,7 +4,7 @@ const e2p = require('event-to-promise');
 const log = require('logdown')('appsync-emulator:lambdaSource');
 
 const Runner = path.join(__dirname, 'lambdaRunner');
-
+const PythonRunner = path.join(__dirname, 'lambdaRunnerPython');
 const lambdaSource = async (
   {
     dynamodbEndpoint,
@@ -37,20 +37,39 @@ const lambdaSource = async (
     }),
     {},
   );
+  let child = null;
 
-  const child = fork(Runner, [], {
-    env: {
-      ...dynamodbTableAliases,
-      DYNAMODB_ENDPOINT: dynamodbEndpoint,
-    },
-    stdio: [0, 1, 2, 'ipc'],
-  });
-  child.send({
-    module: fullPath,
-    handlerPath,
-    handlerMethod,
-    payload,
-  });
+  if (fnConfig.runtime && fnConfig.runtime.indexOf('python') >= 0) {
+    child = fork(PythonRunner, [], {
+      env: {
+        ...process.env,
+        ...dynamodbTableAliases,
+        DYNAMODB_ENDPOINT: dynamodbEndpoint,
+      },
+      stdio: [0, 1, 2, 'ipc'],
+    });
+
+    child.send({
+      serverlessDirectory,
+      handlerMethod,
+      payload,
+    });
+  } else {
+    child = fork(Runner, [], {
+      env: {
+        ...dynamodbTableAliases,
+        DYNAMODB_ENDPOINT: dynamodbEndpoint,
+      },
+      stdio: [0, 1, 2, 'ipc'],
+    });
+
+    child.send({
+      module: fullPath,
+      handlerPath,
+      handlerMethod,
+      payload,
+    });
+  }
 
   const response = await e2p(child, 'message');
 

@@ -8,7 +8,7 @@ It is possible to use this emulator without serverless by mirroring the structur
 
 We aim to support the majority of appsync features (as we use all of them except elastic search).
 
- - Lambda source (only tested with serverless functions)
+ - Lambda source (only tested with serverless functions, including Node, Python)
  - DynamoDB source (batch operations, all single table operations, etc.)
  - HTTP(S) source
  - NONE source
@@ -146,6 +146,19 @@ describe("graphql", () => {
 
 ```
 
+### Python Lambda
+
+Add the following description for a Python Lambda (the runtime flag is important). In the following example, it will look for a file named
+handler.py in the current directory with a method called `composedJSON`.
+
+```
+functions:
+  composedJSON:
+    handler: handler.composedJSON
+    runtime: python3.6
+```
+
+Running a Python Lambda requires `sls` to be on your environment `$PATH`.
 
 ### Lambda <> DynamoDB
 

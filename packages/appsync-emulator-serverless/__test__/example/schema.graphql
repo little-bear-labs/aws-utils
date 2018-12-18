@@ -11,6 +11,7 @@ type Query {
   QuoteResponse(query: [AttributeFilter]): [QuoteResponse]!
   cognitoInfo: CognitoInfo!
   lambda: LambdaInfo!
+  lambdaPython: LambdaInfo!
   error: Boolean
   httpUsers: [httpUser]
   jsonTest: AWSJSON
