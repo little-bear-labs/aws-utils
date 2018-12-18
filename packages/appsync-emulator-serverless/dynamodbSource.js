@@ -7,10 +7,21 @@ const nullIfEmpty = obj => (Object.keys(obj).length === 0 ? null : obj);
 const unmarshall = (raw, isRaw = true) => {
   const content = isRaw ? Converter.unmarshall(raw) : raw;
 
-  // because of the funky set type used in the aws-sdk we need to further unwrap
+  // Because of the funky set type used in the aws-sdk, we need to further unwrap
   // to find if there is a set that needs to be unpacked into an array.
+
+  // Unwrap sets
   if (content && typeof content === 'object' && content.wrapperName === 'Set') {
     return content.values;
+  }
+
+  // Unwrap lists
+  if (
+    content &&
+    typeof content === 'object' &&
+    Object.keys(content).includes('0')
+  ) {
+    return Object.values(content);
   }
 
   if (content && typeof content === 'object') {

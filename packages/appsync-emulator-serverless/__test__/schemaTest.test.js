@@ -12,8 +12,10 @@ const getScalarSource = (field, val) => `
   }
 `;
 
-const expectScalarResult = (result, field, val) =>
+const expectScalarResult = (result, field, val) => {
+  expect(result).not.toHaveProperty('errors');
   expect(result).toMatchObject({ data: { [field]: val } });
+};
 
 describe('creates executable schema', () => {
   const serverless = `${__dirname}/example/serverless.yml`;
@@ -166,6 +168,7 @@ describe('creates executable schema', () => {
             id
             commodity
             amount
+            tags
           }
         }
       `,
@@ -173,16 +176,20 @@ describe('creates executable schema', () => {
         input: {
           commodity: 'foo',
           amount: 100.5,
+          tags: ['foo', 'bar'],
         },
       },
       contextValue,
     });
+
+    expect(insertResult).not.toHaveProperty('errors');
 
     expect(insertResult).toMatchObject({
       data: {
         putQuoteRequest: {
           commodity: 'foo',
           amount: 100.5,
+          tags: ['foo', 'bar'],
         },
       },
     });
@@ -290,6 +297,7 @@ describe('creates executable schema', () => {
         `,
         variableValues: { id },
       });
+      expect(result).not.toHaveProperty('errors');
       expect(result).toMatchObject({
         data: { QuoteRequestById: { commodity: 'foo', amount: 100.5 } },
       });
@@ -317,6 +325,7 @@ describe('creates executable schema', () => {
           ],
         },
       });
+      expect(result).not.toHaveProperty('errors');
       expect(result).toMatchObject({
         data: {
           QuoteRequest: [
@@ -350,6 +359,7 @@ describe('creates executable schema', () => {
           },
         },
       });
+      expect(result).not.toHaveProperty('errors');
       expect(result).toMatchObject({
         data: {
           updateQuoteRequest: {
