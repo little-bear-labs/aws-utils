@@ -7,21 +7,17 @@ const parseErrorStack = error =>
     .slice(1);
 
 const sendOutput = output => {
-  console.log(output);
   process.send({ type: 'success', output }, process.exit);
 };
 const sendErr = err => {
-  let error;
-  console.log(err);
-  if (err instanceof Error) {
-    error = {
-      stackTrace: parseErrorStack(err),
-      errorType: err.constructor.name,
-      errorMessage: err.message,
-    };
-  } else {
-    error = err;
-  }
+  const error =
+    err instanceof Error
+      ? {
+          stackTrace: parseErrorStack(err),
+          errorType: err.constructor.name,
+          errorMessage: err.message,
+        }
+      : err;
   process.send({ type: 'error', error }, process.exit);
 };
 

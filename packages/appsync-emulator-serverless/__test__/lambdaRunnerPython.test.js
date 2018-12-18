@@ -19,7 +19,6 @@ const run = ({ handlerMethod, payload = {} }) => {
 
 describe('lambdaRunner', () => {
   describe('async python', () => {
-    jest.setTimeout(10000);
     it('return empty', async () => {
       const response = await run({
         handlerMethod: 'emptyJSON',

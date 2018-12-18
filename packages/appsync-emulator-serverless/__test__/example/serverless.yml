@@ -206,7 +206,7 @@ custom:
         config:
           lambdaFunctionArn: { Fn::GetAtt: [PythonLambdaFunction, Arn] }
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] } 
-          functionName: graphQL
+          functionName: pythonGraphQL
 functions:
   graphqlJSON:
     handler: handler.graphqlJSON
@@ -221,8 +221,8 @@ functions:
   error:
     handler: handler.error
     runtime: python3.6
-  graphQL:
-    handler: handler.graphQL
+  pythonGraphQL:
+    handler: handler.pythonGraphQL
     runtime: python3.6
 resources:
   Resources:

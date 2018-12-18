@@ -16,7 +16,6 @@ process.once(
 
       const sls = spawn('sls', args, {
         env: process.env,
-        stdio: ['pipe', null, 'pipe'],
         shell: '/bin/bash',
         cwd: serverlessDirectory,
       });

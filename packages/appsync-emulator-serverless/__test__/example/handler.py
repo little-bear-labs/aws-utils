@@ -8,5 +8,5 @@ def error(event, context):
     raise Exception
 
 
-def graphQL(event, context):
+def pythonGraphQL(event, context):
     return {'test': 'yup'}

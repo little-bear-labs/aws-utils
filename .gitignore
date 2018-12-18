@@ -3,3 +3,4 @@ node_modules
 yarn-error.log
 .DS_Store
 package-lock.json
+/packages/appsync-emulator-serverless/__test__/example/__pycache__
