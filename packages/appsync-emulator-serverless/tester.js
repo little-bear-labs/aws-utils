@@ -3,13 +3,31 @@ const { createSchema } = require('./schemaTest');
 const createServerCore = require('./serverCore');
 const testJWT = require('./testJWT');
 const dynamoEmulator = require('@conduitvc/dynamodb-emulator/client');
+const { DynamoDB } = require('aws-sdk');
 
-const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
-  // For performance we leverage a single emulator instance per process.
-  // To keep things unqiue between runs we use table names which are specific
-  // to each invocation of 'create'
-  const emulator = await dynamoEmulator.launch();
-  const dynamodb = dynamoEmulator.getClient(emulator);
+const create = async ({
+  serverless,
+  schemaPath,
+  port = 0,
+  useLocalstack = false,
+} = {}) => {
+  let dynamodb;
+  let emulator;
+
+  if (useLocalstack) {
+    dynamodb = new DynamoDB({
+      endpoint: 'http://localhost:61023',
+      accessKeyId: 'fake',
+      secretAccessKey: 'fake',
+      region: 'fake',
+    });
+  } else {
+    // For performance we leverage a single emulator instance per process.
+    // To keep things unqiue between runs we use table names which are specific
+    // to each invocation of 'create'
+    emulator = await dynamoEmulator.launch();
+    dynamodb = dynamoEmulator.getClient(emulator);
+  }
 
   const {
     pubusb,
@@ -35,7 +53,7 @@ const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
     await schemaClose();
   };
 
-  const terminate = () => emulator.terminate();
+  const terminate = () => emulator && emulator.terminate();
 
   return {
     close,
