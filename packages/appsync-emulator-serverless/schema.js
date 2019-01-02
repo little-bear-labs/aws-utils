@@ -223,7 +223,7 @@ const generateTypeResolver = (
     return response;
   } catch (err) {
     consola.error(`${info.parentType}.${info.fieldName} failed`);
-    consola.error(err);
+    consola.error(err.errorMessage || err.stack || err);
     throw err;
   }
 };
