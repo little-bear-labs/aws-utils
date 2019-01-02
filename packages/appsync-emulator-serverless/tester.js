@@ -15,7 +15,7 @@ const create = async ({
   let emulator;
 
   if (dynamodbConfig) {
-    dynamodb = new DynamoDB(dynamodbConfig)
+    dynamodb = new DynamoDB(dynamodbConfig);
   } else {
     // For performance we leverage a single emulator instance per process.
     // To keep things unqiue between runs we use table names which are specific
