@@ -123,8 +123,18 @@ global.fetch = require("node-fetch");
 describe("graphql", () => {
   let server, client;
   beforeEach(async () => {
-    // invoke create with { useLocalstack:true } to utilize localstack
-    // for dynamodb instead of java emulator
+    // by default, ths create method will spin up a dynamodb emulator in memory using java
+    // to utilize another dynamo instance, pass in a valid config:
+    /* below works with localstack
+      {
+        dynamodbConfig: {
+          endpoint: 'http://localhost:61023',
+          accessKeyId: 'fake',
+          secretAccessKey: 'fake',
+          region: 'fake',
+        }
+      }
+    */
     server = await create();
     client = connect(
       server,

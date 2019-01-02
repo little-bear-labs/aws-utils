@@ -67,7 +67,12 @@ describe('appasync-emulator-serverless/tester', () => {
   it('supports localstack', async () => {
     serverSetup = await createTestServer({
       serverless: `${__dirname}/example/serverless.yml`,
-      useLocalstack: true,
+      dynamodbConfig: {
+        endpoint: 'http://localhost:61023',
+        accessKeyId: 'fake',
+        secretAccessKey: 'fake',
+        region: 'fake',
+      },
     });
 
     const client = connectTestServer(serverSetup, AWSAppSyncClient);

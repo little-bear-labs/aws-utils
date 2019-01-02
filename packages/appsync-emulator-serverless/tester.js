@@ -9,18 +9,13 @@ const create = async ({
   serverless,
   schemaPath,
   port = 0,
-  useLocalstack = false,
+  dynamodbConfig = null,
 } = {}) => {
   let dynamodb;
   let emulator;
 
-  if (useLocalstack) {
-    dynamodb = new DynamoDB({
-      endpoint: 'http://localhost:61023',
-      accessKeyId: 'fake',
-      secretAccessKey: 'fake',
-      region: 'fake',
-    });
+  if (dynamodbConfig) {
+    dynamodb = new DynamoDB(dynamodbConfig)
   } else {
     // For performance we leverage a single emulator instance per process.
     // To keep things unqiue between runs we use table names which are specific
