@@ -3,7 +3,6 @@ const { createSchema } = require('./schemaTest');
 const createServerCore = require('./serverCore');
 const testJWT = require('./testJWT');
 const dynamoEmulator = require('@conduitvc/dynamodb-emulator/client');
-const { DynamoDB } = require('aws-sdk');
 
 const create = async ({
   serverless,
@@ -14,7 +13,11 @@ const create = async ({
   let dynamodb;
   let emulator;
 
+  // when dynamodbConfig is passed to this method
+  // instead of spinning up a dynamodb emulator using java
+  // we connect to an existing instance provided in dynamodbConfig
   if (dynamodbConfig) {
+    const { DynamoDB } = require('aws-sdk');
     dynamodb = new DynamoDB(dynamodbConfig);
   } else {
     // For performance we leverage a single emulator instance per process.
