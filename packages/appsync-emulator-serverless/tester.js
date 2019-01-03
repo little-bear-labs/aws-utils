@@ -4,12 +4,28 @@ const createServerCore = require('./serverCore');
 const testJWT = require('./testJWT');
 const dynamoEmulator = require('@conduitvc/dynamodb-emulator/client');
 
-const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
-  // For performance we leverage a single emulator instance per process.
-  // To keep things unqiue between runs we use table names which are specific
-  // to each invocation of 'create'
-  const emulator = await dynamoEmulator.launch();
-  const dynamodb = dynamoEmulator.getClient(emulator);
+const create = async ({
+  serverless,
+  schemaPath,
+  port = 0,
+  dynamodbConfig = null,
+} = {}) => {
+  let dynamodb;
+  let emulator;
+
+  // when dynamodbConfig is passed to this method
+  // instead of spinning up a dynamodb emulator using java
+  // we connect to an existing instance provided in dynamodbConfig
+  if (dynamodbConfig) {
+    const { DynamoDB } = require('aws-sdk');
+    dynamodb = new DynamoDB(dynamodbConfig);
+  } else {
+    // For performance we leverage a single emulator instance per process.
+    // To keep things unqiue between runs we use table names which are specific
+    // to each invocation of 'create'
+    emulator = await dynamoEmulator.launch();
+    dynamodb = dynamoEmulator.getClient(emulator);
+  }
 
   const {
     pubusb,
@@ -35,7 +51,7 @@ const create = async ({ serverless, schemaPath, port = 0 } = {}) => {
     await schemaClose();
   };
 
-  const terminate = () => emulator.terminate();
+  const terminate = () => emulator && emulator.terminate();
 
   return {
     close,

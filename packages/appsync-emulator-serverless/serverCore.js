@@ -310,6 +310,7 @@ const createServer = async ({
   await e2p(mqttServer, 'ready');
   // Trailing slash is very important. The mqtt client will not connect without it.
   const mqttURL = `ws://localhost:${mqttHTTP.address().port}/`;
+  // eslint-disable-next-line
   console.log(`listening for subscriptions at: ${mqttURL}`);
   const subServer = new SubscriptionServer({
     schema,
