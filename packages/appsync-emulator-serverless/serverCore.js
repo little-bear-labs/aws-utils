@@ -225,7 +225,13 @@ class SubscriptionServer {
   }
 }
 
-const executeGQL = async ({ schema, documentAST, jwt, variables }) => {
+const executeGQL = async ({
+  schema,
+  documentAST,
+  jwt,
+  variables,
+  operationName,
+}) => {
   const context = { jwt };
   const output = await execute(
     schema,
@@ -233,6 +239,7 @@ const executeGQL = async ({ schema, documentAST, jwt, variables }) => {
     null, // root value
     context,
     variables,
+    operationName,
   );
 
   // nasty hack to emulator appsync errors which are more robust than what
@@ -257,7 +264,7 @@ const createGQLHandler = ({ schema, subServer }) => async (req, res) => {
     throw new Error('Must pass authorization header');
   }
   const jwt = headers.authorization ? jwtDecode(headers.authorization) : {};
-  const { variables, query } = req.body;
+  const { variables, query, operationName } = req.body;
   consola.start('graphql', query);
   log.info('request', { variables, query });
   const documentAST = parse(query);
@@ -275,7 +282,13 @@ const createGQLHandler = ({ schema, subServer }) => async (req, res) => {
     case 'query':
     case 'mutation':
       return res.send(
-        await executeGQL({ schema, documentAST, jwt, variables }),
+        await executeGQL({
+          schema,
+          documentAST,
+          jwt,
+          variables,
+          operationName,
+        }),
       );
     case 'subscription':
       return res.send(
