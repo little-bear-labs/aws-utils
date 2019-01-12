@@ -1,3 +1,4 @@
+const path = require('path');
 const {
   log,
   sendErr,
@@ -12,15 +13,14 @@ process.once(
       log.info('load', handlerMethod);
 
       const { spawn } = require('child_process');
-      const args = ['invoke', 'local', '-f', handlerMethod];
+      const args = ['local', 'invoke'];
 
-      const sls = spawn('sls', args, {
+      const sam = spawn('sam', args, {
         env: process.env,
         shell: '/bin/bash',
-        cwd: serverlessDirectory,
+        cwd: path.join(serverlessDirectory, handlerMethod),
       });
-
-      installStdIOHandlers('python', sls, payload);
+      installStdIOHandlers('go', sam, payload);
     } catch (err) {
       sendErr(err);
     }

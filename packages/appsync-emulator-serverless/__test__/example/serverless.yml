@@ -162,6 +162,11 @@ custom:
         field: lambdaPython
         request: lambda-request.vtl
         response: result-response.txt
+      - dataSource: TestGoLambda
+        type: Query
+        field: lambdaGo
+        request: lambda-request.vtl
+        response: result-response.txt
     serviceRole: 'AppSyncServiceRole'
     dataSources:
       - type: AMAZON_DYNAMODB
@@ -207,6 +212,13 @@ custom:
           lambdaFunctionArn: { Fn::GetAtt: [PythonLambdaFunction, Arn] }
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] } 
           functionName: pythonGraphQL
+      - type: AWS_LAMBDA
+        name: TestGoLambda
+        description: 'Go Lambda DataSource'
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [GoLambdaFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+          functionName: gographql
 functions:
   graphqlJSON:
     handler: handler.graphqlJSON
@@ -224,6 +236,18 @@ functions:
   pythonGraphQL:
     handler: handler.pythonGraphQL
     runtime: python3.6
+  goemptyjson:
+    handler: goemptyjson
+    runtime: go1.x
+  gocomposedjson:
+    handler: gocomposedjson
+    runtime: go1.x
+  goerror:
+    handler: goerror
+    runtime: go1.x
+  gographql:
+    handler: gographql
+    runtime: go1.x
 resources:
   Resources:
     QuoteRequestTable:

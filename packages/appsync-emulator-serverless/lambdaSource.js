@@ -5,6 +5,7 @@ const log = require('logdown')('appsync-emulator:lambdaSource');
 
 const Runner = path.join(__dirname, 'lambdaRunner');
 const PythonRunner = path.join(__dirname, 'lambdaRunnerPython');
+const GoRunner = path.join(__dirname, 'lambdaRunnerGo');
 const lambdaSource = async (
   {
     dynamodbEndpoint,
@@ -39,8 +40,18 @@ const lambdaSource = async (
   );
   let child = null;
 
-  if (fnConfig.runtime && fnConfig.runtime.indexOf('python') >= 0) {
-    child = fork(PythonRunner, [], {
+  if (fnConfig.runtime && !fnConfig.runtime.includes('node')) {
+    let extHandlerMethod = '';
+    let runner = null;
+    if (fnConfig.runtime.indexOf('python') >= 0) {
+      extHandlerMethod = handlerMethod;
+      runner = PythonRunner;
+    } else if (fnConfig.runtime.indexOf('go') >= 0) {
+      extHandlerMethod = fnConfig.handler.split('/').pop();
+      runner = GoRunner;
+    }
+
+    child = fork(runner, [], {
       env: {
         ...process.env,
         ...dynamodbTableAliases,
@@ -51,7 +62,7 @@ const lambdaSource = async (
 
     child.send({
       serverlessDirectory,
-      handlerMethod,
+      handlerMethod: extHandlerMethod,
       payload,
     });
   } else {

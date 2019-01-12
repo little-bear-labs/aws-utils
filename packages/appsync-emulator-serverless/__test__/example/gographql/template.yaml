@@ -1,0 +1,11 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'SAM template for Serverless framework service: '
+Resources:
+  gographql:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: gographql
+      Runtime: go1.x
+      MemorySize: 128
+      Timeout: 3

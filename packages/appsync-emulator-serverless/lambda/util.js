@@ -33,4 +33,55 @@ function installExceptionHandlers() {
   });
 }
 
-module.exports = { log, sendOutput, sendErr, installExceptionHandlers };
+function installStdIOHandlers(runtime, proc, payload) {
+  let results = '';
+  let allResults = '';
+  let errorResult = '';
+
+  proc.stdin.write(`${JSON.stringify(payload)}\n`);
+  proc.stdin.end();
+
+  proc.stdout.on('data', data => {
+    results = data.toString();
+    allResults += results;
+    results = results.replace('\n', '');
+  });
+
+  proc.on('close', code => {
+    if (allResults === '') {
+      sendErr(errorResult);
+    } else if (allResults.indexOf('Traceback') >= 0) {
+      sendErr(allResults);
+    } else if (code === 0) {
+      try {
+        if (runtime.includes('go')) {
+          sendOutput(JSON.parse(allResults));
+        } else if (runtime.includes('python')) {
+          sendOutput(JSON.parse(results));
+        }
+      } catch (err) {
+        sendErr(errorResult);
+      }
+    } else {
+      sendErr(allResults);
+    }
+  });
+
+  proc.stderr.on('data', data => {
+    errorResult = data.toString();
+    try {
+      const parsedData = JSON.parse(data.toString());
+      sendErr(parsedData);
+    } catch (err) {
+      //
+    }
+  });
+}
+
+module.exports = {
+  log,
+  sendOutput,
+  sendErr,
+  installStdIOHandlers,
+  installExceptionHandlers,
+};

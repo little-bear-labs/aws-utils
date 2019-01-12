@@ -238,6 +238,21 @@ describe('creates executable schema', () => {
     expect(result).toMatchObject({ data: { lambdaPython: { test: 'yup' } } });
   });
 
+  it('should allow querying lambda go', async () => {
+    const result = await graphql({
+      schema,
+      contextValue,
+      source: `
+      query test {
+        lambdaGo {
+          test
+        }
+      }
+      `,
+    });
+    expect(result).toMatchObject({ data: { lambdaGo: { test: 'yup' } } });
+  });
+
   it('should have identity with jwt contextValue', async () => {
     const output = await graphql({
       schema,
