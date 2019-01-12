@@ -203,7 +203,7 @@ custom:
         name: QuoteRequest
         description: QuoteRequest description
         config:
-          tableName: QuoteRequest-emulator
+          tableName: { Ref: QuoteRequestTable }
           serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
       - type: AMAZON_DYNAMODB
         name: ${self:custom.quote}Response

@@ -51,7 +51,8 @@ describe('dynamodbSource', () => {
     });
   });
 
-  const runOp = op =>
+  const runOp = op => subject(dynamodb, tableName, {}, op);
+  const runBatchOp = op =>
     subject(
       dynamodb,
       'MyTable',
@@ -374,7 +375,7 @@ describe('dynamodbSource', () => {
         })
         .promise();
 
-      const result = await runOp({
+      const result = await runBatchOp({
         operation: 'BatchGetItem',
         tables: {
           MyTable: {
@@ -398,7 +399,7 @@ describe('dynamodbSource', () => {
     });
 
     it('BatchPutItem', async () => {
-      const result = await runOp({
+      const result = await runBatchOp({
         operation: 'BatchPutItem',
         tables: {
           MyTable: [
@@ -435,7 +436,7 @@ describe('dynamodbSource', () => {
         })
         .promise();
 
-      const result = await runOp({
+      const result = await runBatchOp({
         operation: 'BatchDeleteItem',
         tables: {
           MyTable: [{ id: { S: 'foo' } }],

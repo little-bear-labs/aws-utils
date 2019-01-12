@@ -164,7 +164,7 @@ const dispatchRequestToSource = async (
         dynamodb,
         // default alias
         source.config.tableName,
-        // mapping
+        // mapping used for multi table operations.
         dynamodbTables,
         request,
       );
