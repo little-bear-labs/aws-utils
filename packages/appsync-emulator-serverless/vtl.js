@@ -127,7 +127,7 @@ class JavaMap {
   }
 
   entrySet() {
-    return new JavaArray(this.map.values());
+    return new JavaArray(Array.from(this.map.values()));
   }
 
   equals(value) {
@@ -177,7 +177,7 @@ class JavaMap {
   }
 
   values() {
-    return new JavaArray(this.map.values());
+    return new JavaArray(Array.from(this.map.values()));
   }
 
   toJSON() {
