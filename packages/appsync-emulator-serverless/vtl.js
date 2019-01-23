@@ -127,7 +127,16 @@ class JavaMap {
   }
 
   entrySet() {
-    return new JavaArray(Array.from(this.map.values()));
+    const entries = Array.from(this.map.entries()).map(([key, value]) => {
+      return createMapProxy(
+        new JavaMap({
+          key,
+          value
+        })
+      );
+    });
+
+    return new JavaArray(entries);
   }
 
   equals(value) {
