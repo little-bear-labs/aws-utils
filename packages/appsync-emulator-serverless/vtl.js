@@ -127,14 +127,14 @@ class JavaMap {
   }
 
   entrySet() {
-    const entries = Array.from(this.map.entries()).map(([key, value]) => {
-      return createMapProxy(
+    const entries = Array.from(this.map.entries()).map(([key, value]) =>
+      createMapProxy(
         new JavaMap({
           key,
-          value
-        })
-      );
-    });
+          value,
+        }),
+      ),
+    );
 
     return new JavaArray(entries);
   }
