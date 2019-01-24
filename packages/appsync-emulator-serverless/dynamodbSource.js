@@ -23,6 +23,10 @@ const unmarshall = (raw, isRaw = true) => {
   ) {
     return Object.values(content);
   }
+  
+  if (Array.isArray(content)) {
+    return content.map(value => unmarshall(value, false));
+  }
 
   if (content && typeof content === 'object') {
     return Object.entries(content).reduce(
@@ -32,10 +36,6 @@ const unmarshall = (raw, isRaw = true) => {
       }),
       {},
     );
-  }
-
-  if (Array.isArray(content)) {
-    return content.map(value => unmarshall(value, false));
   }
 
   return content;
