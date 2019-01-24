@@ -14,7 +14,7 @@ const unmarshall = (raw, isRaw = true) => {
   if (content && typeof content === 'object' && content.wrapperName === 'Set') {
     return content.values;
   }
-  
+
   // Unwrap lists
   if (Array.isArray(content)) {
     return content.map(value => unmarshall(value, false));
