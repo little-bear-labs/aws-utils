@@ -30,6 +30,13 @@ const javaify = value => {
   return value;
 };
 
+const toJSON = value => {
+  if (typeof value === 'object' && value != null && 'toJSON' in value) {
+    return value.toJSON();
+  }
+  return value;
+};
+
 class JavaArray extends Array {
   // required so array starts with zero elements
   // eslint-disable-next-line
@@ -86,7 +93,7 @@ class JavaArray extends Array {
   }
 
   toJSON() {
-    return Array.from(this);
+    return Array.from(this).map(toJSON);
   }
 }
 
@@ -99,13 +106,6 @@ const createMapProxy = map =>
       return map[prop];
     },
   });
-
-const toJSON = value => {
-  if (typeof value === 'object' && value != null && 'toJSON' in value) {
-    return value.toJSON();
-  }
-  return value;
-};
 
 class JavaMap {
   constructor(obj) {
