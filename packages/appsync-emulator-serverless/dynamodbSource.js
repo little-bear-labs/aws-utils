@@ -16,14 +16,11 @@ const unmarshall = (raw, isRaw = true) => {
   }
 
   // Unwrap lists
-  if (
-    content &&
-    typeof content === 'object' &&
-    Object.keys(content).includes('0')
-  ) {
-    return Object.values(content);
+  if (Array.isArray(content)) {
+    return content.map(value => unmarshall(value, false));
   }
 
+  // Unwrap maps
   if (content && typeof content === 'object') {
     return Object.entries(content).reduce(
       (sum, [key, value]) => ({
@@ -32,10 +29,6 @@ const unmarshall = (raw, isRaw = true) => {
       }),
       {},
     );
-  }
-
-  if (Array.isArray(content)) {
-    return content.map(value => unmarshall(value, false));
   }
 
   return content;
