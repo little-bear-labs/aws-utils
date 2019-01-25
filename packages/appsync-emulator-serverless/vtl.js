@@ -86,7 +86,7 @@ class JavaArray extends Array {
   }
 
   toJSON() {
-    return Array.from(this);
+    return Array.from(this).map(toJSON);
   }
 }
 
