@@ -1,6 +1,6 @@
 {
   "name": "@conduitvc/appsync-emulator-serverless",
-  "version": "0.7.14",
+  "version": "0.7.15",
   "main": "schema.js",
   "license": "MIT",
   "bin": {
