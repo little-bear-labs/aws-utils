@@ -1,4 +1,4 @@
-const { toJSON } = require('./vtl');
+const { JavaMap, toJSON } = require('./vtl');
 
 class Unauthorized extends Error {}
 class TemplateSentError extends Error {
@@ -159,20 +159,14 @@ const create = (errors = [], now = new Date()) => ({
   },
   map: {
     copyAndRetainAllKeys(map, keys = []) {
-      return Object.entries(map).reduce((sum, [key, value]) => {
-        if (keys.indexOf(key) === -1) return sum;
-        return {
-          ...sum,
-          [key]: value,
-        };
-      }, {});
+      const newMap = new JavaMap();
+      keys.forEach(key => newMap.set(key, map.get(key)));
+      return newMap;
     },
     copyAndRemoveAllKeys(map, keys = []) {
-      const result = { ...map };
-      for (const key of keys) {
-        delete result[key];
-      }
-      return result;
+      const newMap = new JavaMap(map.entrySet());
+      keys.forEach(key => newMap.remove(key));
+      return newMap;
     },
   },
   dynamodb: {
