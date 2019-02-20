@@ -10,6 +10,8 @@ const sendOutput = output => {
   process.send({ type: 'success', output }, process.exit);
 };
 const sendErr = err => {
+  // log.error('Serverless problem', err);
+  console.log(err);
   const error =
     err instanceof Error
       ? {
@@ -56,7 +58,7 @@ function installStdIOHandlers(runtime, proc, payload) {
       try {
         if (runtime.includes('go')) {
           sendOutput(JSON.parse(allResults));
-        } else if (runtime.includes('python')) {
+        } else if (runtime.includes('python') || runtime.includes('ruby')) {
           sendOutput(JSON.parse(results));
         }
       } catch (err) {
@@ -68,12 +70,15 @@ function installStdIOHandlers(runtime, proc, payload) {
   });
 
   proc.stderr.on('data', data => {
+    console.log(data);
+
     errorResult = data.toString();
     try {
       const parsedData = JSON.parse(data.toString());
       sendErr(parsedData);
     } catch (err) {
-      //
+      log.error('Could not parse JSON from lambda invocation', data);
+      console.log(err);
     }
   });
 }
