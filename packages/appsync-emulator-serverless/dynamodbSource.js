@@ -145,10 +145,10 @@ const query = async (
     TableName: table,
     KeyConditionExpression: keyCondition.expression,
     FilterExpression: filter.expression,
-    ExpressionAttributeNames: {
+    ExpressionAttributeNames: nullIfEmpty({
       ...(filter.expressionNames || {}),
       ...(keyCondition.expressionNames || {}),
-    },
+    }),
     ExpressionAttributeValues: {
       ...(filter.expressionValues || {}),
       ...(keyCondition.expressionValues || {}),
@@ -202,9 +202,9 @@ const scan = async (
   if (filter) {
     Object.assign(params, {
       FilterExpression: filter.expression,
-      ExpressionAttributeNames: {
+      ExpressionAttributeNames: nullIfEmpty({
         ...(filter.expressionNames || undefined),
-      },
+      }),
       ExpressionAttributeValues: {
         ...(filter.expressionValues || undefined),
       },
