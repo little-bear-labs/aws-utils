@@ -68,7 +68,6 @@ const lambdaSource = async (
   } else {
     child = fork(Runner, [], {
       env: {
-        ...process.env,
         ...dynamodbTableAliases,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
       },
