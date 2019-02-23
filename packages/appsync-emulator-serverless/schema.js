@@ -284,17 +284,25 @@ const generateSubscriptionTypeResolver = (
   };
 };
 
+const flatten = arr => arr.reduce((acc, curr) => {
+  if (Array.isArray(curr)) {
+    return [...acc, ...flatten(curr)];
+  }
+  return [...acc, curr];
+}, []);
+
 const generateResolvers = (cwd, config, configs) => {
   const { mappingTemplatesLocation = 'mapping-templates' } = config;
   const mappingTemplates = path.join(cwd, mappingTemplatesLocation);
-  const dataSourceByName = config.dataSources.reduce(
+  const dataSourceByName = flatten(config.dataSources).reduce(
     (sum, value) => ({
       ...sum,
       [value.name]: value,
     }),
     {},
   );
-  return config.mappingTemplates.reduce(
+
+  return flatten(config.mappingTemplates).reduce(
     (sum, { dataSource, type, field, request, response }) => {
       if (!sum[type]) {
         // eslint-disable-next-line
