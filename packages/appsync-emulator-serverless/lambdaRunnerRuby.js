@@ -9,7 +9,7 @@ process.once(
   'message',
   async ({ serverlessDirectory, handlerMethod, payload }) => {
     try {
-      log.info('load Ruby', handlerMethod);
+      log.info('Running Ruby lambda function', handlerMethod);
 
       const { spawn } = require('child_process');
       const args = ['invoke', 'local', '-f', handlerMethod];
@@ -22,6 +22,7 @@ process.once(
 
       installStdIOHandlers('ruby', sls, payload);
     } catch (err) {
+      log('Could not invoke serverless', err);
       sendErr(err);
     }
   },

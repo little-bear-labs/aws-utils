@@ -9,9 +9,8 @@ const parseErrorStack = error =>
 const sendOutput = output => {
   process.send({ type: 'success', output }, process.exit);
 };
+
 const sendErr = err => {
-  // log.error('Serverless problem', err);
-  console.log(err);
   const error =
     err instanceof Error
       ? {
@@ -59,10 +58,22 @@ function installStdIOHandlers(runtime, proc, payload) {
         if (runtime.includes('go')) {
           sendOutput(JSON.parse(allResults));
         } else if (runtime.includes('python') || runtime.includes('ruby')) {
+          // Syntax/language errors also hit here. Exit code should maybe not be 0
+          // from sls when there is an exception, but it is. The error output is not sent via
+          // STDERR, so it doesn't otherwise get picked up. JSON parse will fail here,
+          // then the error ends up in the catch block.
           sendOutput(JSON.parse(results));
         }
       } catch (err) {
-        sendErr(errorResult);
+        // Serverless exited cleanly, but the output was not JSON, so parsing
+        // failed.
+        if (errorResult !== '') {
+          log.error('Lambda invocation returned an error', errorResult);
+          sendErr(errorResult);
+        } else {
+          log.error('Lambda invocation returned an error', results);
+          sendErr(results);
+        }
       }
     } else {
       sendErr(allResults);
@@ -70,15 +81,12 @@ function installStdIOHandlers(runtime, proc, payload) {
   });
 
   proc.stderr.on('data', data => {
-    console.log(data);
-
     errorResult = data.toString();
     try {
       const parsedData = JSON.parse(data.toString());
       sendErr(parsedData);
     } catch (err) {
-      log.error('Could not parse JSON from lambda invocation', data);
-      console.log(err);
+      log.error('Could not parse JSON from lambda invocation', errorResult);
     }
   });
 }

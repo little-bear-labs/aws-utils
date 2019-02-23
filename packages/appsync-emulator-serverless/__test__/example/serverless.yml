@@ -269,6 +269,9 @@ functions:
   rubyerror:
     handler: handler.ruby_error
     runtime: ruby2.5
+  rubybroken:
+    handler: handler.ruby_broken_function
+    runtime: ruby2.5
   rubyGraphQL:
     handler: handler.ruby_graphqL
     runtime: ruby2.5

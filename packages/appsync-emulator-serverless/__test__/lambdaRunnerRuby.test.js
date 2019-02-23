@@ -26,8 +26,8 @@ describe('lambdaRunner', () => {
           handlerMethod: 'rubyemptyjson',
         });
 
-        expect(response.output).toEqual({});
         expect(response.type).toBe('success');
+        expect(response.output).toEqual({});
       },
       20000,
     );
@@ -51,6 +51,20 @@ describe('lambdaRunner', () => {
         });
 
         expect(response.type).toBe('error');
+      },
+      20000,
+    );
+
+    it(
+      'shows Ruby errors',
+      async () => {
+        const response = await run({
+          handlerMethod: 'rubybroken',
+        });
+
+        expect(response.error).toContain(
+          'missing keyword: context (ArgumentError)',
+        );
       },
       20000,
     );
