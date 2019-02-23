@@ -284,12 +284,13 @@ const generateSubscriptionTypeResolver = (
   };
 };
 
-const flatten = arr => arr.reduce((acc, curr) => {
-  if (Array.isArray(curr)) {
-    return [...acc, ...flatten(curr)];
-  }
-  return [...acc, curr];
-}, []);
+const flatten = arr =>
+  arr.reduce((acc, curr) => {
+    if (Array.isArray(curr)) {
+      return [...acc, ...flatten(curr)];
+    }
+    return [...acc, curr];
+  }, []);
 
 const generateResolvers = (cwd, config, configs) => {
   const { mappingTemplatesLocation = 'mapping-templates' } = config;
