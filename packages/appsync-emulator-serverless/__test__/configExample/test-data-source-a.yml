@@ -1,0 +1,12 @@
+- type: AMAZON_DYNAMODB
+  name: QuoteRequest
+  description: QuoteRequest description
+  config:
+    tableName: QuoteRequest-emulator
+    serviceRoleArn: 'ARN'
+- type: AMAZON_DYNAMODB
+  name: Response
+  description: QuoteResponse description
+  config:
+    tableName: QuoteResponse-emulator
+    serviceRoleArn: 'ARN'

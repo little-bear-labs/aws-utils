@@ -9,6 +9,13 @@ custom:
   service: file-service
   assetPutRequestsTable: ${self:custom.service}-AssetPutRequests-${opt:stage, 'dev'}
   assetsTable: ${self:custom.service}-Assets-${opt:stage, 'dev'}
+  appSync:
+    mappingTemplates:
+      - ${file(./test-mapping-a.yml)}
+      - ${file(./test-mapping-b.yml)}
+    dataSources:
+      - ${file(./test-data-source-a.yml)}
+      - ${file(./test-data-source-b.yml)}
 
 resources:
  Resources:

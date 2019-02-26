@@ -21,6 +21,76 @@ describe('loadServerlessConfig', () => {
         service: 'file-service',
         assetPutRequestsTable: 'file-service-AssetPutRequests-dev',
         assetsTable: 'file-service-Assets-dev',
+        appSync: {
+          mappingTemplates: [
+            {
+              dataSource: 'QuoteRequest',
+              type: 'Query',
+              field: 'error',
+              request: 'error-request.txt',
+              response: 'result-response.txt',
+            },
+            {
+              dataSource: 'QuoteRequest',
+              type: 'Query',
+              field: 'QuoteRequestById',
+              request: 'byId-request.txt',
+              response: 'result-response.txt',
+            },
+            {
+              dataSource: 'QuoteRequest',
+              type: 'Mutation',
+              field: 'putQuoteRequest',
+              request: 'put-request.txt',
+              response: 'result-response.txt',
+            },
+            {
+              dataSource: 'QuoteRequest',
+              type: 'Mutation',
+              field: 'batchPutQuotes',
+              request: 'batchput-request.txt',
+              response: 'batchput-response.txt',
+            },
+          ],
+          dataSources: [
+            {
+              type: 'AMAZON_DYNAMODB',
+              name: 'QuoteRequest',
+              description: 'QuoteRequest description',
+              config: {
+                tableName: 'QuoteRequest-emulator',
+                serviceRoleArn: 'ARN',
+              },
+            },
+            {
+              type: 'AMAZON_DYNAMODB',
+              name: 'Response',
+              description: 'QuoteResponse description',
+              config: {
+                tableName: 'QuoteResponse-emulator',
+                serviceRoleArn: 'ARN',
+              },
+            },
+            {
+              type: 'NONE',
+              name: 'SubscriberPassthrough',
+              description: 'Non-datasource datasource',
+              config: {
+                serviceRoleArn: 'ARN',
+              },
+            },
+            {
+              type: 'AWS_LAMBDA',
+              name: 'TestLambda',
+              description: 'Lambda DataSource',
+              config: {
+                lambdaFunctionArn: 'ARN',
+                serviceRoleArn: 'ARN',
+                functionName: 'graphql',
+              },
+            },
+          ],
+        },
       },
       resources: {
         Resources: {
