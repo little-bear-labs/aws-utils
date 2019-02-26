@@ -45,13 +45,19 @@ const createSchema = async ({
   pubsub,
   dynamodb,
 } = {}) => {
-  const serverlessDirectory =
-    typeof serverless === 'string'
-      ? path.dirname(serverless)
-      : findServerlessPath();
-  const { config: serverlessConfig } = await loadServerlessConfig(
-    serverlessDirectory,
-  );
+  let serverlessConfig = {};
+  let serverlessDirectory;
+  if (typeof serverless === 'object') {
+    serverlessConfig = serverless.service;
+    serverlessDirectory = serverless.config.servicePath;
+  } else {
+    serverlessDirectory =
+      typeof serverless === 'string'
+        ? path.dirname(serverless)
+        : findServerlessPath();
+    const config = await loadServerlessConfig(serverlessDirectory);
+    serverlessConfig = config.config;
+  }
 
   // eslint-disable-next-line
   schemaPath = schemaPath || path.join(serverlessDirectory, 'schema.graphql');
