@@ -51,12 +51,12 @@ const createSchema = async ({
     serverlessConfig = serverless.service;
     serverlessDirectory = serverless.config.servicePath;
   } else {
-    serverlessDirectory = typeof serverless === 'string'
-      ? path.dirname(serverless)
-      : findServerlessPath();
-    let { config: serverlessConfig } = await loadServerlessConfig(
-      serverlessDirectory,
-    );
+    serverlessDirectory =
+      typeof serverless === 'string'
+        ? path.dirname(serverless)
+        : findServerlessPath();
+    const config = await loadServerlessConfig(serverlessDirectory);
+    serverlessConfig = config.config;
   }
 
   // eslint-disable-next-line
