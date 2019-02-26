@@ -5,6 +5,7 @@ const log = require('logdown')('appsync-emulator:lambdaSource');
 
 const Runner = path.join(__dirname, 'lambdaRunner');
 const PythonRunner = path.join(__dirname, 'lambdaRunnerPython');
+const RubyRunner = path.join(__dirname, 'lambdaRunnerRuby');
 const GoRunner = path.join(__dirname, 'lambdaRunnerGo');
 const lambdaSource = async (
   {
@@ -46,6 +47,9 @@ const lambdaSource = async (
     if (fnConfig.runtime.indexOf('python') >= 0) {
       extHandlerMethod = fn;
       runner = PythonRunner;
+    } else if (fnConfig.runtime.indexOf('ruby') >= 0) {
+      extHandlerMethod = fn;
+      runner = RubyRunner;
     } else if (fnConfig.runtime.indexOf('go') >= 0) {
       extHandlerMethod = fnConfig.handler.split('/').pop();
       runner = GoRunner;
