@@ -4,6 +4,7 @@
  */
 
 const Serverless = require('serverless');
+const AwsProvider = require('serverless/lib/plugins/aws/provider/awsProvider.js');
 const path = require('path');
 const fs = require('fs');
 
@@ -25,6 +26,8 @@ class ConfigServerless extends Serverless {
 
     // make sure the command exists before doing anything else
     this.pluginManager.validateCommand(this.processedInput.commands);
+
+    this.setProvider('aws', new AwsProvider(this, this.processedInput.options));
 
     // populate variables after --help, otherwise help may fail to print
     // (https://github.com/serverless/serverless/issues/2041)
