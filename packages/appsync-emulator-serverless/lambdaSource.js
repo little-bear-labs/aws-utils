@@ -11,7 +11,7 @@ const lambdaSource = async (
   {
     dynamodbEndpoint,
     dynamodbTables,
-    serverlessConfig: { functions = {}, custom = {} },
+    serverlessConfig: { functions = {}, custom = {}, provider = {} },
     serverlessDirectory,
   },
   fn,
@@ -58,8 +58,10 @@ const lambdaSource = async (
     child = fork(runner, [], {
       env: {
         ...process.env,
+        ...provider.environment,
         ...dynamodbTableAliases,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
+        FORCE_COLOR: true,
       },
       stdio: [0, 1, 2, 'ipc'],
     });
@@ -73,7 +75,9 @@ const lambdaSource = async (
     child = fork(Runner, [], {
       env: {
         ...dynamodbTableAliases,
+        ...provider.environment,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
+        FORCE_COLOR: true,
       },
       stdio: [0, 1, 2, 'ipc'],
     });
