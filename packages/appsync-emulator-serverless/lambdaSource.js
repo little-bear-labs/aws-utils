@@ -59,6 +59,7 @@ const lambdaSource = async (
       env: {
         ...process.env,
         ...provider.environment,
+        ...fnConfig.environment,
         ...dynamodbTableAliases,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
         FORCE_COLOR: true,
@@ -76,6 +77,7 @@ const lambdaSource = async (
       env: {
         ...dynamodbTableAliases,
         ...provider.environment,
+        ...fnConfig.environment,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
         FORCE_COLOR: true,
       },
