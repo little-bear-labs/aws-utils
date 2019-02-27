@@ -294,6 +294,7 @@ const generateResolvers = (cwd, config, configs) => {
     }),
     {},
   );
+
   return config.mappingTemplates.reduce(
     (sum, { dataSource, type, field, request, response }) => {
       if (!sum[type]) {

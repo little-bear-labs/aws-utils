@@ -1,0 +1,12 @@
+- type: NONE
+  name: SubscriberPassthrough
+  description: Non-datasource datasource
+  config:
+    serviceRoleArn: 'ARN'
+- type: AWS_LAMBDA
+  name: TestLambda
+  description: 'Lambda DataSource'
+  config:
+    lambdaFunctionArn: 'ARN'
+    serviceRoleArn: 'ARN'
+    functionName: graphql
