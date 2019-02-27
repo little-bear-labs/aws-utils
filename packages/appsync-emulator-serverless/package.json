@@ -32,7 +32,7 @@
     "node-fetch": "^2.2.0",
     "paho-mqtt": "^1.0.4",
     "pkg-up": "^2.0.0",
-    "serverless": "^1.30",
+    "serverless": "1.38.0",
     "uuid": "^3.2.1",
     "velocityjs": "^1.1.3"
   },

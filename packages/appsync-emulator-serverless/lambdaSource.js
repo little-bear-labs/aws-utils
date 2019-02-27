@@ -5,12 +5,13 @@ const log = require('logdown')('appsync-emulator:lambdaSource');
 
 const Runner = path.join(__dirname, 'lambdaRunner');
 const PythonRunner = path.join(__dirname, 'lambdaRunnerPython');
+const RubyRunner = path.join(__dirname, 'lambdaRunnerRuby');
 const GoRunner = path.join(__dirname, 'lambdaRunnerGo');
 const lambdaSource = async (
   {
     dynamodbEndpoint,
     dynamodbTables,
-    serverlessConfig: { functions = {}, custom = {} },
+    serverlessConfig: { functions = {}, custom = {}, provider = {} },
     serverlessDirectory,
   },
   fn,
@@ -46,6 +47,9 @@ const lambdaSource = async (
     if (fnConfig.runtime.indexOf('python') >= 0) {
       extHandlerMethod = fn;
       runner = PythonRunner;
+    } else if (fnConfig.runtime.indexOf('ruby') >= 0) {
+      extHandlerMethod = fn;
+      runner = RubyRunner;
     } else if (fnConfig.runtime.indexOf('go') >= 0) {
       extHandlerMethod = fnConfig.handler.split('/').pop();
       runner = GoRunner;
@@ -54,8 +58,10 @@ const lambdaSource = async (
     child = fork(runner, [], {
       env: {
         ...process.env,
+        ...provider.environment,
         ...dynamodbTableAliases,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
+        FORCE_COLOR: true,
       },
       stdio: [0, 1, 2, 'ipc'],
     });
@@ -69,7 +75,9 @@ const lambdaSource = async (
     child = fork(Runner, [], {
       env: {
         ...dynamodbTableAliases,
+        ...provider.environment,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
+        FORCE_COLOR: true,
       },
       stdio: [0, 1, 2, 'ipc'],
     });

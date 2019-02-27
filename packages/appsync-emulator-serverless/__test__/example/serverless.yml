@@ -162,6 +162,11 @@ custom:
         field: lambdaPython
         request: lambda-request.vtl
         response: result-response.txt
+      - dataSource: TestRubyLambda
+        type: Query
+        field: lambdaRuby
+        request: lambda-request.vtl
+        response: result-response.txt
       - dataSource: TestGoLambda
         type: Query
         field: lambdaGo
@@ -210,7 +215,7 @@ custom:
         description: 'Python Lambda DataSource'
         config:
           lambdaFunctionArn: { Fn::GetAtt: [PythonLambdaFunction, Arn] }
-          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] } 
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: pythonGraphQL
       - type: AWS_LAMBDA
         name: TestGoLambda
@@ -219,6 +224,13 @@ custom:
           lambdaFunctionArn: { Fn::GetAtt: [GoLambdaFunction, Arn] }
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: gographql
+      - type: AWS_LAMBDA
+        name: TestRubyLambda
+        description: 'Ruby Lambda DataSource'
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [RubyLambdaFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+          functionName: rubyGraphQL
 functions:
   graphqlJSON:
     handler: handler.graphqlJSON
@@ -248,6 +260,21 @@ functions:
   gographql:
     handler: gographql
     runtime: go1.x
+  rubyemptyjson:
+    handler: handler.ruby_empty_json
+    runtime: ruby2.5
+  rubycomposedjson:
+    handler: handler.ruby_composed_json
+    runtime: ruby2.5
+  rubyerror:
+    handler: handler.ruby_error
+    runtime: ruby2.5
+  rubybroken:
+    handler: handler.ruby_broken_function
+    runtime: ruby2.5
+  rubyGraphQL:
+    handler: handler.ruby_graphqL
+    runtime: ruby2.5
 resources:
   Resources:
     QuoteRequestTable:
