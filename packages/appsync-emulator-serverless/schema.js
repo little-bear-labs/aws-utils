@@ -47,14 +47,14 @@ class AppSyncError extends Error {
 const buildVTLContext = ({ root, vars, context, info }, result = null) => {
   const {
     jwt: { iss: issuer, sub },
-    request,
+    request: { headers },
   } = context;
   const util = createUtils();
   const args = javaify(vars);
   const vtlContext = {
     arguments: args,
     args,
-    request,
+    request: { headers },
     identity: javaify({
       sub,
       issuer,
