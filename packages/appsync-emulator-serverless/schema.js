@@ -51,10 +51,12 @@ const buildVTLContext = ({ root, vars, context, info }, result = null) => {
   } = context;
   const util = createUtils();
   const args = javaify(vars);
+  const vtlRequest = request ? { headers: request.headers } : {};
+
   const vtlContext = {
     arguments: args,
     args,
-    request,
+    request: vtlRequest,
     identity: javaify({
       sub,
       issuer,
