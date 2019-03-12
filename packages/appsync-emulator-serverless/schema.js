@@ -16,6 +16,8 @@ const log = require('logdown')('appsync-emulator:schema');
 const consola = require('./log');
 const { inspect } = require('util');
 const { scalars } = require('./schemaWrapper');
+const DataLoader = require('dataloader');
+const _ = require("lodash");
 
 const vtlMacros = {
   console: (...args) => {
@@ -187,31 +189,68 @@ const dispatchRequestToSource = async (
   }
 };
 
+const batchLoaders = {};
+const batchRequests = {};
+
+const getBatchLoader = (fieldPath, source, configs) => {
+    if (batchLoaders[fieldPath] === undefined) {
+        batchRequests[fieldPath] = {};
+        batchLoaders[fieldPath] = new DataLoader(
+            (keys) => {
+                // Group requests together and execute them in batch
+                let batchRequest = batchRequests[fieldPath][keys[0]];
+                batchRequest.payload = keys.map(k => batchRequests[fieldPath][k].payload);
+                consola.info(
+                    'Rendered Batch Request:\n',
+                    inspect(batchRequest, { depth: null, colors: true }),
+                );
+                log.info('resolver batch request', batchRequest);
+                return dispatchRequestToSource(
+                    source,
+                    configs,
+                    batchRequest,
+                );     
+            }
+        );
+    }
+    
+    return batchLoaders[fieldPath];
+}
+
 const generateTypeResolver = (
   source,
   configs,
   { requestPath, responsePath },
 ) => async (root, vars, context, info) => {
   try {
-    consola.start(
-      `Resolve: ${info.parentType}.${info.fieldName} [${gqlPathAsArray(
-        info.path,
-      )}]`,
-    );
-    log.info('resolving', gqlPathAsArray(info.path));
+    const fieldPath = `${info.parentType}.${info.fieldName}`;
+    const pathInfo = gqlPathAsArray(info.path);
+    consola.start(`Resolve: ${fieldPath} [${pathInfo}]`);
+    log.info('resolving', pathInfo);
+
     assert(context && context.jwt, 'must have context.jwt');
     const resolverArgs = { root, vars, context, info };
     const request = runRequestVTL(requestPath, resolverArgs);
-    consola.info(
-      'Rendered Request:\n',
-      inspect(request, { depth: null, colors: true }),
-    );
-    log.info('resolver request', request);
-    const requestResult = await dispatchRequestToSource(
-      source,
-      configs,
-      request,
-    );
+    
+    let requestResult;
+    if (request.operation === 'BatchInvoke') {
+      const loader = getBatchLoader(fieldPath, source, configs);
+      // put request in batch, this will be used by the data loader
+      let key = pathInfo.join(".");
+      batchRequests[fieldPath][key] = request;
+      requestResult = await batchLoaders[fieldPath].load(key);
+    } else {
+        consola.info(
+            'Rendered Request:\n',
+            inspect(request, { depth: null, colors: true }),
+        );
+        log.info('resolver request', request);
+        requestResult = await dispatchRequestToSource(
+            source,
+            configs,
+            request,
+        );
+    }
 
     const response = runResponseVTL(responsePath, resolverArgs, requestResult);
     consola.info(
