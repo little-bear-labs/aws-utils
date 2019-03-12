@@ -17,7 +17,6 @@ const consola = require('./log');
 const { inspect } = require('util');
 const { scalars } = require('./schemaWrapper');
 const DataLoader = require('dataloader');
-const _ = require("lodash");
 
 const vtlMacros = {
   console: (...args) => {
@@ -193,29 +192,23 @@ const batchLoaders = {};
 const batchRequests = {};
 
 const getBatchLoader = (fieldPath, source, configs) => {
-    if (batchLoaders[fieldPath] === undefined) {
-        batchRequests[fieldPath] = {};
-        batchLoaders[fieldPath] = new DataLoader(
-            (keys) => {
-                // Group requests together and execute them in batch
-                let batchRequest = batchRequests[fieldPath][keys[0]];
-                batchRequest.payload = keys.map(k => batchRequests[fieldPath][k].payload);
-                consola.info(
-                    'Rendered Batch Request:\n',
-                    inspect(batchRequest, { depth: null, colors: true }),
-                );
-                log.info('resolver batch request', batchRequest);
-                return dispatchRequestToSource(
-                    source,
-                    configs,
-                    batchRequest,
-                );     
-            }
-        );
-    }
-    
-    return batchLoaders[fieldPath];
-}
+  if (batchLoaders[fieldPath] === undefined) {
+    batchRequests[fieldPath] = {};
+    batchLoaders[fieldPath] = new DataLoader(keys => {
+      // Group requests together and execute them in batch
+      let batchRequest = batchRequests[fieldPath][keys[0]];
+      batchRequest.payload = keys.map(k => batchRequests[fieldPath][k].payload);
+      consola.info(
+        'Rendered Batch Request:\n',
+        inspect(batchRequest, { depth: null, colors: true }),
+      );
+      log.info('resolver batch request', batchRequest);
+      return dispatchRequestToSource(source, configs, batchRequest);
+    });
+  }
+
+  return batchLoaders[fieldPath];
+};
 
 const generateTypeResolver = (
   source,
@@ -231,25 +224,21 @@ const generateTypeResolver = (
     assert(context && context.jwt, 'must have context.jwt');
     const resolverArgs = { root, vars, context, info };
     const request = runRequestVTL(requestPath, resolverArgs);
-    
+
     let requestResult;
     if (request.operation === 'BatchInvoke') {
       const loader = getBatchLoader(fieldPath, source, configs);
       // put request in batch, this will be used by the data loader
-      let key = pathInfo.join(".");
+      let key = pathInfo.join('.');
       batchRequests[fieldPath][key] = request;
-      requestResult = await batchLoaders[fieldPath].load(key);
+      requestResult = await loader.load(key);
     } else {
-        consola.info(
-            'Rendered Request:\n',
-            inspect(request, { depth: null, colors: true }),
-        );
-        log.info('resolver request', request);
-        requestResult = await dispatchRequestToSource(
-            source,
-            configs,
-            request,
-        );
+      consola.info(
+        'Rendered Request:\n',
+        inspect(request, { depth: null, colors: true }),
+      );
+      log.info('resolver request', request);
+      requestResult = await dispatchRequestToSource(source, configs, request);
     }
 
     const response = runResponseVTL(responsePath, resolverArgs, requestResult);
