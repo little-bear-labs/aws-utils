@@ -11,6 +11,7 @@ type Query {
   QuoteResponse(query: [AttributeFilter]): [QuoteResponse]!
   cognitoInfo: CognitoInfo!
   lambda: LambdaInfo!
+  lambdaBatch: [LambdaInfo]
   lambdaPython: LambdaInfo!
   lambdaRuby: LambdaInfo!
   lambdaGo: LambdaInfo!
@@ -77,6 +78,7 @@ type CognitoInfo {
 
 type LambdaInfo {
   test: String!
+  lambdaChild: [LambdaInfo]
 }
 
 type QuoteRequest {

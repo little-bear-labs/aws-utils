@@ -223,6 +223,59 @@ describe('creates executable schema', () => {
     expect(result).toMatchObject({ data: { lambda: { test: 'yup' } } });
   });
 
+  it('should allow querying lambda in batch', async () => {
+    const result = await graphql({
+      schema,
+      contextValue,
+      source: `
+      query test {
+        lambdaBatch {
+          test
+          lambdaChild {
+            test
+            lambdaChild {
+              test
+            }
+          }
+        }
+      }
+      `,
+    });
+
+    expect(result).toMatchObject({
+      data: {
+        lambdaBatch: [
+          {
+            test: 'yup.0',
+            lambdaChild: [
+              {
+                test: 'yup.0.0',
+                lambdaChild: [{ test: 'yup.0.0.0' }, { test: 'yup.0.0.1' }],
+              },
+              {
+                test: 'yup.0.1',
+                lambdaChild: [{ test: 'yup.0.1.0' }, { test: 'yup.0.1.1' }],
+              },
+            ],
+          },
+          {
+            test: 'yup.1',
+            lambdaChild: [
+              {
+                test: 'yup.1.0',
+                lambdaChild: [{ test: 'yup.1.0.0' }, { test: 'yup.1.0.1' }],
+              },
+              {
+                test: 'yup.1.1',
+                lambdaChild: [{ test: 'yup.1.1.0' }, { test: 'yup.1.1.1' }],
+              },
+            ],
+          },
+        ],
+      },
+    });
+  });
+
   it('should allow querying lambda python', async () => {
     const result = await graphql({
       schema,

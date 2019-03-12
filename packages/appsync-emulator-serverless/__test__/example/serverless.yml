@@ -122,6 +122,16 @@ custom:
         type: Query
         request: lambda-request.vtl
         response: result-response.txt
+      - dataSource: TestLambdasJSON
+        type: Query
+        field: lambdaBatch
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestBatchLambdaJSON
+        type: LambdaInfo
+        field: lambdaChild
+        request: lambda-batch-request.vtl
+        response: result-response.txt
       - dataSource: TestLambdaJSON
         type: Query
         field: jsonTest
@@ -205,6 +215,20 @@ custom:
           lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: graphqlJSON
+      - type: AWS_LAMBDA
+        name: TestLambdasJSON
+        description: 'Lambda JSON array DataSource'
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdasFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+          functionName: graphqlArrayJSON
+      - type: AWS_LAMBDA
+        name: TestBatchLambdaJSON
+        description: 'Lambda JSON DataSource'
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+          functionName: graphqlBatchJSON
       - type: HTTP
         name: TestHTTP
         description: 'Test HTTP endpoint'
@@ -234,6 +258,10 @@ custom:
 functions:
   graphqlJSON:
     handler: handler.graphqlJSON
+  graphqlArrayJSON:
+    handler: handler.graphqlArrayJSON
+  graphqlBatchJSON:
+    handler: handler.graphqlBatchJSON
   graphql:
     handler: handler.graphql
   emptyJSON:
