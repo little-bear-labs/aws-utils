@@ -188,32 +188,35 @@ const dispatchRequestToSource = async (
   }
 };
 
-const batchLoaders = {};
-const batchRequests = {};
-
-const getBatchLoader = (fieldPath, source, configs) => {
-  if (batchLoaders[fieldPath] === undefined) {
-    batchRequests[fieldPath] = {};
-    batchLoaders[fieldPath] = new DataLoader(keys => {
-      // Group requests together and execute them in batch
-      let batchRequest = batchRequests[fieldPath][keys[0]];
-      batchRequest.payload = keys.map(k => batchRequests[fieldPath][k].payload);
-      consola.info(
-        'Rendered Batch Request:\n',
-        inspect(batchRequest, { depth: null, colors: true }),
+const generateDataLoaderResolver = (source, configs) => {
+  const batchLoaders = {};
+  return fieldPath => {
+    if (batchLoaders[fieldPath] === undefined) {
+      batchLoaders[fieldPath] = new DataLoader(
+        requests => {
+          const batchRequest = requests[0];
+          batchRequest.payload = requests.map(r => r.payload);
+          consola.info(
+            'Rendered Batch Request:\n',
+            inspect(batchRequest, { depth: null, colors: true }),
+          );
+          log.info('resolver batch request', batchRequest);
+          return dispatchRequestToSource(source, configs, batchRequest);
+        },
+        {
+          shouldCache: false,
+        },
       );
-      log.info('resolver batch request', batchRequest);
-      return dispatchRequestToSource(source, configs, batchRequest);
-    });
-  }
+    }
 
-  return batchLoaders[fieldPath];
+    return batchLoaders[fieldPath];
+  };
 };
 
 const generateTypeResolver = (
   source,
   configs,
-  { requestPath, responsePath },
+  { requestPath, responsePath, dataLoaderResolver },
 ) => async (root, vars, context, info) => {
   try {
     const fieldPath = `${info.parentType}.${info.fieldName}`;
@@ -227,11 +230,8 @@ const generateTypeResolver = (
 
     let requestResult;
     if (request.operation === 'BatchInvoke') {
-      const loader = getBatchLoader(fieldPath, source, configs);
-      // put request in batch, this will be used by the data loader
-      let key = pathInfo.join('.');
-      batchRequests[fieldPath][key] = request;
-      requestResult = await loader.load(key);
+      const loader = dataLoaderResolver(fieldPath);
+      requestResult = await loader.load(request);
     } else {
       consola.info(
         'Rendered Request:\n',
@@ -336,6 +336,7 @@ const generateResolvers = (cwd, config, configs) => {
       const source = dataSourceByName[dataSource];
       const pathing = {
         requestPath: path.join(mappingTemplates, request),
+        dataLoaderResolver: generateDataLoaderResolver(source, configs),
         responsePath: path.join(mappingTemplates, response),
       };
       const resolver =

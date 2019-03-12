@@ -223,7 +223,7 @@ describe('creates executable schema', () => {
     expect(result).toMatchObject({ data: { lambda: { test: 'yup' } } });
   });
 
-  it.only('should allow querying lambda in batch', async () => {
+  it('should allow querying lambda in batch', async () => {
     const result = await graphql({
       schema,
       contextValue,
