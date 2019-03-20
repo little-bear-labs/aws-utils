@@ -255,51 +255,58 @@ const executeGQL = async ({
 };
 
 const createGQLHandler = ({ schema, subServer }) => async (req, res) => {
-  // const { headers: { authorization = null, }, } = req;
-  const { headers } = req;
-  log.info('req', { req });
+  try {
+    // const { headers: { authorization = null, }, } = req;
+    const { headers } = req;
+    log.info('req', { req });
 
-  if (!headers.authorization && !headers['x-api-key']) {
-    throw new Error('Must pass authorization header');
-  }
-  const jwt = headers.authorization ? jwtDecode(headers.authorization) : {};
-  const { variables, query, operationName } = req.body;
-  consola.start('graphql', query);
-  log.info('request', { variables, query });
-  const documentAST = parse(query);
-  const validationErrors = validate(schema, documentAST, specifiedRules);
-  if (validationErrors.length) {
+    if (!headers.authorization && !headers['x-api-key']) {
+      throw new Error('Must pass authorization header');
+    }
+    const jwt = headers.authorization ? jwtDecode(headers.authorization) : {};
+    const { variables, query, operationName } = req.body;
+    consola.start('graphql', query);
+    log.info('request', { variables, query });
+    const documentAST = parse(query);
+    const validationErrors = validate(schema, documentAST, specifiedRules);
+    if (validationErrors.length) {
+      return res.send({
+        errors: validationErrors,
+      });
+    }
+    const {
+      definitions: [{ operation: queryType }],
+    } = documentAST;
+
+    const context = { jwt, request: req };
+    switch (queryType) {
+      case 'query':
+      case 'mutation':
+        return res.send(
+          await executeGQL({
+            schema,
+            documentAST,
+            context,
+            variables,
+            operationName,
+          }),
+        );
+      case 'subscription':
+        return res.send(
+          await subServer.register({
+            context,
+            documentAST,
+            variables,
+          }),
+        );
+      default:
+        throw new Error(`unknown operation type: ${queryType}`);
+    }
+  } catch (error) {
+    consola.error(inspect(error));
     return res.send({
-      errors: validationErrors,
+      errorMessage: error.message,
     });
-  }
-  const {
-    definitions: [{ operation: queryType }],
-  } = documentAST;
-
-  const context = { jwt, request: req };
-  switch (queryType) {
-    case 'query':
-    case 'mutation':
-      return res.send(
-        await executeGQL({
-          schema,
-          documentAST,
-          context,
-          variables,
-          operationName,
-        }),
-      );
-    case 'subscription':
-      return res.send(
-        await subServer.register({
-          context,
-          documentAST,
-          variables,
-        }),
-      );
-    default:
-      throw new Error(`unknown operation type: ${queryType}`);
   }
 };
 
