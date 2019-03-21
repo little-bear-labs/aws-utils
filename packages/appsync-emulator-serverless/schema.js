@@ -173,7 +173,7 @@ const dispatchRequestToSource = async (
         {
           serverlessDirectory,
           serverlessConfig,
-          dynamodbEndpoint: dynamodb.endpoint.href,
+          dynamodbEndpoint: dynamodb ? dynamodb.endpoint.href : null,
           dynamodbTables,
         },
         source.config.functionName,
@@ -378,11 +378,6 @@ const createSchema = async ({
   serverlessConfig,
   pubsub,
 } = {}) => {
-  assert(dynamodb, 'must pass dynamodb');
-  assert(
-    dynamodbTables && typeof dynamodbTables === 'object',
-    'must pass dynamodbTables',
-  );
   assert(graphqlSchema, 'must pass graphql schema');
   assert(serverlessDirectory, 'must pass serverless dir');
   assert(serverlessConfig, 'must pass serverless config');

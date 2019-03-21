@@ -43,26 +43,36 @@ const main = async () => {
     help: 'Port to bind the dynamodb to (default is any free port)',
     type: 'int',
   });
+  
+  parser.addArgument(['--no-dynamodb'], {
+    help: 'Disable dynamodb',
+    action: 'storeTrue',
+  });
   // argparse converts any argument with a dash to underscores
   // eslint-disable-next-line
-  let { ws_port: wsPort, port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
+  let { ws_port: wsPort, port, path: serverlessPath, dynamodb_port: dynamodbPort, no_dynamodb: noDynamodb } = parser.parseArgs();
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
   dynamodbPort = dynamodbPort || null;
-
-  // start the dynamodb emulator
+  noDynamodb = noDynamodb || false;
+  
   const pkgPath = pkgUp.sync(serverlessPath);
-  const emulator = await dynamoEmulator.launch({
-    dbPath: path.join(path.dirname(pkgPath), '.dynamodb'),
-    port: dynamodbPort,
-  });
-  process.on('SIGINT', () => {
-    // _ensure_ we do not leave java processes lying around.
-    emulator.terminate().then(() => {
-      process.exit(0);
+
+  let dynamodb = null;
+  if (!noDynamodb) {
+    // start the dynamodb emulator
+    const emulator = await dynamoEmulator.launch({
+      dbPath: path.join(path.dirname(pkgPath), '.dynamodb'),
+      port: dynamodbPort,
     });
-  });
-  const dynamodb = dynamoEmulator.getClient(emulator);
+    process.on('SIGINT', () => {
+      // _ensure_ we do not leave java processes lying around.
+      emulator.terminate().then(() => {
+        process.exit(0);
+      });
+    });
+    dynamodb = dynamoEmulator.getClient(emulator);
+  }
 
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
   const server = await createServer({ wsPort, serverless, port, dynamodb });

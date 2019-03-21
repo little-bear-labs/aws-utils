@@ -67,11 +67,14 @@ const createSchema = async ({
 
   const graphqlSchema = wrapSchema(fs.readFileSync(schemaPath, 'utf8'));
   const { custom: { appSync: appSyncConfig } = {} } = serverlessConfig;
-  const dynamodbTables = await ensureDynamodbTables(
-    dynamodb,
-    serverlessConfig,
-    appSyncConfig,
-  );
+  let dynamodbTables = [];
+  if (dynamodb) {
+    dynamodbTables = await ensureDynamodbTables(
+      dynamodb,
+      serverlessConfig,
+      appSyncConfig,
+    );
+  }
 
   return createSchemaCore({
     dynamodb,

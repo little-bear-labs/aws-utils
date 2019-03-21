@@ -58,6 +58,7 @@ const lambdaSource = async (
     child = fork(runner, [], {
       env: {
         ...process.env,
+        ...provider.environment,
         ...dynamodbTableAliases,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
         ...provider.environment,
@@ -76,6 +77,7 @@ const lambdaSource = async (
       env: {
         ...process.env,
         ...dynamodbTableAliases,
+        ...provider.environment,
         DYNAMODB_ENDPOINT: dynamodbEndpoint,
         ...provider.environment,
         ...fnConfig.environment,
