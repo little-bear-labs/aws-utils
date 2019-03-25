@@ -18,7 +18,8 @@ const main = async () => {
   });
 
   parser.addArgument(['--path'], {
-    help: 'Directory path in which serverless.yml is configured',
+    help:
+      'Directory path in which serverless.yml, general config file is configured',
     type: serverlessPath => {
       // eslint-disable-next-line
       serverlessPath = path.resolve(serverlessPath);
@@ -43,12 +44,25 @@ const main = async () => {
     help: 'Port to bind the dynamodb to (default is any free port)',
     type: 'int',
   });
+
+  parser.addArgument(['--config'], {
+    help:
+      'Name of optional configuration file which resides in the same directory as serverless.yml (default is config)',
+    type: 'string',
+  });
   // argparse converts any argument with a dash to underscores
   // eslint-disable-next-line
-  let { ws_port: wsPort, port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
+  let {
+    ws_port: wsPort,
+    port,
+    path: serverlessPath,
+    dynamodb_port: dynamodbPort,
+    config,
+  } = parser.parseArgs();
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
   dynamodbPort = dynamodbPort || null;
+  config = config || 'config';
 
   // start the dynamodb emulator
   const pkgPath = pkgUp.sync(serverlessPath);
