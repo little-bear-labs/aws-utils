@@ -578,6 +578,51 @@ describe('creates executable schema', () => {
     expectScalarResult(result, field, val);
   });
 
+  it('AWSDate scalar input', async () => {
+    const field = 'dateTestInput';
+    const val = new Date('05 October 2011').toISOString().split('T')[0];
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSTime scalar input', async () => {
+    const field = 'timeTestInput';
+    const val = new Date('05 October 2011').toISOString().split('T')[1];
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSDateTime scalar input', async () => {
+    const field = 'dateTimeTestInput';
+    const val = new Date('05 October 2011').toISOString();
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
   it('AWSEmail scalar', async () => {
     const field = 'emailTest';
     const val = 'foobar@example.com';
