@@ -21,9 +21,9 @@ type Query {
   dateTest(dateTest: String): AWSDate
   timeTest(timeTest: String): AWSTime
   dateTimeTest(dateTimeTest: String): AWSDateTime
-  dateTestInput(dateTestInput: AWSDate): AWSDate
-  timeTestInput(timeTestInput: AWSTime): AWSTime
-  dateTimeTestInput(dateTimeTestInput: AWSDateTime): AWSDateTime
+  dateTestInput(dateTestInput: AWSDate): String
+  timeTestInput(timeTestInput: AWSTime): String
+  dateTimeTestInput(dateTimeTestInput: AWSDateTime): String
   emailTest(emailTest: String): AWSEmail
   phoneTest(phoneTest: String): AWSPhone
   urlTest(urlTest: String): AWSURL
