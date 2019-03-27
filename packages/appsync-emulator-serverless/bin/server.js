@@ -57,12 +57,15 @@ const main = async () => {
     port,
     path: serverlessPath,
     dynamodb_port: dynamodbPort,
-    config,
+    config: configFileName,
   } = parser.parseArgs();
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
   dynamodbPort = dynamodbPort || null;
-  config = config || 'config';
+  configFileName = configFileName || 'config';
+
+  const config = fs.existsSync(path.join(serverlessPath)
+
 
   // start the dynamodb emulator
   const pkgPath = pkgUp.sync(serverlessPath);
