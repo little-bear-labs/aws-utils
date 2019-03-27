@@ -154,6 +154,21 @@ custom:
         response: result-response.txt
       - dataSource: TestLambda
         type: Query
+        field: dateTestInput
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: timeTestInput
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: dateTimeTestInput
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
         field: emailTest
         request: lambda-request.vtl
         response: result-response.txt
