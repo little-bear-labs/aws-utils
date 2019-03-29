@@ -6,8 +6,9 @@ const uuid = require('uuid/v4');
 const { createSchema: createSchemaCore } = require('./schema');
 const { PubSub } = require('graphql-subscriptions');
 const { wrapSchema } = require('./schemaWrapper');
+const { cloudFormationProcessor } = require('./cloudFormationProcessor');
 
-const setupDocumentDB = async (serverlessConfig, appSyncConfig, dynamodb) => {
+const createDBNames = async (serverlessConfig, dynamodb) => {
   const {
     resources: { Resources: resources },
   } = serverlessConfig;
@@ -21,21 +22,15 @@ const setupDocumentDB = async (serverlessConfig, appSyncConfig, dynamodb) => {
       {},
     );
 
-  const { dataSources = [] } = appSyncConfig;
-  const appSyncTables = dataSources.filter(
-    source => source.type === 'AMAZON_DYNAMODB',
-  );
-
   const list = await Promise.all(
-    appSyncTables.map(async ({ config: { tableName } }) => {
+    Object.values(resourceTables).map(async ({ Properties: props }) => {
       const testName = uuid();
-      const resourceConfig = resourceTables[tableName];
       const tableConfig = {
-        ...resourceConfig.Properties,
+        ...props,
         TableName: testName,
       };
       await dynamodb.createTable(tableConfig).promise();
-      return { testName, tableName };
+      return { testName, tableName: props.TableName };
     }),
   );
 
@@ -67,13 +62,15 @@ const createSchema = async ({
   }
 
   const graphqlSchema = wrapSchema(fs.readFileSync(schemaPath, 'utf8'));
-  const { custom: { appSync: appSyncConfig } = {} } = serverlessConfig;
-
-  const dynamodbTables = await setupDocumentDB(
-    serverlessConfig,
-    appSyncConfig,
+  const dynamodbTables = await createDBNames(
+    // process serverless config through CF in case we're using some to craft table names.
+    cloudFormationProcessor(serverlessConfig, { dynamodbTables: {} }),
     dynamodb,
   );
+  // process serverless config again with our aliases.
+  const cfConfig = cloudFormationProcessor(serverlessConfig, {
+    dynamodbTables,
+  });
 
   const pubsub = new PubSub();
   const { schema, subscriptions } = await createSchemaCore({
@@ -81,7 +78,7 @@ const createSchema = async ({
     dynamodbTables,
     graphqlSchema,
     serverlessDirectory,
-    serverlessConfig,
+    serverlessConfig: cfConfig,
     pubsub,
   });
 

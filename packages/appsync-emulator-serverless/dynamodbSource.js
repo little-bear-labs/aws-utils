@@ -374,8 +374,7 @@ const batchDeleteItem = async (db, dynamodbTables, { tables }) => {
   };
 };
 
-const resolve = async (dynamodb, defaultAlias, dynamodbTables, payload) => {
-  const table = dynamodbTables[defaultAlias];
+const resolve = async (dynamodb, table, dynamodbTables, payload) => {
   switch (payload.operation) {
     case 'GetItem':
       return getItem(dynamodb, table, payload);

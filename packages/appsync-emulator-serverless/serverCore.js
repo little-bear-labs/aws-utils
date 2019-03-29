@@ -321,6 +321,10 @@ const createServer = async ({
   const mqttHTTP = http.createServer();
   const mqttServer = new mosca.Server({
     backend: { type: 'memory' },
+    interfaces: [],
+    logger: {
+      level: process.env.DEBUG ? 'debug' : 'error',
+    },
   });
   mqttServer.attachHttpServer(mqttHTTP);
   mqttServer.on('clientConnected', client => {
