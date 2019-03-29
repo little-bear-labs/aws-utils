@@ -259,16 +259,17 @@ describe('dynamodbSource', () => {
 
   describe('DeleteItem', () => {
     it('should delete item', async () => {
+      const item = {
+        id: 'foo',
+        bar: 'bar',
+      };
       await docClient
         .put({
           TableName: tableName,
-          Item: {
-            id: 'foo',
-            bar: 'bar',
-          },
+          Item: item,
         })
         .promise();
-      await runOp({
+      const opOutput = await runOp({
         version: '2017-02-28',
         operation: 'DeleteItem',
         key: {
@@ -282,6 +283,7 @@ describe('dynamodbSource', () => {
           expressionNames: { '#bar': 'bar' },
         },
       });
+      expect(opOutput).toMatchObject(item);
 
       const { Item: output = null } = await docClient
         .get({

@@ -116,15 +116,18 @@ const deleteItem = async (
     } = {},
   },
 ) => {
-  await db
+  const { Attributes: deleted } = await db
     .deleteItem({
       TableName: table,
       Key: key,
+      ReturnValues: 'ALL_OLD',
       ConditionExpression: expression,
       ExpressionAttributeNames: expressionNames,
       ExpressionAttributeValues: expressionValues,
     })
     .promise();
+
+  return unmarshall(deleted);
 };
 
 const query = async (
