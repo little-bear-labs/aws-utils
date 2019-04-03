@@ -124,7 +124,7 @@ const create = (errors = [], now = new Date()) => ({
       return now.toISOString();
     },
     nowEpochSeconds() {
-      return parseInt(now.valueOf() / 1000);
+      return parseInt(now.valueOf() / 1000, 10);
     },
     nowEpochMilliSeconds() {
       return now.valueOf();
