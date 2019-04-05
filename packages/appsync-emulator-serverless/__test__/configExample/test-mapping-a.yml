@@ -1,0 +1,10 @@
+- dataSource: QuoteRequest
+  type: Query
+  field: error
+  request: error-request.txt
+  response: result-response.txt
+- dataSource: QuoteRequest
+  type: Query
+  field: QuoteRequestById
+  request: byId-request.txt
+  response: result-response.txt

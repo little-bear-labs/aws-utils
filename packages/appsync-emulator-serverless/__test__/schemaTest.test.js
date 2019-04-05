@@ -223,6 +223,59 @@ describe('creates executable schema', () => {
     expect(result).toMatchObject({ data: { lambda: { test: 'yup' } } });
   });
 
+  it('should allow querying lambda in batch', async () => {
+    const result = await graphql({
+      schema,
+      contextValue,
+      source: `
+      query test {
+        lambdaBatch {
+          test
+          lambdaChild {
+            test
+            lambdaChild {
+              test
+            }
+          }
+        }
+      }
+      `,
+    });
+
+    expect(result).toMatchObject({
+      data: {
+        lambdaBatch: [
+          {
+            test: 'yup.0',
+            lambdaChild: [
+              {
+                test: 'yup.0.0',
+                lambdaChild: [{ test: 'yup.0.0.0' }, { test: 'yup.0.0.1' }],
+              },
+              {
+                test: 'yup.0.1',
+                lambdaChild: [{ test: 'yup.0.1.0' }, { test: 'yup.0.1.1' }],
+              },
+            ],
+          },
+          {
+            test: 'yup.1',
+            lambdaChild: [
+              {
+                test: 'yup.1.0',
+                lambdaChild: [{ test: 'yup.1.0.0' }, { test: 'yup.1.0.1' }],
+              },
+              {
+                test: 'yup.1.1',
+                lambdaChild: [{ test: 'yup.1.1.0' }, { test: 'yup.1.1.1' }],
+              },
+            ],
+          },
+        ],
+      },
+    });
+  });
+
   it('should allow querying lambda python', async () => {
     const result = await graphql({
       schema,
@@ -236,6 +289,21 @@ describe('creates executable schema', () => {
       `,
     });
     expect(result).toMatchObject({ data: { lambdaPython: { test: 'yup' } } });
+  });
+
+  it('should allow querying lambda ruby', async () => {
+    const result = await graphql({
+      schema,
+      contextValue,
+      source: `
+      query test {
+        lambdaRuby {
+          test
+        }
+      }
+      `,
+    });
+    expect(result).toMatchObject({ data: { lambdaRuby: { test: 'yup' } } });
   });
 
   it('should allow querying lambda go', async () => {
@@ -497,6 +565,51 @@ describe('creates executable schema', () => {
 
   it('AWSDateTime scalar', async () => {
     const field = 'dateTimeTest';
+    const val = new Date('05 October 2011').toISOString();
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSDate scalar input', async () => {
+    const field = 'dateTestInput';
+    const val = new Date('05 October 2011').toISOString().split('T')[0];
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSTime scalar input', async () => {
+    const field = 'timeTestInput';
+    const val = new Date('05 October 2011').toISOString().split('T')[1];
+
+    const source = getScalarSource(field, val);
+
+    const result = await graphql({
+      schema,
+      contextValue,
+      source,
+    });
+
+    expectScalarResult(result, field, val);
+  });
+
+  it('AWSDateTime scalar input', async () => {
+    const field = 'dateTimeTestInput';
     const val = new Date('05 October 2011').toISOString();
 
     const source = getScalarSource(field, val);

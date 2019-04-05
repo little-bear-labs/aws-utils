@@ -1,6 +1,6 @@
 {
   "name": "@conduitvc/appsync-emulator-serverless",
-  "version": "0.7.15",
+  "version": "0.10.4",
   "main": "schema.js",
   "license": "MIT",
   "bin": {
@@ -8,12 +8,13 @@
   },
   "dependencies": {
     "@conduitvc/aws-utils": "^1.2.1",
-    "@conduitvc/mosca": "^2.8.2",
+    "@conduitvc/mosca": "^2.8.3-patch.3",
     "@okgrow/graphql-scalars": "^0.4.2",
     "argparse": "^1.0.10",
     "aws-sdk": "^2.254.1",
     "consola": "^1.4.1",
     "cors": "^2.8.4",
+    "dataloader": "^1.4.0",
     "dateformat": "^3.0.3",
     "event-to-promise": "^0.8.0",
     "express": "^4.16.3",
@@ -28,11 +29,10 @@
     "json5": "^1.0.1",
     "jwt-decode": "^2.2.0",
     "logdown": "^3.2.3",
-    "ngrok": "^3.0.1",
     "node-fetch": "^2.2.0",
     "paho-mqtt": "^1.0.4",
     "pkg-up": "^2.0.0",
-    "serverless": "^1.30",
+    "serverless": "1.38.0",
     "uuid": "^3.2.1",
     "velocityjs": "^1.1.3"
   },

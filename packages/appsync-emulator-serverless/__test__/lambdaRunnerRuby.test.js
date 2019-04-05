@@ -2,10 +2,10 @@ const path = require('path');
 const { fork } = require('child_process');
 const e2p = require('event-to-promise');
 
-const GoRunner = path.join(__dirname, '../lambdaRunnerGo');
+const RubyRunner = path.join(__dirname, '../lambdaRunnerRuby');
 
 const run = ({ handlerMethod, payload = {} }) => {
-  const child = fork(GoRunner, [], {
+  const child = fork(RubyRunner, [], {
     stdio: [0, 1, 2, 'ipc'],
   });
 
@@ -17,43 +17,56 @@ const run = ({ handlerMethod, payload = {} }) => {
   return e2p(child, 'message');
 };
 
-// These specs execute slowly on Mac, so need a larger timeout.
 describe('lambdaRunner', () => {
-  describe('async go', () => {
+  describe('async ruby', () => {
     it(
       'return empty',
       async () => {
         const response = await run({
-          handlerMethod: 'goemptyjson',
+          handlerMethod: 'rubyemptyjson',
         });
 
-        expect(response.output).toEqual({});
         expect(response.type).toBe('success');
+        expect(response.output).toEqual({});
       },
-      40000,
+      20000,
     );
     it(
       'return object',
       async () => {
         const response = await run({
-          handlerMethod: 'gocomposedjson',
+          handlerMethod: 'rubycomposedjson',
         });
 
-        expect(response.output).toEqual({ a: 1, b: 2, c: 3 });
         expect(response.type).toBe('success');
+        expect(response.output).toEqual({ a: 1, b: 2, c: 3 });
       },
-      40000,
+      20000,
     );
     it(
       'throw error',
       async () => {
         const response = await run({
-          handlerMethod: 'goerror',
+          handlerMethod: 'rubyerror',
         });
 
         expect(response.type).toBe('error');
       },
-      40000,
+      20000,
+    );
+
+    it(
+      'shows Ruby errors',
+      async () => {
+        const response = await run({
+          handlerMethod: 'rubybroken',
+        });
+
+        expect(response.error).toContain(
+          'missing keyword: context (ArgumentError)',
+        );
+      },
+      20000,
     );
   });
 });

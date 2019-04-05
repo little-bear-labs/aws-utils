@@ -122,6 +122,16 @@ custom:
         type: Query
         request: lambda-request.vtl
         response: result-response.txt
+      - dataSource: TestLambdasJSON
+        type: Query
+        field: lambdaBatch
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestBatchLambdaJSON
+        type: LambdaInfo
+        field: lambdaChild
+        request: lambda-batch-request.vtl
+        response: result-response.txt
       - dataSource: TestLambdaJSON
         type: Query
         field: jsonTest
@@ -144,6 +154,21 @@ custom:
         response: result-response.txt
       - dataSource: TestLambda
         type: Query
+        field: dateTestInput
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: timeTestInput
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
+        field: dateTimeTestInput
+        request: lambda-request.vtl
+        response: result-response.txt
+      - dataSource: TestLambda
+        type: Query
         field: emailTest
         request: lambda-request.vtl
         response: result-response.txt
@@ -162,6 +187,11 @@ custom:
         field: lambdaPython
         request: lambda-request.vtl
         response: result-response.txt
+      - dataSource: TestRubyLambda
+        type: Query
+        field: lambdaRuby
+        request: lambda-request.vtl
+        response: result-response.txt
       - dataSource: TestGoLambda
         type: Query
         field: lambdaGo
@@ -173,7 +203,7 @@ custom:
         name: QuoteRequest
         description: QuoteRequest description
         config:
-          tableName: QuoteRequest-emulator
+          tableName: { Ref: QuoteRequestTable }
           serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
       - type: AMAZON_DYNAMODB
         name: ${self:custom.quote}Response
@@ -200,6 +230,20 @@ custom:
           lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: graphqlJSON
+      - type: AWS_LAMBDA
+        name: TestLambdasJSON
+        description: 'Lambda JSON array DataSource'
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdasFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+          functionName: graphqlArrayJSON
+      - type: AWS_LAMBDA
+        name: TestBatchLambdaJSON
+        description: 'Lambda JSON DataSource'
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+          functionName: graphqlBatchJSON
       - type: HTTP
         name: TestHTTP
         description: 'Test HTTP endpoint'
@@ -210,7 +254,7 @@ custom:
         description: 'Python Lambda DataSource'
         config:
           lambdaFunctionArn: { Fn::GetAtt: [PythonLambdaFunction, Arn] }
-          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] } 
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: pythonGraphQL
       - type: AWS_LAMBDA
         name: TestGoLambda
@@ -219,9 +263,20 @@ custom:
           lambdaFunctionArn: { Fn::GetAtt: [GoLambdaFunction, Arn] }
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: gographql
+      - type: AWS_LAMBDA
+        name: TestRubyLambda
+        description: 'Ruby Lambda DataSource'
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [RubyLambdaFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
+          functionName: rubyGraphQL
 functions:
   graphqlJSON:
     handler: handler.graphqlJSON
+  graphqlArrayJSON:
+    handler: handler.graphqlArrayJSON
+  graphqlBatchJSON:
+    handler: handler.graphqlBatchJSON
   graphql:
     handler: handler.graphql
   emptyJSON:
@@ -248,6 +303,21 @@ functions:
   gographql:
     handler: gographql
     runtime: go1.x
+  rubyemptyjson:
+    handler: handler.ruby_empty_json
+    runtime: ruby2.5
+  rubycomposedjson:
+    handler: handler.ruby_composed_json
+    runtime: ruby2.5
+  rubyerror:
+    handler: handler.ruby_error
+    runtime: ruby2.5
+  rubybroken:
+    handler: handler.ruby_broken_function
+    runtime: ruby2.5
+  rubyGraphQL:
+    handler: handler.ruby_graphqL
+    runtime: ruby2.5
 resources:
   Resources:
     QuoteRequestTable:

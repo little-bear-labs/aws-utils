@@ -1,0 +1,10 @@
+- dataSource: QuoteRequest
+  type: Mutation
+  field: putQuoteRequest
+  request: put-request.txt
+  response: result-response.txt
+- dataSource: QuoteRequest
+  type: Mutation
+  field: batchPutQuotes
+  request: batchput-request.txt
+  response: batchput-response.txt

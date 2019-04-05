@@ -51,7 +51,8 @@ describe('dynamodbSource', () => {
     });
   });
 
-  const runOp = op =>
+  const runOp = op => subject(dynamodb, tableName, {}, op);
+  const runBatchOp = op =>
     subject(
       dynamodb,
       'MyTable',
@@ -258,16 +259,17 @@ describe('dynamodbSource', () => {
 
   describe('DeleteItem', () => {
     it('should delete item', async () => {
+      const item = {
+        id: 'foo',
+        bar: 'bar',
+      };
       await docClient
         .put({
           TableName: tableName,
-          Item: {
-            id: 'foo',
-            bar: 'bar',
-          },
+          Item: item,
         })
         .promise();
-      await runOp({
+      const opOutput = await runOp({
         version: '2017-02-28',
         operation: 'DeleteItem',
         key: {
@@ -281,6 +283,7 @@ describe('dynamodbSource', () => {
           expressionNames: { '#bar': 'bar' },
         },
       });
+      expect(opOutput).toMatchObject(item);
 
       const { Item: output = null } = await docClient
         .get({
@@ -374,7 +377,7 @@ describe('dynamodbSource', () => {
         })
         .promise();
 
-      const result = await runOp({
+      const result = await runBatchOp({
         operation: 'BatchGetItem',
         tables: {
           MyTable: {
@@ -398,7 +401,7 @@ describe('dynamodbSource', () => {
     });
 
     it('BatchPutItem', async () => {
-      const result = await runOp({
+      const result = await runBatchOp({
         operation: 'BatchPutItem',
         tables: {
           MyTable: [
@@ -435,7 +438,7 @@ describe('dynamodbSource', () => {
         })
         .promise();
 
-      const result = await runOp({
+      const result = await runBatchOp({
         operation: 'BatchDeleteItem',
         tables: {
           MyTable: [{ id: { S: 'foo' } }],

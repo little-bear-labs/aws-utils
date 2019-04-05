@@ -75,6 +75,14 @@ const normalizeResources = config => {
   };
 };
 
+const flatten = arr =>
+  arr.reduce((acc, curr) => {
+    if (Array.isArray(curr)) {
+      return [...acc, ...flatten(curr)];
+    }
+    return [...acc, curr];
+  }, []);
+
 const loadServerlessConfig = async (cwd = process.cwd()) => {
   const stat = fs.statSync(cwd);
   if (!stat.isDirectory()) {
@@ -88,10 +96,28 @@ const loadServerlessConfig = async (cwd = process.cwd()) => {
   const serverless = new ConfigServerless();
   await serverless.getConfig(cwd);
   const { service: config } = serverless;
+
+  const { custom = {} } = config;
+  const { appSync = {} } = custom;
+  const { mappingTemplates = [] } = appSync;
+  const { dataSources = [] } = appSync;
+
   const output = {
-    config: { ...config, resources: normalizeResources(config) },
+    config: {
+      ...config,
+      custom: {
+        ...custom,
+        appSync: {
+          ...appSync,
+          mappingTemplates: flatten(mappingTemplates),
+          dataSources: flatten(dataSources),
+        },
+      },
+      resources: normalizeResources(config),
+    },
     directory: cwd,
   };
+
   GlobalCache.set(cwd, output);
   return output;
 };

@@ -16,6 +16,7 @@ const log = require('logdown')('appsync-emulator:schema');
 const consola = require('./log');
 const { inspect } = require('util');
 const { scalars } = require('./schemaWrapper');
+const DataLoader = require('dataloader');
 
 const vtlMacros = {
   console: (...args) => {
@@ -47,12 +48,16 @@ class AppSyncError extends Error {
 const buildVTLContext = ({ root, vars, context, info }, result = null) => {
   const {
     jwt: { iss: issuer, sub },
+    request,
   } = context;
   const util = createUtils();
   const args = javaify(vars);
+  const vtlRequest = request ? { headers: request.headers } : {};
+
   const vtlContext = {
     arguments: args,
     args,
+    request: vtlRequest,
     identity: javaify({
       sub,
       issuer,
@@ -159,7 +164,7 @@ const dispatchRequestToSource = async (
         dynamodb,
         // default alias
         source.config.tableName,
-        // mapping
+        // mapping used for multi table operations.
         dynamodbTables,
         request,
       );
@@ -183,31 +188,58 @@ const dispatchRequestToSource = async (
   }
 };
 
+const generateDataLoaderResolver = (source, configs) => {
+  const batchLoaders = {};
+  return fieldPath => {
+    if (batchLoaders[fieldPath] === undefined) {
+      batchLoaders[fieldPath] = new DataLoader(
+        requests => {
+          const batchRequest = requests[0];
+          batchRequest.payload = requests.map(r => r.payload);
+          consola.info(
+            'Rendered Batch Request:\n',
+            inspect(batchRequest, { depth: null, colors: true }),
+          );
+          log.info('resolver batch request', batchRequest);
+          return dispatchRequestToSource(source, configs, batchRequest);
+        },
+        {
+          shouldCache: false,
+        },
+      );
+    }
+
+    return batchLoaders[fieldPath];
+  };
+};
+
 const generateTypeResolver = (
   source,
   configs,
-  { requestPath, responsePath },
+  { requestPath, responsePath, dataLoaderResolver },
 ) => async (root, vars, context, info) => {
   try {
-    consola.start(
-      `Resolve: ${info.parentType}.${info.fieldName} [${gqlPathAsArray(
-        info.path,
-      )}]`,
-    );
-    log.info('resolving', gqlPathAsArray(info.path));
+    const fieldPath = `${info.parentType}.${info.fieldName}`;
+    const pathInfo = gqlPathAsArray(info.path);
+    consola.start(`Resolve: ${fieldPath} [${pathInfo}]`);
+    log.info('resolving', pathInfo);
+
     assert(context && context.jwt, 'must have context.jwt');
     const resolverArgs = { root, vars, context, info };
     const request = runRequestVTL(requestPath, resolverArgs);
-    consola.info(
-      'Rendered Request:\n',
-      inspect(request, { depth: null, colors: true }),
-    );
-    log.info('resolver request', request);
-    const requestResult = await dispatchRequestToSource(
-      source,
-      configs,
-      request,
-    );
+
+    let requestResult;
+    if (request.operation === 'BatchInvoke') {
+      const loader = dataLoaderResolver(fieldPath);
+      requestResult = await loader.load(request);
+    } else {
+      consola.info(
+        'Rendered Request:\n',
+        inspect(request, { depth: null, colors: true }),
+      );
+      log.info('resolver request', request);
+      requestResult = await dispatchRequestToSource(source, configs, request);
+    }
 
     const response = runResponseVTL(responsePath, resolverArgs, requestResult);
     consola.info(
@@ -294,6 +326,7 @@ const generateResolvers = (cwd, config, configs) => {
     }),
     {},
   );
+
   return config.mappingTemplates.reduce(
     (sum, { dataSource, type, field, request, response }) => {
       if (!sum[type]) {
@@ -303,6 +336,7 @@ const generateResolvers = (cwd, config, configs) => {
       const source = dataSourceByName[dataSource];
       const pathing = {
         requestPath: path.join(mappingTemplates, request),
+        dataLoaderResolver: generateDataLoaderResolver(source, configs),
         responsePath: path.join(mappingTemplates, response),
       };
       const resolver =

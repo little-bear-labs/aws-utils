@@ -144,12 +144,12 @@ class SubscriptionServer {
     }
   }
 
-  async register({ documentAST, variables, jwt }) {
-    const clientId = jwt.sub;
+  async register({ documentAST, variables, context }) {
+    const clientId = context.jwt.sub;
+
     const topicId = uuid();
     log.info('register', { clientId, topicId });
 
-    const context = { jwt };
     const registration = {
       context,
       documentAST,
@@ -228,11 +228,10 @@ class SubscriptionServer {
 const executeGQL = async ({
   schema,
   documentAST,
-  jwt,
+  context,
   variables,
   operationName,
 }) => {
-  const context = { jwt };
   const output = await execute(
     schema,
     documentAST,
@@ -256,50 +255,58 @@ const executeGQL = async ({
 };
 
 const createGQLHandler = ({ schema, subServer }) => async (req, res) => {
-  // const { headers: { authorization = null, }, } = req;
-  const { headers } = req;
-  log.info('req', { req });
+  try {
+    // const { headers: { authorization = null, }, } = req;
+    const { headers } = req;
+    log.info('req', { req });
 
-  if (!headers.authorization && !headers['x-api-key']) {
-    throw new Error('Must pass authorization header');
-  }
-  const jwt = headers.authorization ? jwtDecode(headers.authorization) : {};
-  const { variables, query, operationName } = req.body;
-  consola.start('graphql', query);
-  log.info('request', { variables, query });
-  const documentAST = parse(query);
-  const validationErrors = validate(schema, documentAST, specifiedRules);
-  if (validationErrors.length) {
+    if (!headers.authorization && !headers['x-api-key']) {
+      throw new Error('Must pass authorization header');
+    }
+    const jwt = headers.authorization ? jwtDecode(headers.authorization) : {};
+    const { variables, query, operationName } = req.body;
+    consola.start('graphql', query);
+    log.info('request', { variables, query });
+    const documentAST = parse(query);
+    const validationErrors = validate(schema, documentAST, specifiedRules);
+    if (validationErrors.length) {
+      return res.send({
+        errors: validationErrors,
+      });
+    }
+    const {
+      definitions: [{ operation: queryType }],
+    } = documentAST;
+
+    const context = { jwt, request: req };
+    switch (queryType) {
+      case 'query':
+      case 'mutation':
+        return res.send(
+          await executeGQL({
+            schema,
+            documentAST,
+            context,
+            variables,
+            operationName,
+          }),
+        );
+      case 'subscription':
+        return res.send(
+          await subServer.register({
+            context,
+            documentAST,
+            variables,
+          }),
+        );
+      default:
+        throw new Error(`unknown operation type: ${queryType}`);
+    }
+  } catch (error) {
+    consola.error(inspect(error));
     return res.send({
-      errors: validationErrors,
+      errorMessage: error.message,
     });
-  }
-  const {
-    definitions: [{ operation: queryType }],
-  } = documentAST;
-
-  switch (queryType) {
-    case 'query':
-    case 'mutation':
-      return res.send(
-        await executeGQL({
-          schema,
-          documentAST,
-          jwt,
-          variables,
-          operationName,
-        }),
-      );
-    case 'subscription':
-      return res.send(
-        await subServer.register({
-          jwt,
-          documentAST,
-          variables,
-        }),
-      );
-    default:
-      throw new Error(`unknown operation type: ${queryType}`);
   }
 };
 
@@ -314,6 +321,10 @@ const createServer = async ({
   const mqttHTTP = http.createServer();
   const mqttServer = new mosca.Server({
     backend: { type: 'memory' },
+    interfaces: [],
+    logger: {
+      level: process.env.DEBUG ? 'debug' : 'error',
+    },
   });
   mqttServer.attachHttpServer(mqttHTTP);
   mqttServer.on('clientConnected', client => {

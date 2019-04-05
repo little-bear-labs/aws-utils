@@ -116,15 +116,18 @@ const deleteItem = async (
     } = {},
   },
 ) => {
-  await db
+  const { Attributes: deleted } = await db
     .deleteItem({
       TableName: table,
       Key: key,
+      ReturnValues: 'ALL_OLD',
       ConditionExpression: expression,
       ExpressionAttributeNames: expressionNames,
       ExpressionAttributeValues: expressionValues,
     })
     .promise();
+
+  return unmarshall(deleted);
 };
 
 const query = async (
@@ -145,10 +148,10 @@ const query = async (
     TableName: table,
     KeyConditionExpression: keyCondition.expression,
     FilterExpression: filter.expression,
-    ExpressionAttributeNames: {
+    ExpressionAttributeNames: nullIfEmpty({
       ...(filter.expressionNames || {}),
       ...(keyCondition.expressionNames || {}),
-    },
+    }),
     ExpressionAttributeValues: {
       ...(filter.expressionValues || {}),
       ...(keyCondition.expressionValues || {}),
@@ -202,9 +205,9 @@ const scan = async (
   if (filter) {
     Object.assign(params, {
       FilterExpression: filter.expression,
-      ExpressionAttributeNames: {
+      ExpressionAttributeNames: nullIfEmpty({
         ...(filter.expressionNames || undefined),
-      },
+      }),
       ExpressionAttributeValues: {
         ...(filter.expressionValues || undefined),
       },
@@ -374,8 +377,7 @@ const batchDeleteItem = async (db, dynamodbTables, { tables }) => {
   };
 };
 
-const resolve = async (dynamodb, defaultAlias, dynamodbTables, payload) => {
-  const table = dynamodbTables[defaultAlias];
+const resolve = async (dynamodb, table, dynamodbTables, payload) => {
   switch (payload.operation) {
     case 'GetItem':
       return getItem(dynamodb, table, payload);
