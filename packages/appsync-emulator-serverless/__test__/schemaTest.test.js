@@ -145,6 +145,88 @@ describe('creates executable schema', () => {
     });
   });
 
+  describe('support Elastic search', () => {
+    beforeEach(async () => {
+      const result = await createSchema({ serverless, schemaPath, dynamodb });
+      // eslint-disable-next-line
+      schema = result.schema;
+      // eslint-disable-next-line
+      close = result.close;
+      contextValue = { jwt };
+
+      nock('http://localhost:9200')
+        .post('/test/_search')
+        .reply(200, {
+          took: 2,
+          timed_out: false,
+          _shards: {
+            total: 5,
+            successful: 5,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: 1,
+            max_score: 0.81942695,
+            hits: [
+              {
+                _index: 'test',
+                _type: '_doc',
+                _id: 'HEwrDWoBkP89GjCv3To-',
+                _score: 0.81942695,
+                _source: {
+                  title: 'Lorem ipsum',
+                  content: 'Lorem ipsum dolor sit amet',
+                },
+              },
+              {
+                _index: 'test',
+                _type: '_doc',
+                _id: 'IUxBDWoBkP89GjCvXzp2',
+                _score: 0.19178805,
+                _source: {
+                  title: 'Foo bar',
+                  content: 'Lorem ipsum',
+                },
+              },
+            ],
+          },
+        });
+    });
+
+    it('should allow querying ElasticSearch', async () => {
+      const source = `
+        query {
+          search(text: "Lorem ipsum") {
+            title
+            content
+          }
+        }
+      `;
+
+      const result = await graphql({
+        schema,
+        contextValue,
+        source,
+      });
+
+      expect(result).toMatchObject({
+        data: {
+          search: [
+            {
+              title: 'Lorem ipsum',
+              content: 'Lorem ipsum dolor sit amet',
+            },
+            {
+              title: 'Foo bar',
+              content: 'Lorem ipsum',
+            },
+          ],
+        },
+      });
+    });
+  });
+
   it('put', async () => {
     const subscription = await subscribe({
       schema,

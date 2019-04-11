@@ -8,7 +8,8 @@ const elasticsearchSource = async (
     // ES accepts GET/HEAD operations with a body,
     // but fetch forbids it.
     method:
-      ['HEAD', 'GET'].indexOf(operation) !== -1 &&
+      ['HEAD', 'GET'].includes(operation) !== -1 &&
+      params.body &&
       Object.entries(params.body).length > 0
         ? 'POST'
         : operation,
@@ -20,7 +21,7 @@ const elasticsearchSource = async (
         ...params.headers,
       },
       body:
-        Object.entries(params.body).length > 0
+        params.body && Object.entries(params.body).length > 0
           ? JSON.stringify(params.body)
           : undefined,
     },

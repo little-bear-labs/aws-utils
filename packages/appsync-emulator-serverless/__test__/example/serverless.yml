@@ -197,6 +197,11 @@ custom:
         field: lambdaGo
         request: lambda-request.vtl
         response: result-response.txt
+      - dataSource: TestElastic
+        type: Query
+        field: search
+        request: es-request.txt
+        response: es-response.txt
     serviceRole: 'AppSyncServiceRole'
     dataSources:
       - type: AMAZON_DYNAMODB
@@ -270,6 +275,10 @@ custom:
           lambdaFunctionArn: { Fn::GetAtt: [RubyLambdaFunction, Arn] }
           serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: rubyGraphQL
+      - type: AMAZON_ELASTICSEARCH
+        name: TestElastic
+        config:
+          endpoint: 'http://localhost:9200'
 functions:
   graphqlJSON:
     handler: handler.graphqlJSON
