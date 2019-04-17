@@ -67,7 +67,7 @@ describe('elasticsearchSource', () => {
 
   it('HTTP GET gets transformed to POST', async () => {
     await elasticsearchSource('http://localhost:9200', {
-      operation: 'POST',
+      operation: 'GET',
       path: '/test/_search',
       params: {
         queryString: { foo: 'bar' },
@@ -99,6 +99,25 @@ describe('elasticsearchSource', () => {
         query: { foo: 'bar' },
       },
       resourcePath: '/test/_search',
+    });
+  });
+
+  it('HTTP DELETE', async () => {
+    await elasticsearchSource('http://localhost:9200', {
+      operation: 'DELETE',
+      path: '/test/_doc/1',
+    });
+
+    expect(httpSource).toHaveBeenCalled();
+    expect(httpSource.mock.calls[0][0]).toEqual('http://localhost:9200');
+    expect(httpSource.mock.calls[0][1]).toMatchObject({
+      method: 'DELETE',
+      params: {
+        body: undefined,
+        headers: { 'Content-Type': 'application/json' },
+        query: undefined,
+      },
+      resourcePath: '/test/_doc/1',
     });
   });
 });

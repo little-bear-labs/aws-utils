@@ -8,7 +8,7 @@ const elasticsearchSource = async (
     // ES accepts GET/HEAD operations with a body,
     // but fetch forbids it.
     method:
-      ['HEAD', 'GET'].includes(operation) !== -1 &&
+      ['HEAD', 'GET'].includes(operation) &&
       params.body &&
       Object.entries(params.body).length > 0
         ? 'POST'
