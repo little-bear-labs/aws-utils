@@ -27,6 +27,7 @@ type Query {
   emailTest(emailTest: String): AWSEmail
   phoneTest(phoneTest: String): AWSPhone
   urlTest(urlTest: String): AWSURL
+  search(text: String!): [ESSearchResult]
 }
 
 type httpUser {
@@ -89,6 +90,11 @@ type QuoteRequest {
   commodity: String
   amount: Float
   tags: [String]
+}
+
+type ESSearchResult {
+    title: String
+    content: String
 }
 
 input QuoteRequestInput {

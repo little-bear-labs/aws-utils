@@ -12,6 +12,7 @@ const { javaify, vtl } = require('./vtl');
 const dynamodbSource = require('./dynamodbSource');
 const lambdaSource = require('./lambdaSource');
 const httpSource = require('./httpSource');
+const elasticsearchSource = require('./elasticsearchSource');
 const log = require('logdown')('appsync-emulator:schema');
 const consola = require('./log');
 const { inspect } = require('util');
@@ -179,6 +180,8 @@ const dispatchRequestToSource = async (
         source.config.functionName,
         request,
       );
+    case 'AMAZON_ELASTICSEARCH':
+      return elasticsearchSource(source.config.endpoint, request);
     case 'HTTP':
       return httpSource(source.config.endpoint, request);
     case 'NONE':

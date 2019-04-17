@@ -1,0 +1,14 @@
+{
+   "version":"2017-02-28",
+   "operation":"POST",
+   "path":"/test/_search",
+   "params":{
+        "body": { 
+            "query": {
+                "fuzzy" : {
+                    "content" : "$context.arguments.text"
+                }
+            }
+        }
+    }
+}
