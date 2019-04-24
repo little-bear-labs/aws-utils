@@ -53,11 +53,7 @@ function cfRef(value, ctx, objectPath) {
     case DynamoDBTable:
       return lookupDynamodbTableName(cfObject, ctx);
     default:
-      throw new Error(
-        `Unable to find logical ref resource for : ${type} (${humanObjectPath(
-          objectPath,
-        )})`,
-      );
+      return value;
   }
 }
 
