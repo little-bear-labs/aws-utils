@@ -6,10 +6,6 @@
 
 const DynamoDBTable = 'AWS::DynamoDB::Table';
 
-function humanObjectPath(objectPath) {
-  return objectPath.join('.');
-}
-
 function lookupResourcesFromCtx(resource, ctx) {
   return ctx.resources && ctx.resources.Resources[resource];
 }
