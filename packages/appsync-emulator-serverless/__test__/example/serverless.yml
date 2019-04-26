@@ -19,7 +19,8 @@ custom:
     userPoolConfig:
       awsRegion: us-east-1
       defaultAction: ALLOW
-      userPoolId: us-east-1_27WcML9k8
+      userPoolId:
+        Ref: UserPoolResource
     region: us-east-2
     mappingTemplates:
       - dataSource: QuoteRequest

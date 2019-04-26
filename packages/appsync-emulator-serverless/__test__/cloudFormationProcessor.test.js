@@ -14,7 +14,10 @@ describe('cloudFormationProcessor', () => {
     const refTable = 'tablefromref';
     const {
       custom: {
-        appSync: { dataSources },
+        appSync: {
+          dataSources,
+          userPoolConfig: { userPoolId },
+        },
       },
     } = cloudFormationProcessor(configs, {
       dynamodbTables: {
@@ -35,20 +38,8 @@ describe('cloudFormationProcessor', () => {
         tableName: refTable,
       },
     });
-  });
-
-  it('will throw errors messages with pathing information', () => {
-    expect(() => {
-      cloudFormationProcessor(
-        {
-          config: {
-            nested: {
-              inarray: [{ Ref: 'somethingnothere' }],
-            },
-          },
-        },
-        {},
-      );
-    }).toThrow('nested.inarray.0.Ref');
+    expect(userPoolId).toMatchObject({
+      Ref: 'UserPoolResource',
+    });
   });
 });

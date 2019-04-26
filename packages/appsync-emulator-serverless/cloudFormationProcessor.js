@@ -28,20 +28,19 @@ function lookupDynamodbTableName(cfObject, { dynamodbTables }) {
 function cfRef(value, ctx) {
   const cfObject = lookupResourcesFromCtx(value, ctx);
   if (!cfObject) {
-    return value;
+    return false;
   }
 
   const { Type: type } = cfObject;
   if (!type) {
-    // TODO: Add path
-    return value;
+    return false;
   }
 
   switch (type) {
     case DynamoDBTable:
       return lookupDynamodbTableName(cfObject, ctx);
     default:
-      return value;
+      return false;
   }
 }
 
@@ -64,11 +63,14 @@ function processObject(object, ctx, objectPath = []) {
   return entries.reduce((sum, [key, value]) => {
     const newObjectPath = [...objectPath, key];
     if (entries.length === 1 && cloudFormationHandlers[key]) {
-      return processObject(
+      const resolvedResource = processObject(
         cloudFormationHandlers[key](value, ctx),
         ctx,
         newObjectPath,
       );
+      if (resolvedResource !== false) {
+        return resolvedResource;
+      }
     }
     return {
       ...sum,
