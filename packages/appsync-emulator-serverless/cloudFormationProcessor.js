@@ -29,24 +29,16 @@ function lookupDynamodbTableName(cfObject, { dynamodbTables }) {
   return tableName;
 }
 
-function cfRef(value, ctx, objectPath) {
+function cfRef(value, ctx) {
   const cfObject = lookupResourcesFromCtx(value, ctx);
   if (!cfObject) {
-    throw new Error(
-      `Cannot find referenced [Ref] cloud formation resource (${humanObjectPath(
-        objectPath,
-      )})`,
-    );
+    return value;
   }
 
   const { Type: type } = cfObject;
   if (!type) {
     // TODO: Add path
-    throw new Error(
-      `Unknown cloud formation object reference or type (${humanObjectPath(
-        objectPath,
-      )})`,
-    );
+    return value;
   }
 
   switch (type) {
@@ -77,7 +69,7 @@ function processObject(object, ctx, objectPath = []) {
     const newObjectPath = [...objectPath, key];
     if (entries.length === 1 && cloudFormationHandlers[key]) {
       return processObject(
-        cloudFormationHandlers[key](value, ctx, newObjectPath),
+        cloudFormationHandlers[key](value, ctx),
         ctx,
         newObjectPath,
       );
