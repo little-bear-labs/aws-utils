@@ -6,10 +6,6 @@
 
 const DynamoDBTable = 'AWS::DynamoDB::Table';
 
-function humanObjectPath(objectPath) {
-  return objectPath.join('.');
-}
-
 function lookupResourcesFromCtx(resource, ctx) {
   return ctx.resources && ctx.resources.Resources[resource];
 }
@@ -29,35 +25,22 @@ function lookupDynamodbTableName(cfObject, { dynamodbTables }) {
   return tableName;
 }
 
-function cfRef(value, ctx, objectPath) {
+function cfRef(value, ctx) {
   const cfObject = lookupResourcesFromCtx(value, ctx);
   if (!cfObject) {
-    throw new Error(
-      `Cannot find referenced [Ref] cloud formation resource (${humanObjectPath(
-        objectPath,
-      )})`,
-    );
+    return false;
   }
 
   const { Type: type } = cfObject;
   if (!type) {
-    // TODO: Add path
-    throw new Error(
-      `Unknown cloud formation object reference or type (${humanObjectPath(
-        objectPath,
-      )})`,
-    );
+    return false;
   }
 
   switch (type) {
     case DynamoDBTable:
       return lookupDynamodbTableName(cfObject, ctx);
     default:
-      throw new Error(
-        `Unable to find logical ref resource for : ${type} (${humanObjectPath(
-          objectPath,
-        )})`,
-      );
+      return false;
   }
 }
 
@@ -80,11 +63,14 @@ function processObject(object, ctx, objectPath = []) {
   return entries.reduce((sum, [key, value]) => {
     const newObjectPath = [...objectPath, key];
     if (entries.length === 1 && cloudFormationHandlers[key]) {
-      return processObject(
-        cloudFormationHandlers[key](value, ctx, newObjectPath),
+      const resolvedResource = processObject(
+        cloudFormationHandlers[key](value, ctx),
         ctx,
         newObjectPath,
       );
+      if (resolvedResource !== false) {
+        return resolvedResource;
+      }
     }
     return {
       ...sum,
