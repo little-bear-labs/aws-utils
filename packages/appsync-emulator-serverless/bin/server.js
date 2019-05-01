@@ -14,7 +14,11 @@ const defaultConfig = require('../config');
 const { DynamoDB } = require('aws-sdk');
 
 async function deriveDynamoClient({ DynamoDB: config }, pkgPath) {
-  if (!config.emulator) {
+  if (config === false) {
+    // if false, we assume dynamo is not needed
+    return null;
+  } else if (!config.emulator) {
+    // if emulator is false, we create a client based on the config object
     /* eslint-disable no-console */
     console.log('dynamodb config: ', util.inspect(config, false, 2, true));
     return new DynamoDB(...config);
