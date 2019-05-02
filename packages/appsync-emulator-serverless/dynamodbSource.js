@@ -380,17 +380,17 @@ const batchDeleteItem = async (db, dynamodbTables, { tables }) => {
 const resolve = async (dynamodb, table, dynamodbTables, payload) => {
   switch (payload.operation) {
     case 'GetItem':
-      return getItem(dynamodb, table, payload);
+      return getItem(dynamodb, dynamodbTables[table], payload);
     case 'PutItem':
-      return putItem(dynamodb, table, payload);
+      return putItem(dynamodb, dynamodbTables[table], payload);
     case 'UpdateItem':
-      return updateItem(dynamodb, table, payload);
+      return updateItem(dynamodb, dynamodbTables[table], payload);
     case 'DeleteItem':
-      return deleteItem(dynamodb, table, payload);
+      return deleteItem(dynamodb, dynamodbTables[table], payload);
     case 'Query':
-      return query(dynamodb, table, payload);
+      return query(dynamodb, dynamodbTables[table], payload);
     case 'Scan':
-      return scan(dynamodb, table, payload);
+      return scan(dynamodb, dynamodbTables[table], payload);
     case 'BatchGetItem':
       return batchGetItem(dynamodb, dynamodbTables, payload);
     case 'BatchPutItem':

@@ -14,17 +14,6 @@ function lookupResourcePropertyFromCtx(cfObject, prop) {
   return cfObject && cfObject.Properties && cfObject.Properties[prop];
 }
 
-function lookupDynamodbTableName(cfObject, { dynamodbTables }) {
-  // support aliasing for test isolation.
-  const tableName = lookupResourcePropertyFromCtx(cfObject, 'TableName');
-  if (dynamodbTables[tableName]) {
-    return dynamodbTables[tableName];
-  }
-
-  // we do not require an alias and fallback to the name in resources if not found.
-  return tableName;
-}
-
 function cfRef(value, ctx) {
   const cfObject = lookupResourcesFromCtx(value, ctx);
   if (!cfObject) {
@@ -38,7 +27,7 @@ function cfRef(value, ctx) {
 
   switch (type) {
     case DynamoDBTable:
-      return lookupDynamodbTableName(cfObject, ctx);
+      return lookupResourcePropertyFromCtx(cfObject, 'TableName');
     default:
       return false;
   }
@@ -79,9 +68,9 @@ function processObject(object, ctx, objectPath = []) {
   }, {});
 }
 
-function cloudFormationProcessor(input, { dynamodbTables }) {
+function cloudFormationProcessor(input) {
   const config = { ...input };
-  const ctx = { dynamodbTables, resources: config.resources };
+  const ctx = { resources: config.resources };
   // remove useless serverless object so we do not traverse functions.
   delete config.serverless;
   return processObject(config, ctx);
