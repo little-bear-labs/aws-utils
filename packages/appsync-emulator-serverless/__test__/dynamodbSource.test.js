@@ -51,7 +51,8 @@ describe('dynamodbSource', () => {
     });
   });
 
-  const runOp = op => subject(dynamodb, tableName, {}, op);
+  const runOp = op =>
+    subject(dynamodb, tableName, { [tableName]: tableName }, op);
   const runBatchOp = op =>
     subject(
       dynamodb,

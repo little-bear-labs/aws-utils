@@ -11,7 +11,6 @@ describe('cloudFormationProcessor', () => {
   });
 
   it('supports ref for dynamodb table', () => {
-    const refTable = 'tablefromref';
     const {
       custom: {
         appSync: {
@@ -19,11 +18,7 @@ describe('cloudFormationProcessor', () => {
           userPoolConfig: { userPoolId },
         },
       },
-    } = cloudFormationProcessor(configs, {
-      dynamodbTables: {
-        'QuoteRequest-emulator': refTable,
-      },
-    });
+    } = cloudFormationProcessor(configs);
 
     const dataSourceByName = Object.entries(dataSources).reduce(
       (sum, [, value]) => ({
@@ -35,7 +30,7 @@ describe('cloudFormationProcessor', () => {
 
     expect(dataSourceByName.QuoteRequest).toMatchObject({
       config: {
-        tableName: refTable,
+        tableName: 'QuoteRequest-emulator',
       },
     });
     expect(userPoolId).toMatchObject({
