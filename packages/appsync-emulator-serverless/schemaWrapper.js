@@ -1,5 +1,6 @@
-const { GraphQLScalarType } = require('graphql');
+const { GraphQLScalarType, GraphQLError, Kind } = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
+const { isValidNumber, getNumberType } = require('libphonenumber-js');
 
 const {
   GraphQLDate,
@@ -7,9 +8,52 @@ const {
   GraphQLDateTime,
 } = require('graphql-iso-date');
 
-const GraphQLPhoneType = require('graphql-phone-type');
-
 const { EmailAddress, URL } = require('@okgrow/graphql-scalars');
+
+const phoneValidator = (ast, { country = 'US', type } = {}) => {
+  const { kind, value } = ast;
+  if (kind !== Kind.STRING) {
+    throw new GraphQLError(
+      `Query error: Can only parse strings got a: ${kind}`,
+      [ast],
+    );
+  }
+
+  let isValid = isValidNumber(value, country);
+  if (isValid && type) {
+    isValid = getNumberType(value, country) === type;
+  }
+  if (!isValid) {
+    throw new GraphQLError('Query error: Not a valid phone number', [ast]);
+  }
+
+  return value;
+};
+
+class AWSPhone extends GraphQLScalarType {
+  constructor(options = {}) {
+    const { name, description } = options;
+    super({
+      name,
+      description,
+      serialize: value => {
+        const ast = {
+          kind: Kind.STRING,
+          value,
+        };
+        return phoneValidator(ast, options);
+      },
+      parseValue: value => {
+        const ast = {
+          kind: Kind.STRING,
+          value,
+        };
+        return phoneValidator(ast, options);
+      },
+      parseLiteral: ast => phoneValidator(ast, options),
+    });
+  }
+}
 
 const AWSDate = new GraphQLScalarType({
   name: 'AWSDate',
@@ -58,7 +102,7 @@ const scalars = {
   AWSDate,
   AWSTime,
   AWSDateTime,
-  AWSPhone: GraphQLPhoneType,
+  AWSPhone,
   AWSEmail: EmailAddress,
   AWSURL: URL,
 };
