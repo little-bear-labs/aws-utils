@@ -6,6 +6,7 @@ const fs = require('fs');
 const waitPort = require('wait-port');
 const portPid = require('port-pid');
 const log = require('logdown')('dynamodb-emulator');
+const mkdirSafe = require('./mkdirSafe');
 
 // random port I chose in the ephemeral range.
 const basePort = 62224;
@@ -121,7 +122,7 @@ async function launch(givenOptions = {}, retry = 0, startTime = Date.now()) {
       }
     } else {
       log.info('Creating directory', { dbPath: opts.dbPath });
-      fs.mkdirSync(opts.dbPath);
+      mkdirSafe(opts.dbPath);
     }
   }
 

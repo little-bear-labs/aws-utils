@@ -8,6 +8,7 @@ const { flockSync } = require('fs-ext');
 const { spawn } = require('child_process');
 const log = require('logdown')('dynamodb-emulator:client');
 const { getClient } = require('./index');
+const mkdirSafe = require('./mkdirSafe');
 const { homedir } = require('os');
 
 const homeDir = homedir();
@@ -84,9 +85,7 @@ async function requestEmulator(unixSocketFile, options) {
 }
 
 async function startDeamon(hash, unixSocketFile, options) {
-  if (!fs.existsSync(pidPath)) {
-    fs.mkdirSync(pidPath);
-  }
+  mkdirSafe(pidPath);
   // file does not exist so we will need to create one.
   const pidFile = path.join(pidPath, `${hash}.pid`);
   const fd = fs.openSync(pidFile, 'w');
