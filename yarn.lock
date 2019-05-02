@@ -4178,6 +4178,14 @@ libphonenumber-js@^0.4.43:
     minimist "^1.2.0"
     xml2js "^0.4.17"
 
+libphonenumber-js@^1.7.16:
+  version "1.7.16"
+  resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.7.16.tgz#6fdd5c9b2b3292da4bfc988a7c76ad921a12951d"
+  dependencies:
+    minimist "^1.2.0"
+    semver-compare "^1.0.0"
+    xml2js "^0.4.17"
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -5813,6 +5821,10 @@ selective-whitespace@^1.0.0:
   resolved "https://registry.yarnpkg.com/selective-whitespace/-/selective-whitespace-1.0.4.tgz#02d428b46b2c770398be9a538eb442b1e842fc5c"
   dependencies:
     tokenize-whitespace "0.0.1"
+
+semver-compare@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/semver-compare/-/semver-compare-1.0.0.tgz#0dee216a1c941ab37e9efb1788f6afc5ff5537fc"
 
 semver-diff@^2.0.0:
   version "2.1.0"
