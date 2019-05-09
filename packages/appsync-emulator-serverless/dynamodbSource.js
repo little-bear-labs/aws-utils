@@ -157,7 +157,9 @@ const query = async (
       ...(keyCondition.expressionValues || {}),
     },
     // XXX: need to validate that this works ...
-    ExclusiveStartKey: nextToken ? JSON.parse(Buffer.from(nextToken, 'base64').toString()) : null,
+    ExclusiveStartKey: nextToken
+      ? JSON.parse(Buffer.from(nextToken, 'base64').toString())
+      : null,
     IndexName: index,
     Limit: limit,
     ConsistentRead: consistentRead,
@@ -173,7 +175,9 @@ const query = async (
   return {
     items: items.map(item => unmarshall(item)),
     scannedCount,
-    nextToken: resultNextToken ? Buffer.from(JSON.stringify(resultNextToken)).toString('base64') : null,
+    nextToken: resultNextToken
+      ? Buffer.from(JSON.stringify(resultNextToken)).toString('base64')
+      : null,
   };
 };
 
@@ -194,7 +198,9 @@ const scan = async (
   const params = {
     TableName: table,
     // XXX: need to validate that this works ...
-    ExclusiveStartKey: nextToken ? JSON.parse(Buffer.from(nextToken, 'base64').toString()) : null,
+    ExclusiveStartKey: nextToken
+      ? JSON.parse(Buffer.from(nextToken, 'base64').toString())
+      : null,
     IndexName: index,
     Limit: limit,
     ConsistentRead: consistentRead,
@@ -222,7 +228,9 @@ const scan = async (
   return {
     items: items.map(item => unmarshall(item)),
     scannedCount,
-    nextToken: resultNextToken ? Buffer.from(JSON.stringify(resultNextToken)).toString('base64') : null,
+    nextToken: resultNextToken
+      ? Buffer.from(JSON.stringify(resultNextToken)).toString('base64')
+      : null,
   };
 };
 
