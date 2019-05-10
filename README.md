@@ -22,6 +22,7 @@ git clone git@github.com:ConduitVC/aws-utils.git
 cd aws-utils
 go get -u github.com/aws/aws-lambda-go/lambda
 ./compileAll.sh
+yarn install
 ```
 
 ### Then make sure all the specs pass:
