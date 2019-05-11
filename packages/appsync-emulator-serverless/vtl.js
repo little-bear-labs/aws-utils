@@ -10,7 +10,11 @@ const javaify = value => {
     // eslint-disable-next-line
     return new JavaArray(value.map(x => javaify(x)));
   }
-  if (value != null && typeof value === 'object') {
+  if (
+    value != null &&
+    typeof value === 'object' &&
+    value.constructor === Object
+  ) {
     // eslint-disable-next-line
     return createMapProxy(
       // eslint-disable-next-line
@@ -26,7 +30,13 @@ const javaify = value => {
     );
   }
 
-  // for now we don't handle string/number.
+  // eslint-disable-next-line
+  if (typeof value === 'string' && !(value instanceof JavaString)) {
+    // eslint-disable-next-line
+    return new JavaString(value);
+  }
+
+  // for now we don't handle number.
   return value;
 };
 
@@ -36,6 +46,12 @@ const toJSON = value => {
   }
   return value;
 };
+
+class JavaString extends String {
+  replaceAll(...args) {
+    return new JavaString(this.replace(new RegExp(args[0], 'g'), args[1]));
+  }
+}
 
 class JavaArray extends Array {
   // required so array starts with zero elements

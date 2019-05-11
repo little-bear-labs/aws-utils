@@ -63,4 +63,20 @@ describe('vtl', () => {
       expect(out.trim()).toBe('worked');
     });
   });
+
+  describe('string', () => {
+    it('should have a replaceAll method', () => {
+      const out = vtl(
+        `
+        #set($item = {})
+        #set($ignore = $item.put('id', $ctx.result.pk.replaceAll('pk-', '')))
+        $item.toJSON()
+        `,
+        javaify({
+          ctx: { result: { pk: 'pk-123', sk: 'sk' } },
+        }),
+      ).trim();
+      expect(out).toBe('{id=123}');
+    });
+  });
 });
