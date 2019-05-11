@@ -63,4 +63,48 @@ describe('vtl', () => {
       expect(out.trim()).toBe('worked');
     });
   });
+
+  describe('string', () => {
+    it('should have a replaceAll method', () => {
+      const out = vtl(
+        `
+        #set($item = {})
+        #set($ignore = $item.put('id', $ctx.result.pk.replaceAll('pk-', '')))
+        $item.toJSON()
+        `,
+        javaify({
+          ctx: { result: { pk: 'pk-123', sk: 'sk' } },
+        }),
+      ).trim();
+      expect(out).toBe('{id=123}');
+    });
+  });
+});
+
+describe('value mapper', () => {
+  it('should recurse through the map and assign values', () => {
+    const jResult = javaify({ ctx: { result: { pk: 'pk-123', sk: 'sk' } } });
+    expect(jResult.constructor.name).toEqual('JavaMap');
+    const ctx = jResult.map.get('ctx');
+    expect(ctx.constructor.name).toEqual('JavaMap');
+    const result = ctx.map.get('result');
+    expect(result.constructor.name).toEqual('JavaMap');
+    const pk = result.map.get('pk');
+    const sk = result.map.get('sk');
+    expect(pk.constructor.name).toEqual('JavaString');
+    expect(sk.constructor.name).toEqual('JavaString');
+  });
+
+  it('should recurse through an array and assign values', () => {
+    const jResult = javaify([[1, '2', 3], [4, 5, 6], [7, 8, 9]]);
+    expect(jResult.constructor.name).toEqual('JavaArray');
+    expect(jResult[0].constructor.name).toEqual('JavaArray');
+    expect(jResult[0][0].constructor.name).toEqual('Number');
+    expect(jResult[0][1].constructor.name).toEqual('JavaString');
+  });
+
+  it('should map a string', () => {
+    const jResult = javaify('lorem ipsum');
+    expect(jResult.constructor.name).toEqual('JavaString');
+  });
 });
