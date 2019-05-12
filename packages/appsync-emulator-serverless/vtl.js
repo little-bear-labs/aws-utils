@@ -167,7 +167,7 @@ class JavaMap {
 
   putAll(map) {
     assert(map instanceof JavaMap);
-    map.map.entries.forEach(([key, value]) => {
+    Array.from(map.map.entries()).forEach(([key, value]) => {
       this.put(key, value);
     });
   }

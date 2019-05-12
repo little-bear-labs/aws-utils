@@ -62,5 +62,19 @@ describe('vtl', () => {
       );
       expect(out.trim()).toBe('worked');
     });
+
+    it('should work with putAll', () => {
+      const out = vtl(
+        `
+        #set($item = {})
+        #set($ignore = $item.putAll($ctx.result))
+        $item.toJSON()
+        `,
+        javaify({
+          ctx: { result: { pk: 'pk-123', sk: 'sk' } },
+        }),
+      );
+      expect(out.trim()).toBe('{pk=pk-123, sk=sk}');
+    });
   });
 });
