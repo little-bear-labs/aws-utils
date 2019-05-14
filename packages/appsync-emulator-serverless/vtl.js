@@ -52,8 +52,8 @@ class JavaString {
     this.strVal = str;
   }
 
-  replaceAll(...args) {
-    const rep = this.strVal.replace(new RegExp(args[0], 'g'), args[1]);
+  replaceAll(find, replace) {
+    const rep = this.strVal.replace(new RegExp(find, 'g'), replace);
     return new JavaString(rep);
   }
 
