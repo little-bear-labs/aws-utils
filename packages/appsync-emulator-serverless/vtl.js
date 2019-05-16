@@ -10,7 +10,11 @@ const javaify = value => {
     // eslint-disable-next-line
     return new JavaArray(value.map(x => javaify(x)));
   }
-  if (value != null && typeof value === 'object') {
+  if (
+    value != null &&
+    typeof value === 'object' &&
+    value.constructor === Object
+  ) {
     // eslint-disable-next-line
     return createMapProxy(
       // eslint-disable-next-line
@@ -26,7 +30,13 @@ const javaify = value => {
     );
   }
 
-  // for now we don't handle string/number.
+  // eslint-disable-next-line
+  if (typeof value === 'string' && !(value instanceof JavaString)) {
+    // eslint-disable-next-line
+    return new JavaString(value);
+  }
+
+  // for now we don't handle number.
   return value;
 };
 
@@ -36,6 +46,25 @@ const toJSON = value => {
   }
   return value;
 };
+
+class JavaString {
+  constructor(str) {
+    this.strVal = str;
+  }
+
+  replaceAll(find, replace) {
+    const rep = this.strVal.replace(new RegExp(find, 'g'), replace);
+    return new JavaString(rep);
+  }
+
+  toJSON() {
+    return this.toString();
+  }
+
+  toString() {
+    return this.strVal;
+  }
+}
 
 class JavaArray extends Array {
   // required so array starts with zero elements
@@ -111,7 +140,9 @@ class JavaMap {
   constructor(obj) {
     this.map = new Map();
     this.toJSON = this.toJSON.bind(this);
-    Object.entries(obj).forEach(([key, value]) => this.map.set(key, value));
+    Object.entries(obj).forEach(([key, value]) => {
+      this.map.set(key, value);
+    });
   }
 
   clear() {
@@ -145,7 +176,7 @@ class JavaMap {
   }
 
   get(key) {
-    if (this.map.has(key)) {
+    if (this.map.has(key.toString())) {
       return this.map.get(key);
     }
     return null;

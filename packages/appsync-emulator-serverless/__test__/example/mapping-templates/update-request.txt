@@ -2,7 +2,7 @@
 #set($expressionNames = {"#modifyDate": "modifyDate"})
 #set($expression = "SET #modifyDate = :modifyDate, ")
 #foreach( $key in $ctx.args.input.keySet() )
-  $util.quiet($expressionValues.put(":$key", $util.dynamodb.toDynamoDB($ctx.args.input.get($key))))
+  $util.quiet($expressionValues.put(":$key", $util.dynamodb.toDynamoDB($ctx.args.input.get("$key"))))
   $util.quiet($expressionNames.put("#$key", $key))
   #if ($foreach.hasNext)
     #set($expression = "$expression #$key = :$key, ")
