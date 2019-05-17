@@ -2,7 +2,7 @@ const { createSchema } = require('../schemaTest');
 const { graphql } = require('graphql');
 const { subscribe } = require('graphql/subscription');
 const gql = require('graphql-tag');
-const { decoded: jwt } = require('../testJWT');
+const { generateTestJWT } = require('../testJWT');
 const nock = require('nock');
 const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
 
@@ -16,6 +16,8 @@ const expectScalarResult = (result, field, val) => {
   expect(result).not.toHaveProperty('errors');
   expect(result).toMatchObject({ data: { [field]: val } });
 };
+
+const jwt = generateTestJWT();
 
 describe('creates executable schema', () => {
   const serverless = `${__dirname}/example/serverless.yml`;
