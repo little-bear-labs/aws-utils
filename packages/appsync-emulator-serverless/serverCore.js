@@ -32,9 +32,7 @@ class SubscriptionServer {
       this.onClientDisconnect(...args),
     );
 
-    mqttServer.on('subscribed', (...args) => {
-      this.onClientSubscribed(...args);
-    });
+    mqttServer.on('subscribed', (...args) => this.onClientSubscribed(...args));
 
     mqttServer.on('unsubscribed', (...args) =>
       this.onClientUnsubscribed(...args),
@@ -97,8 +95,10 @@ class SubscriptionServer {
         continue;
       }
 
-      // subscription filter based on variables
       let shouldPublish = true;
+
+      // subscription filter based on variables
+      // variable key/value pair must match payload key/value pair
       const variableKeys = Object.keys(variables);
       if (variableKeys.length) {
         const payloadField = Object.keys(payload.data)[0];
