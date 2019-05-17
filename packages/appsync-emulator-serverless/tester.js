@@ -81,7 +81,7 @@ const connect = (
     disableOffline: true,
     auth: {
       type: AUTH_TYPE,
-      jwtToken: () => testJWT.string,
+      jwtToken: testJWT.generateTestJWT(),
     },
     ...configs,
   });
