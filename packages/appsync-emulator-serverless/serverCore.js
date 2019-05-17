@@ -118,6 +118,7 @@ class SubscriptionServer {
           inspect(payload),
         );
         consola.info('variables', inspect(variables));
+        // eslint-disable-next-line
         continue;
       }
 
