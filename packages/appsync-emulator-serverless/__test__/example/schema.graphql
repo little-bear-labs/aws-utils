@@ -58,7 +58,7 @@ type Mutation {
 }
 
 type Subscription {
-  subscribeToPutQuoteRequest: QuoteRequest!
+  subscribeToPutQuoteRequest(commodity: String): QuoteRequest!
     @aws_subscribe(mutations: ["putQuoteRequest"])
   subscribeToPutQuoteResponse: QuoteResponse!
     @aws_subscribe(mutations: ["putQuoteResponse"])

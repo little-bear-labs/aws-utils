@@ -231,8 +231,8 @@ describe('creates executable schema', () => {
     const subscription = await subscribe({
       schema,
       document: gql`
-        subscription test {
-          subscribeToPutQuoteRequest {
+        subscription test($commodity: String) {
+          subscribeToPutQuoteRequest(commodity: $commodity) {
             id
             commodity
             amount
@@ -240,6 +240,9 @@ describe('creates executable schema', () => {
         }
       `,
       contextValue,
+      variables: {
+        commodity: 'foo',
+      },
     });
 
     const insertResult = await graphql({

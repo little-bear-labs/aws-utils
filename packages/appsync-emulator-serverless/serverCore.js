@@ -32,7 +32,9 @@ class SubscriptionServer {
       this.onClientDisconnect(...args),
     );
 
-    mqttServer.on('subscribed', (...args) => this.onClientSubscribed(...args));
+    mqttServer.on('subscribed', (...args) => {
+      this.onClientSubscribed(...args);
+    });
 
     mqttServer.on('unsubscribed', (...args) =>
       this.onClientUnsubscribed(...args),
@@ -79,8 +81,8 @@ class SubscriptionServer {
       });
     }
 
-    const { asyncIterator, topicId } = reg;
-    log.info('clientConnect', { clientId, topicId });
+    const { asyncIterator, topicId, variables } = reg;
+    log.info('clientConnect', { clientId, topicId, variables });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -92,6 +94,30 @@ class SubscriptionServer {
       ) {
         log.info('subscribe payload is null skipping publish', payload);
         // eslint-disable-next-line
+        continue;
+      }
+
+      // subscription filter based on variables
+      let shouldPublish = true;
+      const variableKeys = Object.keys(variables);
+      if (variableKeys.length) {
+        const payloadField = Object.keys(payload.data)[0];
+        variableKeys.forEach(variableKey => {
+          if (
+            !payload.data[payloadField][variableKey] ||
+            payload.data[payloadField][variableKey] !== variables[variableKey]
+          ) {
+            shouldPublish = false;
+          }
+        });
+      }
+
+      if (!shouldPublish) {
+        consola.info(
+          'subscribe payload did not match variables',
+          inspect(payload),
+        );
+        consola.info('variables', inspect(variables));
         continue;
       }
 
