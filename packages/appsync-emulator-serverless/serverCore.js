@@ -18,6 +18,39 @@ const { inspect } = require('util');
 const TopicExpires = 1000 * 60 * 100;
 const ConnectTimeout = 1000 * 60 * 2;
 
+function shouldPublishSubscription(payload, variables) {
+  if (
+    payload == null ||
+    (typeof payload === 'object' && payload.data == null)
+  ) {
+    log.info('subscribe payload is null skipping publish', payload);
+    return false;
+  }
+
+  const variableEntries = Object.entries(variables);
+
+  if (!variableEntries.length) {
+    return true;
+  }
+
+  const payloadData = Object.entries(payload.data)[0].pop();
+
+  // every variable key/value pair must match corresponding payload key/value pair
+  const variableResult = variables.every(
+    ([variableKey, variableValue]) =>
+      payloadData[variableKey] === variableValue,
+  );
+
+  if (!variableResult) {
+    consola.info('subscribe payload did not match variables', inspect(payload));
+    consola.info('variables', inspect(variables));
+    // eslint-disable-next-line
+    return false;
+  }
+
+  return true;
+}
+
 class SubscriptionServer {
   constructor({ schema, mqttServer, mqttURL, pubsub, subscriptions }) {
     Object.assign(this, { schema, mqttServer, mqttURL, pubsub, subscriptions });
@@ -86,38 +119,10 @@ class SubscriptionServer {
     while (true) {
       const { value: payload, done } = await asyncIterator.next();
       if (done) break;
-      if (
-        payload == null ||
-        (typeof payload === 'object' && payload.data == null)
-      ) {
-        log.info('subscribe payload is null skipping publish', payload);
-        // eslint-disable-next-line
-        continue;
-      }
 
-      let shouldPublish = true;
-
-      // subscription filter based on variables
-      // variable key/value pair must match payload key/value pair
-      const variableKeys = Object.keys(variables);
-      if (variableKeys.length) {
-        const payloadField = Object.keys(payload.data)[0];
-        variableKeys.forEach(variableKey => {
-          if (
-            !payload.data[payloadField][variableKey] ||
-            payload.data[payloadField][variableKey] !== variables[variableKey]
-          ) {
-            shouldPublish = false;
-          }
-        });
-      }
+      const shouldPublish = shouldPublishSubscription(payload, variables);
 
       if (!shouldPublish) {
-        consola.info(
-          'subscribe payload did not match variables',
-          inspect(payload),
-        );
-        consola.info('variables', inspect(variables));
         // eslint-disable-next-line
         continue;
       }
