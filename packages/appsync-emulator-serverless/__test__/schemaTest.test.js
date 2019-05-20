@@ -228,11 +228,11 @@ describe('creates executable schema', () => {
   });
 
   it('put', async () => {
-    const subscription = await subscribe({
+    const subscriptionWithNoArguments = await subscribe({
       schema,
       document: gql`
-        subscription test($commodity: String) {
-          subscribeToPutQuoteRequest(commodity: $commodity) {
+        subscription test {
+          subscribeToPutQuoteRequest {
             id
             commodity
             amount
@@ -242,6 +242,72 @@ describe('creates executable schema', () => {
       contextValue,
       variables: {
         commodity: 'foo',
+      },
+    });
+
+    const subscriptionWithProvidedOptionalArgument = await subscribe({
+      schema,
+      document: gql`
+        subscription subscribeWithOptionalArgument($commodity: String) {
+          subscribeWithOptionalArgument(commodity: $commodity) {
+            id
+            commodity
+            amount
+          }
+        }
+      `,
+      contextValue,
+      variables: {
+        commodity: 'foo',
+      },
+    });
+
+    const subscriptionWithoutProvidedOptionalArgument = await subscribe({
+      schema,
+      document: gql`
+        subscription subscribeWithOptionalArgument($commodity: String) {
+          subscribeWithOptionalArgument(commodity: $commodity) {
+            id
+            commodity
+            amount
+          }
+        }
+      `,
+      contextValue,
+    });
+
+    const subscriptionWithProvidedRequiredArgument = await subscribe({
+      schema,
+      document: gql`
+        subscription subscribeWithRequiredArgument($commodity: String) {
+        subscribeWithRequiredArgument(commodity: $commodity!) {
+            id
+            commodity
+            amount
+          }
+        }
+      `,
+      contextValue,
+      variables: {
+        commodity: 'foo',
+      },
+    });
+
+    const subscriptionWithBothArgumentTypesProvided = await subscribe({
+      schema,
+      document: gql`
+        subscribeWithBothArgumentTypes(commodity: String!, amount: Float)
+        subscribeWithBothArgumentTypes(commodity: $commodity!, amount: $amount) {
+            id
+            commodity
+            amount
+          }
+        }
+      `,
+      contextValue,
+      variables: {
+        commodity: 'foo',
+        amoundt: 100.5,
       },
     });
 
@@ -279,13 +345,61 @@ describe('creates executable schema', () => {
       },
     });
 
-    const subscriptionItem = await subscription.next();
-    expect(subscriptionItem).toMatchObject({
+    const noArgumentSubscriptionItem = await subscriptionWithNoArguments.next();
+    expect(noArgumentSubscriptionItem).toMatchObject({
       value: {
         data: {
           subscribeToPutQuoteRequest: {
             commodity: 'foo',
             amount: 100.5,
+          },
+        },
+      },
+      done: false,
+    });
+
+    const subscriptionWithProvidedOptionalArgumentItem = subscriptionWithProvidedOptionalArgument.next();
+    expect(subscriptionWithProvidedOptionalArgumentItem).toMatchObject({
+      value: {
+        data: {
+          subscribeToPutQuoteRequest: {
+            commodity: 'foo',
+          },
+        },
+      },
+      done: false,
+    });
+
+    const subscriptionWithoutProvidedOptionalArgumentItem = subscriptionWithoutProvidedOptionalArgument.next();
+    expect(subscriptionWithoutProvidedOptionalArgumentItem).toMatchObject({
+      value: {
+        data: {
+          subscribeToPutQuoteRequest: {
+            commodity: 'foo',
+          },
+        },
+      },
+      done: false,
+    });
+
+    const subscriptionWithProvidedRequiredArgumentItem = subscriptionWithProvidedRequiredArgument.next();
+    expect(subscriptionWithProvidedRequiredArgumentItem).toMatchObject({
+      value: {
+        data: {
+          subscribeToPutQuoteRequest: {
+            commodity: 'foo',
+          },
+        },
+      },
+      done: false,
+    });
+
+    const subscriptionWithBothArgumentTypesProvidedItem = subscriptionWithBothArgumentTypesProvided.next();
+    expect(subscriptionWithBothArgumentTypesProvidedItem).toMatchObject({
+      value: {
+        data: {
+          subscribeToPutQuoteRequest: {
+            commodity: 'foo',
           },
         },
       },
