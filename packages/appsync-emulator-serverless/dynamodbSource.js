@@ -58,25 +58,43 @@ const putItem = async (
       expression,
       expressionNames,
       expressionValues,
+      conditionalCheckFailedHandler,
+      equalsIgnore
     } = {},
   },
 ) => {
-  await db
-    .putItem({
-      TableName: table,
-      Item: {
-        ...attributeValues,
-        ...key,
-      },
-      ConditionExpression: expression,
-      ExpressionAttributeNames: expressionNames,
-      ExpressionAttributeValues: expressionValues,
-    })
-    .promise();
+  try {
+    const omit = require('lodash.omit');
+    const isEqual = require('lodash.isEqual');
 
-  // put does not return us anything useful so we need to fetch the object.
+    await db
+      .putItem({
+        TableName: table,
+        Item: {
+          ...attributeValues,
+          ...key,
+        },
+        ConditionExpression: expression,
+        ExpressionAttributeNames: expressionNames,
+        ExpressionAttributeValues: expressionValues
+      })
+      .promise();
+  } catch (err) {
+    if(err.code === "ConditionalCheckFailedException") {
+      // not error if PutItem would not have had any effect
+      let oldValues
+      try {oldValues = await getItem(db, table, {key, consistentRead: true})} catch (ignore) {}
+      const shouldBeValues = unmarshall({...attributeValues, ...key})
 
-  return getItem(db, table, { key, consistentRead: true });
+      if(isEqual(omit(oldValues, equalsIgnore || []), omit(shouldBeValues, equalsIgnore || [])))
+        return Promise.resolve(oldValues)
+
+      if (conditionalCheckFailedHandler && conditionalCheckFailedHandler.strategy !== "Reject") {
+        // if there is a custom check-failed handler pass oldValues up to give the caller a chance to call conditionalCheckFailedHandler
+        err.oldValues = oldValues
+      }
+    }
+    throw err
 };
 
 const updateItem = async (
