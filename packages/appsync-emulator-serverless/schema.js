@@ -46,7 +46,7 @@ class AppSyncError extends Error {
 }
 
 // eslint-disable-next-line
-const buildVTLContext = ({ root, vars, context, info }, result = null) => {
+const buildVTLContext = ({ root, vars, context, info }, result = null, stash = javaify({})) => {
   const {
     jwt: { iss: issuer, sub },
     request,
@@ -69,6 +69,7 @@ const buildVTLContext = ({ root, vars, context, info }, result = null) => {
     }),
     source: root || {},
     result: javaify(result),
+    stash,
   };
   return {
     util,
@@ -139,12 +140,12 @@ const runRequestVTL = (fullPath, graphqlInfo) => {
   log.info('loading request vtl', path.relative(process.cwd(), fullPath));
   const context = buildVTLContext(graphqlInfo);
   const content = fs.readFileSync(fullPath, 'utf8');
-  return handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo);
+  return [handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo), context.ctx.stash];
 };
 
-const runResponseVTL = (fullPath, graphqlInfo, result) => {
+const runResponseVTL = (fullPath, graphqlInfo, result, stash) => {
   log.info('loading response vtl', path.relative(process.cwd(), fullPath));
-  const context = buildVTLContext(graphqlInfo, result);
+  const context = buildVTLContext(graphqlInfo, result, stash);
   const content = fs.readFileSync(fullPath, 'utf8');
   return handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo);
 };
@@ -229,7 +230,7 @@ const generateTypeResolver = (
 
     assert(context && context.jwt, 'must have context.jwt');
     const resolverArgs = { root, vars, context, info };
-    const request = runRequestVTL(requestPath, resolverArgs);
+    const [request, stash] = runRequestVTL(requestPath, resolverArgs);
 
     let requestResult;
     if (request.operation === 'BatchInvoke') {
@@ -244,7 +245,7 @@ const generateTypeResolver = (
       requestResult = await dispatchRequestToSource(source, configs, request);
     }
 
-    const response = runResponseVTL(responsePath, resolverArgs, requestResult);
+    const response = runResponseVTL(responsePath, resolverArgs, requestResult, stash);
     consola.info(
       'Rendered Response:\n',
       inspect(response, { depth: null, colors: true }),
