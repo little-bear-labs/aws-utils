@@ -254,7 +254,7 @@ describe('creates executable schema', () => {
         }
       `,
       contextValue,
-      variables: {
+      variableValues: {
         commodity: 'foo',
       },
     });
@@ -273,10 +273,29 @@ describe('creates executable schema', () => {
       contextValue,
     });
 
+    const subscriptionWithProvidedButDifferentOptionalArgument = await subscribe(
+      {
+        schema,
+        document: gql`
+          subscription subscribeWithOptionalArgument($commodity: String) {
+            subscribeWithOptionalArgument(commodity: $commodity) {
+              id
+              commodity
+              amount
+            }
+          }
+        `,
+        contextValue,
+        variableValues: {
+          commodity: 'bar',
+        },
+      },
+    );
+
     const subscriptionWithProvidedRequiredArgument = await subscribe({
       schema,
       document: gql`
-        subscription subscribeWithRequiredArgument($commodity: String) {
+        subscription subscribeWithRequiredArgument($commodity: String!) {
           subscribeWithRequiredArgument(commodity: $commodity) {
             id
             commodity
@@ -285,12 +304,11 @@ describe('creates executable schema', () => {
         }
       `,
       contextValue,
-      variables: {
+      variableValues: {
         commodity: 'foo',
       },
     });
 
-    /*
     const subscriptionWithBothArgumentTypesProvided = await subscribe({
       schema,
       document: gql`
@@ -309,12 +327,11 @@ describe('creates executable schema', () => {
         }
       `,
       contextValue,
-      variables: {
+      variableValues: {
         commodity: 'foo',
         amoundt: 100.5,
       },
     });
-    */
 
     const insertResult = await graphql({
       schema,
@@ -387,6 +404,13 @@ describe('creates executable schema', () => {
       done: false,
     });
 
+    // subscriptionWithProvidedButDifferentOptionalArgument.next should not resolve
+    const result = await Promise.race([
+      subscriptionWithProvidedButDifferentOptionalArgument.next(),
+      new Promise(resolve => setTimeout(() => resolve(true), 5000)),
+    ]);
+    expect(result).toEqual(true);
+
     const subscriptionWithProvidedRequiredArgumentItem = await subscriptionWithProvidedRequiredArgument.next();
     expect(subscriptionWithProvidedRequiredArgumentItem).toMatchObject({
       value: {
@@ -399,7 +423,6 @@ describe('creates executable schema', () => {
       done: false,
     });
 
-    /*
     const subscriptionWithBothArgumentTypesProvidedItem = await subscriptionWithBothArgumentTypesProvided.next();
     expect(subscriptionWithBothArgumentTypesProvidedItem).toMatchObject({
       value: {
@@ -411,7 +434,6 @@ describe('creates executable schema', () => {
       },
       done: false,
     });
-    */
   });
 
   it('should allow querying lambda', async () => {
