@@ -275,6 +275,59 @@ const create = (errors = [], now = new Date()) => ({
       throw new Error('not implemented');
     },
   },
+    transform: {
+    toDynamoDBFilterExpression(filter) {
+      const opMap = {
+          'ne': '<>',
+          'eq': '=',
+          'lt': '<',
+          'le': '<=',
+          'gt': '>',
+          'ge': '>='
+      }
+      const funcMap = {
+          'notContains': 'NOT contains',
+          'beginsWith': 'begins_with'
+      }
+      const {DynamoDB: { Converter },} = require('aws-sdk')
+
+      filter = filter.toJSON()
+      const expressionValues = {}
+      const expressionNames = {}
+      let expression = Object.entries(filter).reduce(
+        (result, [fieldName, fieldFilters]) => {
+          return Object.entries(fieldFilters).reduce(
+            (result, [op, expectedValue]) => {
+              let currCondition
+              if(op === 'between') {
+                currCondition = `(#${fieldName} between :${fieldName}Lower AND :${fieldName}Upper)`
+                expressionValues[`:${fieldName}Lower`] = Converter.input(toJSON(expectedValue[0]))
+                expressionValues[`:${fieldName}Upper`] = Converter.input(toJSON(expectedValue[1]))
+                expressionNames[`#${fieldName}`] = fieldName
+              } else {
+                const dynamoOp = opMap[op]
+                if(dynamoOp) {
+                  currCondition = `(#${fieldName} ${opMap[op]} :${fieldName}_${op})`
+                } else {
+                  op = funcMap[op] || op
+                  currCondition = `(${op}(#${fieldName},:${fieldName}_${op.replace(' ', '_')}))`
+                }
+                expressionValues[`:${fieldName}_${op.replace(' ', '_')}`] = Converter.input(
+                    toJSON(expectedValue)
+                )
+                expressionNames[`#${fieldName}`] = fieldName
+              }
+              return result ? `${result} AND ${currCondition}` : currCondition
+            },
+            result
+          )
+        },
+        undefined
+      )
+      // wrap result in String to protect from escaping
+      return new String(JSON.stringify({expression, expressionValues, expressionNames}))
+    }
+  },
 });
 
 module.exports = {
