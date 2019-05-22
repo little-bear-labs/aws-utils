@@ -36,7 +36,7 @@ function shouldPublishSubscription(payload, variables) {
   const payloadData = Object.entries(payload.data)[0].pop();
 
   // every variable key/value pair must match corresponding payload key/value pair
-  const variableResult = variables.every(
+  const variableResult = variableEntries.every(
     ([variableKey, variableValue]) =>
       payloadData[variableKey] === variableValue,
   );
