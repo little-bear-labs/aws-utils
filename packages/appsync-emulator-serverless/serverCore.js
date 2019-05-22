@@ -120,9 +120,7 @@ class SubscriptionServer {
       const { value: payload, done } = await asyncIterator.next();
       if (done) break;
 
-      const shouldPublish = shouldPublishSubscription(payload, variables);
-
-      if (!shouldPublish) {
+      if (!shouldPublishSubscription(payload, variables)) {
         // eslint-disable-next-line
         continue;
       }

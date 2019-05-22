@@ -73,6 +73,21 @@ custom:
         field: neverNotify
         request: subscribePassthrough-request.txt
         response: null-response.txt
+      - dataSource: SubscriberPassthrough
+        type: Subscription
+        field: subscribeWithOptionalArgument
+        request: subscribePassthrough-request.txt
+        response: result-response.txt
+      - dataSource: SubscriberPassthrough
+        type: Subscription
+        field: subscribeWithRequiredArgument
+        request: subscribePassthrough-request.txt
+        response: result-response.txt
+      - dataSource: SubscriberPassthrough
+        type: Subscription
+        field: subscribeWithBothArgumentTypes
+        request: subscribePassthrough-request.txt
+        response: result-response.txt
       - dataSource: QuoteResponse
         type: Query
         field: QuoteResponseById
