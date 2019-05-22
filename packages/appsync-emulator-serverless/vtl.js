@@ -240,4 +240,4 @@ const vtl = (str, context, macros = {}) => {
   return output;
 };
 
-module.exports = { vtl, javaify, toJSON };
+module.exports = { vtl, JavaMap, javaify, toJSON };
