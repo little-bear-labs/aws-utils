@@ -1,7 +1,5 @@
 const { createSchema } = require('../schemaTest');
 const { graphql } = require('graphql');
-const { subscribe } = require('graphql/subscription');
-const gql = require('graphql-tag');
 const { decoded: jwt } = require('../testJWT');
 const nock = require('nock');
 const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
@@ -228,111 +226,6 @@ describe('creates executable schema', () => {
   });
 
   it('put', async () => {
-    const subscriptionWithNoArguments = await subscribe({
-      schema,
-      document: gql`
-        subscription test {
-          subscribeToPutQuoteRequest {
-            id
-            commodity
-            amount
-          }
-        }
-      `,
-      contextValue,
-    });
-
-    const subscriptionWithProvidedOptionalArgument = await subscribe({
-      schema,
-      document: gql`
-        subscription subscribeWithOptionalArgument($commodity: String) {
-          subscribeWithOptionalArgument(commodity: $commodity) {
-            id
-            commodity
-            amount
-          }
-        }
-      `,
-      contextValue,
-      variableValues: {
-        commodity: 'foo',
-      },
-    });
-
-    const subscriptionWithoutProvidedOptionalArgument = await subscribe({
-      schema,
-      document: gql`
-        subscription subscribeWithOptionalArgument($commodity: String) {
-          subscribeWithOptionalArgument(commodity: $commodity) {
-            id
-            commodity
-            amount
-          }
-        }
-      `,
-      contextValue,
-    });
-
-    const subscriptionWithProvidedButDifferentOptionalArgument = await subscribe(
-      {
-        schema,
-        document: gql`
-          subscription subscribeWithOptionalArgument($commodity: String) {
-            subscribeWithOptionalArgument(commodity: $commodity) {
-              id
-              commodity
-              amount
-            }
-          }
-        `,
-        contextValue,
-        variableValues: {
-          commodity: 'bar',
-        },
-      },
-    );
-
-    const subscriptionWithProvidedRequiredArgument = await subscribe({
-      schema,
-      document: gql`
-        subscription subscribeWithRequiredArgument($commodity: String!) {
-          subscribeWithRequiredArgument(commodity: $commodity) {
-            id
-            commodity
-            amount
-          }
-        }
-      `,
-      contextValue,
-      variableValues: {
-        commodity: 'foo',
-      },
-    });
-
-    const subscriptionWithBothArgumentTypesProvided = await subscribe({
-      schema,
-      document: gql`
-        subscription subscribeWithBothArgumentTypes(
-          $commodity: String!
-          $amount: Float
-        ) {
-          subscribeWithBothArgumentTypes(
-            commodity: $commodity
-            amount: $amount
-          ) {
-            id
-            commodity
-            amount
-          }
-        }
-      `,
-      contextValue,
-      variableValues: {
-        commodity: 'foo',
-        amoundt: 100.5,
-      },
-    });
-
     const insertResult = await graphql({
       schema,
       source: `
@@ -365,74 +258,6 @@ describe('creates executable schema', () => {
           tags: ['foo', 'bar'],
         },
       },
-    });
-
-    const noArgumentSubscriptionItem = await subscriptionWithNoArguments.next();
-    expect(noArgumentSubscriptionItem).toMatchObject({
-      value: {
-        data: {
-          subscribeToPutQuoteRequest: {
-            commodity: 'foo',
-            amount: 100.5,
-          },
-        },
-      },
-      done: false,
-    });
-
-    const subscriptionWithProvidedOptionalArgumentItem = await subscriptionWithProvidedOptionalArgument.next();
-    expect(subscriptionWithProvidedOptionalArgumentItem).toMatchObject({
-      value: {
-        data: {
-          subscribeWithOptionalArgument: {
-            commodity: 'foo',
-          },
-        },
-      },
-      done: false,
-    });
-
-    const subscriptionWithoutProvidedOptionalArgumentItem = await subscriptionWithoutProvidedOptionalArgument.next();
-    expect(subscriptionWithoutProvidedOptionalArgumentItem).toMatchObject({
-      value: {
-        data: {
-          subscribeWithOptionalArgument: {
-            commodity: 'foo',
-          },
-        },
-      },
-      done: false,
-    });
-
-    // subscriptionWithProvidedButDifferentOptionalArgument.next should not resolve
-    const result = await Promise.race([
-      subscriptionWithProvidedButDifferentOptionalArgument.next(),
-      new Promise(resolve => setTimeout(() => resolve(true), 5000)),
-    ]);
-    expect(result).toEqual(true);
-
-    const subscriptionWithProvidedRequiredArgumentItem = await subscriptionWithProvidedRequiredArgument.next();
-    expect(subscriptionWithProvidedRequiredArgumentItem).toMatchObject({
-      value: {
-        data: {
-          subscribeWithRequiredArgument: {
-            commodity: 'foo',
-          },
-        },
-      },
-      done: false,
-    });
-
-    const subscriptionWithBothArgumentTypesProvidedItem = await subscriptionWithBothArgumentTypesProvided.next();
-    expect(subscriptionWithBothArgumentTypesProvidedItem).toMatchObject({
-      value: {
-        data: {
-          subscribeWithBothArgumentTypes: {
-            commodity: 'foo',
-          },
-        },
-      },
-      done: false,
     });
   });
 

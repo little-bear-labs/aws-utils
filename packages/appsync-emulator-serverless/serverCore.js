@@ -121,6 +121,7 @@ class SubscriptionServer {
       if (done) break;
 
       if (!shouldPublishSubscription(payload, variables)) {
+        consola.info('skipping publish', { clientId, topicId });
         // eslint-disable-next-line
         continue;
       }
