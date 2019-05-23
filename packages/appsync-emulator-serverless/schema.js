@@ -140,7 +140,10 @@ const runRequestVTL = (fullPath, graphqlInfo) => {
   log.info('loading request vtl', path.relative(process.cwd(), fullPath));
   const context = buildVTLContext(graphqlInfo);
   const content = fs.readFileSync(fullPath, 'utf8');
-  return [handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo), context.ctx.stash];
+  return [
+    handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo),
+    context.ctx.stash,
+  ];
 };
 
 const runResponseVTL = (fullPath, graphqlInfo, result, stash) => {
@@ -245,7 +248,12 @@ const generateTypeResolver = (
       requestResult = await dispatchRequestToSource(source, configs, request);
     }
 
-    const response = runResponseVTL(responsePath, resolverArgs, requestResult, stash);
+    const response = runResponseVTL(
+      responsePath,
+      resolverArgs,
+      requestResult,
+      stash,
+    );
     consola.info(
       'Rendered Response:\n',
       inspect(response, { depth: null, colors: true }),

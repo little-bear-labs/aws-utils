@@ -615,6 +615,24 @@ describe('creates executable schema', () => {
     expect(result).toMatchObject({ data: { jsonTest: { test: 'yup' } } });
   });
 
+  it('should pass stash to response template', async () => {
+    const result = await graphql({
+      schema,
+      contextValue,
+      source: `
+      query test {
+        testStash(name: "horst") {
+          test
+          stash
+        }
+      }
+      `,
+    });
+    expect(result).toMatchObject({
+      data: { testStash: { test: 'yup', stash: 'horst' }, },
+    });
+  });
+
   it('AWSDate scalar', async () => {
     const field = 'dateTest';
     const val = new Date('05 October 2011').toISOString().split('T')[0];

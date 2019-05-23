@@ -28,6 +28,7 @@ type Query {
   phoneTest(phoneTest: String): AWSPhone
   urlTest(urlTest: String): AWSURL
   search(text: String!): [ESSearchResult]
+  stashTest(name: String!): String!
 }
 
 type httpUser {
