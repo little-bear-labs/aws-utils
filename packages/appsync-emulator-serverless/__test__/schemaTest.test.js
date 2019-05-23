@@ -631,7 +631,7 @@ describe('creates executable schema', () => {
       `,
     });
     expect(result).toMatchObject({
-      data: { testStash: { test: 'yup', stash: 'horst' } },
+      data: { stashTest: { test: 'yup', stash: 'horst' } },
     });
   });
 

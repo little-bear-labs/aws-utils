@@ -28,7 +28,7 @@ type Query {
   phoneTest(phoneTest: String): AWSPhone
   urlTest(urlTest: String): AWSURL
   search(text: String!): [ESSearchResult]
-  stashTest(name: String!): String!
+  stashTest(name: String!): LambdaInfo!
 }
 
 type httpUser {
@@ -84,6 +84,7 @@ type CognitoInfo {
 type LambdaInfo {
   test: String!
   lambdaChild: [LambdaInfo]
+  stash: String
 }
 
 type QuoteRequest {
@@ -91,6 +92,7 @@ type QuoteRequest {
   commodity: String
   amount: Float
   tags: [String]
+  stash: String
 }
 
 type ESSearchResult {
@@ -108,7 +110,6 @@ type QuoteResponse {
   id: ID!
   offer: String
   expires: Float
-  stash: String
 }
 
 input QuoteResponseInput {

@@ -46,7 +46,8 @@ class AppSyncError extends Error {
 }
 
 // eslint-disable-next-line
-const buildVTLContext = ({ root, vars, context, info }, result = null, stash = javaify({})) => {
+const buildVTLContext = ({ root, vars, context, info }, result = null, stash = null) => {
+  stash = stash || javaify({});
   const {
     jwt: { iss: issuer, sub },
     request,
@@ -302,20 +303,21 @@ const generateSubscriptionTypeResolver = (
       // XXX: The below is what our templates expect but not 100% sure it's correct.
       // for subscriptions the "arguments" field is same as root here.
       const resolverArgs = { root, vars: root, context, info };
-      const [request, stash] = runRequestVTL(requestPath, resolverArgs)
+      const [request, stash] = runRequestVTL(requestPath, resolverArgs);
       const requestResult =
-        (await dispatchRequestToSource(
-          source,
-          configs,
-          request,
-        )) || {};
+        (await dispatchRequestToSource(source, configs, request)) || {};
 
       consola.info(
         'Rendered Request:\n',
         inspect(requestResult, { depth: null, colors: true }),
       );
       log.info('subscription resolver request', requestResult);
-      const response = runResponseVTL(responsePath, resolverArgs, requestResult, stash);
+      const response = runResponseVTL(
+        responsePath,
+        resolverArgs,
+        requestResult,
+        stash,
+      );
       consola.info(
         'Rendered Response:\n',
         inspect(response, { depth: null, colors: true }),
