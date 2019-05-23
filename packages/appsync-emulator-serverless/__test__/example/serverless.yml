@@ -102,7 +102,7 @@ custom:
         type: Subscription
         field: subscribeToPutQuoteResponse
         request: subscribePassthrough-request.txt
-        response: result-response.txt
+        response: result-with-stash-response.vtl
       - dataSource: SubscriberPassthrough
         type: Query
         field: cognitoInfo

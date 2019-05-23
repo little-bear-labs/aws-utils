@@ -1,3 +1,4 @@
+#set($context.stash.name = "horst")
 {
   "version": "2017-02-28",
   "payload": $utils.toJson($context.arguments)

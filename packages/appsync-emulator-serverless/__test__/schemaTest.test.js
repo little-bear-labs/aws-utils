@@ -236,6 +236,7 @@ describe('creates executable schema', () => {
             id
             commodity
             amount
+            stash
           }
         }
       `,
@@ -272,6 +273,7 @@ describe('creates executable schema', () => {
           commodity: 'foo',
           amount: 100.5,
           tags: ['foo', 'bar'],
+          stash: 'horst',
         },
       },
     });
@@ -621,7 +623,7 @@ describe('creates executable schema', () => {
       contextValue,
       source: `
       query test {
-        testStash(name: "horst") {
+        stashTest(name: "horst") {
           test
           stash
         }
@@ -629,7 +631,7 @@ describe('creates executable schema', () => {
       `,
     });
     expect(result).toMatchObject({
-      data: { testStash: { test: 'yup', stash: 'horst' }, },
+      data: { testStash: { test: 'yup', stash: 'horst' } },
     });
   });
 

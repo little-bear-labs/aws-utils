@@ -302,19 +302,20 @@ const generateSubscriptionTypeResolver = (
       // XXX: The below is what our templates expect but not 100% sure it's correct.
       // for subscriptions the "arguments" field is same as root here.
       const resolverArgs = { root, vars: root, context, info };
-      const request =
+      const [request, stash] = runRequestVTL(requestPath, resolverArgs)
+      const requestResult =
         (await dispatchRequestToSource(
           source,
           configs,
-          runRequestVTL(requestPath, resolverArgs),
+          request,
         )) || {};
 
       consola.info(
         'Rendered Request:\n',
-        inspect(request, { depth: null, colors: true }),
+        inspect(requestResult, { depth: null, colors: true }),
       );
-      log.info('subscription resolver request', request);
-      const response = runResponseVTL(responsePath, resolverArgs, request);
+      log.info('subscription resolver request', requestResult);
+      const response = runResponseVTL(responsePath, resolverArgs, requestResult, stash);
       consola.info(
         'Rendered Response:\n',
         inspect(response, { depth: null, colors: true }),

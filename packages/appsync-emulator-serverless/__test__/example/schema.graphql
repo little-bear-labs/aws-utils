@@ -108,6 +108,7 @@ type QuoteResponse {
   id: ID!
   offer: String
   expires: Float
+  stash: String
 }
 
 input QuoteResponseInput {
