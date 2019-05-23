@@ -186,43 +186,6 @@ describe('appsync-emulator-serverless/tester', () => {
     });
   });
 
-  it('subscription with provided optional argument', async () => {
-    serverSetup = await createTestServer({
-      serverless: `${__dirname}/example/serverless.yml`,
-    });
-    const client = connectTestServer(serverSetup, AWSAppSyncClient);
-
-    const subscriptionWithProvidedOptionalArgument = await client.subscribe({
-      query: gql`
-        subscription subscribeWithOptionalArgument($commodity: String) {
-          subscribeWithOptionalArgument(commodity: $commodity) {
-            id
-            commodity
-            amount
-          }
-        }
-      `,
-      variables: {
-        commodity: 'foo',
-      },
-    });
-
-    const subscriptionPayloadPromise = getPromiseForNextSubscriptionEvent(
-      subscriptionWithProvidedOptionalArgument,
-    );
-
-    await mutate(client);
-
-    expect(await subscriptionPayloadPromise).toMatchObject({
-      data: {
-        subscribeWithOptionalArgument: {
-          commodity: 'foo',
-          amount: 100.5,
-        },
-      },
-    });
-  });
-
   it('subscription without provided optional argument', async () => {
     serverSetup = await createTestServer({
       serverless: `${__dirname}/example/serverless.yml`,
@@ -257,7 +220,7 @@ describe('appsync-emulator-serverless/tester', () => {
     });
   });
 
-  it('subscription with provided, but non equal, optional argument', async () => {
+  it('subscription with provided optional argument', async () => {
     serverSetup = await createTestServer({
       serverless: `${__dirname}/example/serverless.yml`,
     });
@@ -273,26 +236,24 @@ describe('appsync-emulator-serverless/tester', () => {
       }
     `;
 
-    const subscriptionWithProvidedButDifferentOptionalArgument = await client.subscribe(
-      {
-        query,
-        variables: {
-          commodity: 'bar',
-        },
-      },
-    );
-    const subscriptionWithProvidedOptionalArgument = await clientTwo.subscribe({
+    const subscriptionWhichShouldBePublished = await clientTwo.subscribe({
       query,
       variables: {
         commodity: 'foo',
       },
     });
+    const subscriptionWhichShouldNotBePublished = await client.subscribe({
+      query,
+      variables: {
+        commodity: 'bar',
+      },
+    });
 
     const subscriptionPayloadPromise = getPromiseForNextSubscriptionEvent(
-      subscriptionWithProvidedButDifferentOptionalArgument,
+      subscriptionWhichShouldNotBePublished,
     );
     const subscriptionPayloadPromiseTwo = getPromiseForNextSubscriptionEvent(
-      subscriptionWithProvidedOptionalArgument,
+      subscriptionWhichShouldBePublished,
     );
 
     await mutate(client);
