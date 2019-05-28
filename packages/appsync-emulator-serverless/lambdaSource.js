@@ -80,7 +80,7 @@ const lambdaSource = async (
         ...provider.environment,
         ...fnConfig.environment,
       },
-      stdio: [0, 1, 2, 'ipc']
+      stdio: [0, 1, 2, 'ipc'],
     };
     if (process.env.SLS_DEBUG) childOptions.execArgv = ['--inspect-brk'];
     child = fork(Runner, [], childOptions);
