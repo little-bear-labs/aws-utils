@@ -275,58 +275,72 @@ const create = (errors = [], now = new Date()) => ({
       throw new Error('not implemented');
     },
   },
-    transform: {
+  transform: {
     toDynamoDBFilterExpression(filter) {
       const opMap = {
-          'ne': '<>',
-          'eq': '=',
-          'lt': '<',
-          'le': '<=',
-          'gt': '>',
-          'ge': '>='
-      }
+        ne: '<>',
+        eq: '=',
+        lt: '<',
+        le: '<=',
+        gt: '>',
+        ge: '>=',
+      };
       const funcMap = {
-          'notContains': 'NOT contains',
-          'beginsWith': 'begins_with'
-      }
-      const {DynamoDB: { Converter },} = require('aws-sdk')
+        notContains: 'NOT contains',
+        beginsWith: 'begins_with',
+      };
+      const {
+        DynamoDB: { Converter },
+      } = require('aws-sdk');
 
-      filter = filter.toJSON()
-      const expressionValues = {}
-      const expressionNames = {}
-      let expression = Object.entries(filter).reduce(
-        (result, [fieldName, fieldFilters]) => {
-          return Object.entries(fieldFilters).reduce(
-            (result, [op, expectedValue]) => {
-              let currCondition
-              if(op === 'between') {
-                currCondition = `(#${fieldName} between :${fieldName}Lower AND :${fieldName}Upper)`
-                expressionValues[`:${fieldName}Lower`] = Converter.input(toJSON(expectedValue[0]))
-                expressionValues[`:${fieldName}Upper`] = Converter.input(toJSON(expectedValue[1]))
-                expressionNames[`#${fieldName}`] = fieldName
+      const filterObj = filter.toJSON();
+      const expressionValues = {};
+      const expressionNames = {};
+      const expression = Object.entries(filterObj).reduce(
+        (result, [fieldName, fieldFilters]) =>
+          Object.entries(fieldFilters).reduce(
+            (conditions, [op, expectedValue]) => {
+              let currCondition;
+              if (op === 'between') {
+                currCondition = `(#${fieldName} between :${fieldName}Lower AND :${fieldName}Upper)`;
+                expressionValues[`:${fieldName}Lower`] = Converter.input(
+                  toJSON(expectedValue[0]),
+                );
+                expressionValues[`:${fieldName}Upper`] = Converter.input(
+                  toJSON(expectedValue[1]),
+                );
+                expressionNames[`#${fieldName}`] = fieldName;
               } else {
-                const dynamoOp = opMap[op]
-                if(dynamoOp) {
-                  currCondition = `(#${fieldName} ${opMap[op]} :${fieldName}_${op})`
+                const dynamoOp = opMap[op];
+                if (dynamoOp) {
+                  currCondition = `(#${fieldName} ${
+                    opMap[op]
+                  } :${fieldName}_${op})`;
                 } else {
-                  op = funcMap[op] || op
-                  currCondition = `(${op}(#${fieldName},:${fieldName}_${op.replace(' ', '_')}))`
+                  const func = funcMap[op] || op;
+                  currCondition = `(${func}(#${fieldName},:${fieldName}_${func.replace(
+                    ' ',
+                    '_',
+                  )}))`;
                 }
-                expressionValues[`:${fieldName}_${op.replace(' ', '_')}`] = Converter.input(
-                    toJSON(expectedValue)
-                )
-                expressionNames[`#${fieldName}`] = fieldName
+                expressionValues[
+                  `:${fieldName}_${op.replace(' ', '_')}`
+                ] = Converter.input(toJSON(expectedValue));
+                expressionNames[`#${fieldName}`] = fieldName;
               }
-              return result ? `${result} AND ${currCondition}` : currCondition
+              return conditions
+                ? `${conditions} AND ${currCondition}`
+                : currCondition;
             },
-            result
-          )
-        },
-        undefined
-      )
+            result,
+          ),
+        undefined,
+      );
       // wrap result in String to protect from escaping
-      return new String(JSON.stringify({expression, expressionValues, expressionNames}))
-    }
+      return new String( // eslint-disable-line no-new-wrappers
+        JSON.stringify({ expression, expressionValues, expressionNames }),
+      );
+    },
   },
 });
 
