@@ -1,6 +1,7 @@
 const {
   DynamoDB: { Converter },
 } = require('aws-sdk');
+const isEqual = require('lodash.isequal'); // TODO: hoist
 
 const nullIfEmpty = obj => (Object.keys(obj).length === 0 ? null : obj);
 
@@ -59,14 +60,11 @@ const putItem = async (
       expressionNames,
       expressionValues,
       conditionalCheckFailedHandler,
-      equalsIgnore
+      equalsIgnore,
     } = {},
   },
 ) => {
   try {
-    const omit = require('lodash.omit');
-    const isEqual = require('lodash.isEqual');
-
     await db
       .putItem({
         TableName: table,
@@ -76,25 +74,48 @@ const putItem = async (
         },
         ConditionExpression: expression,
         ExpressionAttributeNames: expressionNames,
-        ExpressionAttributeValues: expressionValues
+        ExpressionAttributeValues: expressionValues,
       })
       .promise();
+
+    return await getItem(db, table, { key, consistentRead: true });
   } catch (err) {
-    if(err.code === "ConditionalCheckFailedException") {
-      // not error if PutItem would not have had any effect
-      let oldValues
-      try {oldValues = await getItem(db, table, {key, consistentRead: true})} catch (ignore) {}
-      const shouldBeValues = unmarshall({...attributeValues, ...key})
+    if (err.code === 'ConditionalCheckFailedException') {
+      // not an error if PutItem would not have had any effect
+      let oldValues = {};
+      try {
+        oldValues = await getItem(db, table, { key, consistentRead: true });
+      } catch (ignore) {
+        /* ignore */
+      }
 
-      if(isEqual(omit(oldValues, equalsIgnore || []), omit(shouldBeValues, equalsIgnore || [])))
-        return Promise.resolve(oldValues)
+      const shouldBeValues = unmarshall({ ...attributeValues, ...key });
+      const ignoreKeys = equalsIgnore || [];
 
-      if (conditionalCheckFailedHandler && conditionalCheckFailedHandler.strategy !== "Reject") {
+      if (
+        isEqual(
+          Object.entries(oldValues).reduce((newObject, [k, v]) => {
+            if (ignoreKeys.indexOf(k) === -1) return { ...newObject, k: v };
+            return newObject;
+          }, {}),
+          Object.entries(shouldBeValues).reduce((newObject, [k, v]) => {
+            if (ignoreKeys.indexOf(k) === -1) return { ...newObject, k: v };
+            return newObject;
+          }, {}),
+        )
+      )
+        return Promise.resolve(oldValues);
+
+      if (
+        conditionalCheckFailedHandler &&
+        conditionalCheckFailedHandler.strategy !== 'Reject'
+      ) {
         // if there is a custom check-failed handler pass oldValues up to give the caller a chance to call conditionalCheckFailedHandler
-        err.oldValues = oldValues
+        err.oldValues = oldValues;
       }
     }
-    throw err
+    throw err;
+  }
 };
 
 const updateItem = async (
