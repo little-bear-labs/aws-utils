@@ -92,6 +92,19 @@ describe('vtl', () => {
       ).trim();
       expect(out).toBe('{id=123}');
     });
+
+    it('should do regex split', () => {
+      const out = vtl(
+        `
+        #set($splitted = $ctx.args.str.split("(\\|)(?!.*\\|)"))
+        #splitted.toJSON()
+        `,
+        javaify({
+          ctx: { args: { str: 'a|b|c' } },
+        }),
+      ).trim();
+      expect(out).toBe("['a|b', 'c']");
+    });
   });
 });
 
