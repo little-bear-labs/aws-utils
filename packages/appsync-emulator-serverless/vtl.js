@@ -57,6 +57,14 @@ class JavaString {
     return new JavaString(rep);
   }
 
+  split(regexString, limit = undefined) {
+    const re = new RegExp(
+      typeof regexString === 'object' ? regexString.strVal : regexString,
+    );
+    const result = this.strVal.split(re, limit);
+    return result.map(v => new JavaString(v));
+  }
+
   toJSON() {
     return this.toString();
   }
