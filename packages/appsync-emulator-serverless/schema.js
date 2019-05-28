@@ -47,7 +47,6 @@ class AppSyncError extends Error {
 
 // eslint-disable-next-line
 const buildVTLContext = ({ root, vars, context, info }, result = null, stash = null) => {
-  stash = stash || javaify({});
   const {
     jwt: { iss: issuer, sub },
     request,
@@ -70,7 +69,7 @@ const buildVTLContext = ({ root, vars, context, info }, result = null, stash = n
     }),
     source: root || {},
     result: javaify(result),
-    stash,
+    stash: stash || javaify({}),
   };
   return {
     util,
