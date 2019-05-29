@@ -97,7 +97,7 @@ describe('vtl', () => {
       const out = vtl(
         `
         #set($splitted = $ctx.args.str.split("(\\|)(?!.*\\|)"))
-        #splitted.toJSON()
+        $splitted.toJSON()
         `,
         javaify({
           ctx: { args: { str: 'a|b|c' } },

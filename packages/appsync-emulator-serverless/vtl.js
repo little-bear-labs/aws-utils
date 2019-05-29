@@ -62,7 +62,8 @@ class JavaString {
       typeof regexString === 'object' ? regexString.strVal : regexString,
     );
     const result = this.strVal.split(re, limit);
-    return result.map(v => new JavaString(v));
+    // java.util.String.split does not seem to include the regex in the result ...
+    return result.filter((v, ii) => (ii+1) % 2).map(v => new JavaString(v));
   }
 
   toJSON() {
