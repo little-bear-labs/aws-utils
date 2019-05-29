@@ -103,7 +103,7 @@ describe('vtl', () => {
           ctx: { args: { str: 'a|b|c' } },
         }),
       ).trim();
-      expect(out).toBe("['a|b', 'c']");
+      expect(out).toBe('[a|b, c]');
     });
   });
 });
