@@ -74,7 +74,7 @@ const create = (errors = [], now = new Date()) => ({
     return !!value;
   },
   defaultIfNull(value, defaultValue = '') {
-    if (value !== null) return value;
+    if (value !== null && value !== undefined) return value;
     return defaultValue;
   },
   defaultIfNullOrEmpty(value, defaultValue) {

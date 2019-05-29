@@ -72,7 +72,7 @@ const lambdaSource = async (
       payload,
     });
   } else {
-    child = fork(Runner, [], {
+    const childOptions = {
       env: {
         ...process.env,
         ...dynamodbTableAliases,
@@ -81,7 +81,9 @@ const lambdaSource = async (
         ...fnConfig.environment,
       },
       stdio: [0, 1, 2, 'ipc'],
-    });
+    };
+    if (process.env.SLS_DEBUG) childOptions.execArgv = ['--inspect-brk'];
+    child = fork(Runner, [], childOptions);
 
     child.send({
       module: fullPath,
