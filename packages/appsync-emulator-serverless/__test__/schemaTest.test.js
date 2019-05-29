@@ -226,21 +226,6 @@ describe('creates executable schema', () => {
   });
 
   it('put', async () => {
-    const subscription = await subscribe({
-      schema,
-      document: gql`
-        subscription test {
-          subscribeToPutQuoteRequest {
-            id
-            commodity
-            amount
-            stash
-          }
-        }
-      `,
-      contextValue,
-    });
-
     const insertResult = await graphql({
       schema,
       source: `
@@ -271,7 +256,6 @@ describe('creates executable schema', () => {
           commodity: 'foo',
           amount: 100.5,
           tags: ['foo', 'bar'],
-          stash: 'horst',
         },
       },
     });
