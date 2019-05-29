@@ -95,11 +95,11 @@ const putItem = async (
       if (
         isEqual(
           Object.entries(oldValues).reduce((newObject, [k, v]) => {
-            if (ignoreKeys.indexOf(k) === -1) return { ...newObject, k: v };
+            if (ignoreKeys.indexOf(k) === -1) return { ...newObject, [k]: v };
             return newObject;
           }, {}),
           Object.entries(shouldBeValues).reduce((newObject, [k, v]) => {
-            if (ignoreKeys.indexOf(k) === -1) return { ...newObject, k: v };
+            if (ignoreKeys.indexOf(k) === -1) return { ...newObject, [k]: v };
             return newObject;
           }, {}),
         )
