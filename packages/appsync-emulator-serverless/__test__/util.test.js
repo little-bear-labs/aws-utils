@@ -3,6 +3,7 @@ const {
   Unauthorized,
   TemplateSentError,
   CustomTemplateException,
+  getAppSyncConfig,
 } = require('../util');
 const { javaify } = require('../vtl');
 
@@ -218,6 +219,35 @@ describe('util', () => {
         beep: {
           L: [{ S: 'boop' }],
         },
+      });
+    });
+  });
+
+  describe('getAppSyncConfig', () => {
+    it('single api', () => {
+      expect(
+        getAppSyncConfig({ custom: { appSync: { name: 'test' } } }),
+      ).toEqual({
+        name: 'test',
+      });
+    });
+    it("multiple api's", () => {
+      expect(
+        getAppSyncConfig({
+          custom: { appSync: [{ name: 'first' }, { name: 'second' }] },
+        }),
+      ).toEqual({
+        name: 'first',
+      });
+    });
+
+    it("multiple api's with no name", () => {
+      expect(
+        getAppSyncConfig({
+          custom: { appSync: [{ randomConfig: 1 }, { name: 'second' }] },
+        }),
+      ).toEqual({
+        randomConfig: 1,
       });
     });
   });
