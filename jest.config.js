@@ -1,4 +1,6 @@
 module.exports = {
+  bail: true,
+  verbose: false,
   projects: [
     {
       displayName: 'test',

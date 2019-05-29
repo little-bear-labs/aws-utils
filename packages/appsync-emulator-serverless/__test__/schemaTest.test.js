@@ -1,7 +1,5 @@
 const { createSchema } = require('../schemaTest');
 const { graphql } = require('graphql');
-const { subscribe } = require('graphql/subscription');
-const gql = require('graphql-tag');
 const { decoded: jwt } = require('../testJWT');
 const nock = require('nock');
 const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
@@ -228,20 +226,6 @@ describe('creates executable schema', () => {
   });
 
   it('put', async () => {
-    const subscription = await subscribe({
-      schema,
-      document: gql`
-        subscription test {
-          subscribeToPutQuoteRequest {
-            id
-            commodity
-            amount
-          }
-        }
-      `,
-      contextValue,
-    });
-
     const insertResult = await graphql({
       schema,
       source: `
@@ -274,19 +258,6 @@ describe('creates executable schema', () => {
           tags: ['foo', 'bar'],
         },
       },
-    });
-
-    const subscriptionItem = await subscription.next();
-    expect(subscriptionItem).toMatchObject({
-      value: {
-        data: {
-          subscribeToPutQuoteRequest: {
-            commodity: 'foo',
-            amount: 100.5,
-          },
-        },
-      },
-      done: false,
     });
   });
 
