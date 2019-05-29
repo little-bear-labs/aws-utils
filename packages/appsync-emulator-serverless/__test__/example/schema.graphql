@@ -65,6 +65,12 @@ type Subscription {
     @aws_subscribe(mutations: ["putQuoteResponse"])
   neverNotify: String!
     @aws_subscribe(mutations: ["neverNotify"])
+  subscribeWithRequiredArgument(commodity: String!): QuoteRequest!
+    @aws_subscribe(mutations: ["putQuoteRequest"])
+  subscribeWithOptionalArgument(commodity: String): QuoteRequest!
+    @aws_subscribe(mutations: ["putQuoteRequest"])
+  subscribeWithBothArgumentTypes(commodity: String!, amount: Float): QuoteRequest!
+    @aws_subscribe(mutations: ["putQuoteRequest"])
 }
 
 type BatchPut {

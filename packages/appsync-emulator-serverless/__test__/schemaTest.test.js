@@ -1,7 +1,5 @@
 const { createSchema } = require('../schemaTest');
 const { graphql } = require('graphql');
-const { subscribe } = require('graphql/subscription');
-const gql = require('graphql-tag');
 const { decoded: jwt } = require('../testJWT');
 const nock = require('nock');
 const dynamodbEmulator = require('@conduitvc/dynamodb-emulator/client');
@@ -276,19 +274,6 @@ describe('creates executable schema', () => {
           stash: 'horst',
         },
       },
-    });
-
-    const subscriptionItem = await subscription.next();
-    expect(subscriptionItem).toMatchObject({
-      value: {
-        data: {
-          subscribeToPutQuoteRequest: {
-            commodity: 'foo',
-            amount: 100.5,
-          },
-        },
-      },
-      done: false,
     });
   });
 
