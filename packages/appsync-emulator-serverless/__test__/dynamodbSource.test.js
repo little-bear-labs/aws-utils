@@ -135,7 +135,7 @@ describe('dynamodbSource', () => {
       expect(result).toEqual(expected);
     });
 
-    it('no conditions', async () => {
+    it('failing conditions and unexpected outcome', async () => {
       // create the initial object
       await runOp({
         version: '2017-02-28',
@@ -176,6 +176,110 @@ describe('dynamodbSource', () => {
         return;
       }
       throw new Error('expected exception');
+    });
+
+    it('failing conditions and outcome as expected', async () => {
+      // create the initial object
+      await runOp({
+        version: '2017-02-28',
+        operation: 'PutItem',
+        key: {
+          id: {
+            S: 'foo',
+          },
+        },
+        attributeValues: {
+          bar: {
+            S: 'bar',
+          },
+        },
+      });
+
+      // use a condition which will fail but since no values
+      // change this is ok using the default strategy 'Reject'
+      const result = await runOp({
+        version: '2017-02-28',
+        operation: 'PutItem',
+        key: {
+          id: {
+            S: 'foo',
+          },
+        },
+        attributeValues: {
+          bar: {
+            S: 'bar',
+          },
+        },
+        condition: {
+          expression: 'attribute_not_exists(bar)',
+        },
+      });
+
+      const { Item: output } = await docClient
+        .get({
+          TableName: tableName,
+          Key: { id: 'foo' },
+        })
+        .promise();
+
+      const expected = {
+        id: 'foo',
+        bar: 'bar',
+      };
+      expect(output).toEqual(expected);
+      expect(result).toEqual(expected);
+    });
+
+    it('failing conditions and differences ignored', async () => {
+      // create the initial object
+      await runOp({
+        version: '2017-02-28',
+        operation: 'PutItem',
+        key: {
+          id: {
+            S: 'foo',
+          },
+        },
+        attributeValues: {
+          bar: {
+            S: 'bar',
+          },
+        },
+      });
+
+      // use a condition which will fail, ok because we are ignoring 'bar'
+      const result = await runOp({
+        version: '2017-02-28',
+        operation: 'PutItem',
+        key: {
+          id: {
+            S: 'foo',
+          },
+        },
+        attributeValues: {
+          bar: {
+            S: 'soupbar',
+          },
+        },
+        condition: {
+          expression: 'attribute_not_exists(bar)',
+          equalsIgnore: ['bar'],
+        },
+      });
+
+      const { Item: output } = await docClient
+        .get({
+          TableName: tableName,
+          Key: { id: 'foo' },
+        })
+        .promise();
+
+      const expected = {
+        id: 'foo',
+        bar: 'bar',
+      };
+      expect(output).toEqual(expected);
+      expect(result).toEqual(expected);
     });
   });
 
