@@ -4,7 +4,7 @@
   "description": "DynamoDB emulator nodejs wrapper",
   "main": "index.js",
   "author": "James Lal [:lightsofapollo]",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "private": false,
   "scripts": {
     "install":
