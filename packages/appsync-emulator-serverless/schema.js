@@ -46,7 +46,7 @@ class AppSyncError extends Error {
 }
 
 // eslint-disable-next-line
-const buildVTLContext = ({ root, vars, context, info }, result = null) => {
+const buildVTLContext = ({ root, vars, context, info }, result = null, stash = null) => {
   const {
     jwt: { iss: issuer, sub },
     request,
@@ -69,6 +69,7 @@ const buildVTLContext = ({ root, vars, context, info }, result = null) => {
     }),
     source: root || {},
     result: javaify(result),
+    stash: stash || javaify({}),
   };
   return {
     util,
@@ -139,12 +140,15 @@ const runRequestVTL = (fullPath, graphqlInfo) => {
   log.info('loading request vtl', path.relative(process.cwd(), fullPath));
   const context = buildVTLContext(graphqlInfo);
   const content = fs.readFileSync(fullPath, 'utf8');
-  return handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo);
+  return [
+    handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo),
+    context.ctx.stash,
+  ];
 };
 
-const runResponseVTL = (fullPath, graphqlInfo, result) => {
+const runResponseVTL = (fullPath, graphqlInfo, result, stash) => {
   log.info('loading response vtl', path.relative(process.cwd(), fullPath));
-  const context = buildVTLContext(graphqlInfo, result);
+  const context = buildVTLContext(graphqlInfo, result, stash);
   const content = fs.readFileSync(fullPath, 'utf8');
   return handleVTLRender(content.toString(), context, vtlMacros, graphqlInfo);
 };
@@ -229,7 +233,7 @@ const generateTypeResolver = (
 
     assert(context && context.jwt, 'must have context.jwt');
     const resolverArgs = { root, vars, context, info };
-    const request = runRequestVTL(requestPath, resolverArgs);
+    const [request, stash] = runRequestVTL(requestPath, resolverArgs);
 
     let requestResult;
     if (request.operation === 'BatchInvoke') {
@@ -244,7 +248,12 @@ const generateTypeResolver = (
       requestResult = await dispatchRequestToSource(source, configs, request);
     }
 
-    const response = runResponseVTL(responsePath, resolverArgs, requestResult);
+    const response = runResponseVTL(
+      responsePath,
+      resolverArgs,
+      requestResult,
+      stash,
+    );
     consola.info(
       'Rendered Response:\n',
       inspect(response, { depth: null, colors: true }),
@@ -293,19 +302,21 @@ const generateSubscriptionTypeResolver = (
       // XXX: The below is what our templates expect but not 100% sure it's correct.
       // for subscriptions the "arguments" field is same as root here.
       const resolverArgs = { root, vars: root, context, info };
-      const request =
-        (await dispatchRequestToSource(
-          source,
-          configs,
-          runRequestVTL(requestPath, resolverArgs),
-        )) || {};
+      const [request, stash] = runRequestVTL(requestPath, resolverArgs);
+      const requestResult =
+        (await dispatchRequestToSource(source, configs, request)) || {};
 
       consola.info(
         'Rendered Request:\n',
-        inspect(request, { depth: null, colors: true }),
+        inspect(requestResult, { depth: null, colors: true }),
       );
-      log.info('subscription resolver request', request);
-      const response = runResponseVTL(responsePath, resolverArgs, request);
+      log.info('subscription resolver request', requestResult);
+      const response = runResponseVTL(
+        responsePath,
+        resolverArgs,
+        requestResult,
+        stash,
+      );
       consola.info(
         'Rendered Response:\n',
         inspect(response, { depth: null, colors: true }),

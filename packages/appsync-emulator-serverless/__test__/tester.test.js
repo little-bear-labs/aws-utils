@@ -60,6 +60,7 @@ describe('appsync-emulator-serverless/tester', () => {
             id
             commodity
             amount
+            stash
           }
         }
       `,
@@ -89,6 +90,7 @@ describe('appsync-emulator-serverless/tester', () => {
         subscribeToPutQuoteRequest: {
           amount: 100.5,
           commodity: 'foo',
+          stash: 'horst',
         },
       },
     });

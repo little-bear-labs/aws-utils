@@ -67,7 +67,7 @@ custom:
         type: Subscription
         field: subscribeToPutQuoteRequest
         request: subscribePassthrough-request.txt
-        response: result-response.txt
+        response: result-with-stash-response.vtl
       - dataSource: SubscriberPassthrough
         type: Subscription
         field: neverNotify
@@ -218,6 +218,11 @@ custom:
         field: search
         request: es-request.txt
         response: es-response.txt
+      - dataSource: TestLambdaJSON
+        field: stashTest
+        type: Query
+        request: lambda-with_stash-request.vtl
+        response: result-with-stash-response.vtl
     serviceRole: 'AppSyncServiceRole'
     dataSources:
       - type: AMAZON_DYNAMODB
