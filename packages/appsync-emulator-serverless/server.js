@@ -8,6 +8,7 @@ const createServerCore = require('./serverCore');
 const log = require('logdown')('appsync-emulator:server');
 const { wrapSchema } = require('./schemaWrapper');
 const { cloudFormationProcessor } = require('./cloudFormationProcessor');
+const { getAppSyncConfig } = require('./util');
 
 const ensureDynamodbTables = async (
   dynamodb,
@@ -72,7 +73,8 @@ const createSchema = async ({
   }
 
   const graphqlSchema = wrapSchema(fs.readFileSync(schemaPath, 'utf8'));
-  const { custom: { appSync: appSyncConfig } = {} } = cfConfig;
+  const appSyncConfig = getAppSyncConfig(cfConfig);
+
   const dynamodbTables = await ensureDynamodbTables(
     dynamodb,
     cfConfig,

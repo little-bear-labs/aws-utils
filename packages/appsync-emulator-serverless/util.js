@@ -1,4 +1,5 @@
 const { toJSON } = require('./vtl');
+const log = require('logdown')('appsync-emulator:util');
 
 class Unauthorized extends Error {}
 class TemplateSentError extends Error {
@@ -277,9 +278,27 @@ const create = (errors = [], now = new Date()) => ({
   },
 });
 
+const getAppSyncConfig = cfConfig => {
+  const { custom: { appSync: appSyncConfig } = {} } = cfConfig;
+
+  if (!Array.isArray(appSyncConfig)) {
+    return appSyncConfig;
+  }
+
+  if (appSyncConfig.length > 1) {
+    const apiName = appSyncConfig[0].name || 'api';
+    log.warn(
+      `Multiple API's are not supported, using first instance: ${apiName}`,
+    );
+  }
+
+  return appSyncConfig[0];
+};
+
 module.exports = {
   create,
   TemplateSentError,
   Unauthorized,
   ValidateError,
+  getAppSyncConfig,
 };

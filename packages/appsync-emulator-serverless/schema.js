@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const json5 = require('json5');
 const { GraphQLError } = require('graphql');
-const { create: createUtils } = require('./util');
+const { create: createUtils, getAppSyncConfig } = require('./util');
 const { javaify, vtl } = require('./vtl');
 const dynamodbSource = require('./dynamodbSource');
 const lambdaSource = require('./lambdaSource');
@@ -403,7 +403,7 @@ const createSchema = async ({
   assert(pubsub, 'must pass pubsub');
 
   const { subscriptions, DirectiveVisitor } = createSubscriptionsVisitor();
-  const { custom: { appSync: appSyncConfig } = {} } = serverlessConfig;
+  const appSyncConfig = getAppSyncConfig(serverlessConfig);
 
   // XXX: Below is a nice and easy hack.
   // walk the AST without saving the schema ... this is to capture subscription directives.
