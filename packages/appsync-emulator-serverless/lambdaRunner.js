@@ -32,6 +32,7 @@ process.once(
         sendOutput(await lambdaResult);
       }
     } catch (err) {
+      log.error(err);
       sendErr(err);
     }
   },
