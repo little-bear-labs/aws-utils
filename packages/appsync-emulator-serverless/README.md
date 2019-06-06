@@ -82,6 +82,20 @@ custom:
 
 Where `$PREFIX_LOCATION` is your specified webpack build path i.e. `.webpack`
 
+### Serverless configuration notes
+
+AppSync emulator does support Serverless configurations with multiple endpoints. Like the sample below.
+
+```
+custom:
+  appsync:
+    - name: 'api 1'
+       ...
+    - name: 'api 2'
+```
+**However:** It does not start multiple endpoints, it will only use the first endpoint.
+ 
+
 ## Testing
 
 ### Jest
