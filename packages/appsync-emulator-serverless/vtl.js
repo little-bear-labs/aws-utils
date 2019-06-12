@@ -57,6 +57,28 @@ class JavaString {
     return new JavaString(rep);
   }
 
+  split(regexString, limit = undefined) {
+    // WARNING: this assumes Java and JavaScript regular expressions are identical, according to
+    // https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines#Language_features
+    // this should be the case except for look-behind which is not implemented in JavaScript
+
+    // java.util.String.split does not to include the separatpr in the result. JS does splice any capturing group
+    // in the regex into the result. To remove the groups from the result we need the count of capturing groups in
+    // the provided regex, the only way in JS seems to be via a match to an empty string
+    const testRe = new RegExp(
+      `${typeof regexString === 'object' ? regexString.strVal : regexString}|`,
+    );
+    const ngroups = ''.match(testRe).length; // actually num of groups plus one, ie "" and the (empty) groups
+
+    const re = new RegExp(
+      typeof regexString === 'object' ? regexString.strVal : regexString,
+    );
+    const result = this.strVal.split(re, limit);
+    return result
+      .filter((v, ii) => !(ii % ngroups))
+      .map(v => new JavaString(v));
+  }
+
   toJSON() {
     return this.toString();
   }

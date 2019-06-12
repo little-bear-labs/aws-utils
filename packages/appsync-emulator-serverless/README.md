@@ -16,6 +16,12 @@ We aim to support the majority of appsync features (as we use all of them except
 * Support for `API_KEY` and `AMAZON_COGNITO_USER_POOLS` authentication
 * Subscriptions
 
+## Known Deviations from AppSync
+
+This sections lists known deviations from AppSync behaviour
+* VTL String.split: AppSync Emulator is using JavaScript's regex engine which does not support
+  look-behind. There might be other more subtle differences in the regex implementations.
+
 ## Requirements
 
 * Java\*
