@@ -67,14 +67,16 @@ class JavaString {
     // the provided regex, the only way in JS seems to be via a match to an empty string
     const testRe = new RegExp(
       `${typeof regexString === 'object' ? regexString.strVal : regexString}|`,
-    )
-    const ngroups = "".match(testRe).length   // actually num of groups plus one, ie "" and the (empty) groups
+    );
+    const ngroups = ''.match(testRe).length; // actually num of groups plus one, ie "" and the (empty) groups
 
     const re = new RegExp(
       typeof regexString === 'object' ? regexString.strVal : regexString,
     );
     const result = this.strVal.split(re, limit);
-    return result.filter((v, ii) => !(ii % ngroups)).map(v => new JavaString(v));
+    return result
+      .filter((v, ii) => !(ii % ngroups))
+      .map(v => new JavaString(v));
   }
 
   toJSON() {
