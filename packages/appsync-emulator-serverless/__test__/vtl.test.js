@@ -93,7 +93,46 @@ describe('vtl', () => {
       expect(out).toBe('{id=123}');
     });
 
-    it('should do regex split', () => {
+    it('split without capturing groups', () => {
+      const out = vtl(
+        `
+        #set($splitted = $ctx.args.str.split("\\|"))
+        $splitted.toJSON()
+        `,
+        javaify({
+          ctx: { args: { str: 'a|b|c' } },
+        }),
+      ).trim();
+      expect(out).toBe('[a, b, c]');
+    });
+
+    it('split with capturing group', () => {
+      const out = vtl(
+        `
+        #set($splitted = $ctx.args.str.split("(\\|)"))
+        $splitted.toJSON()
+        `,
+        javaify({
+          ctx: { args: { str: 'a|b|c' } },
+        }),
+      ).trim();
+      expect(out).toBe('[a, b, c]');
+    });
+
+    it('split with two capturing groups', () => {
+      const out = vtl(
+        `
+        #set($splitted = $ctx.args.str.split("(\\|)(x)"))
+        $splitted.toJSON()
+        `,
+        javaify({
+          ctx: { args: { str: 'a|xb|xc' } },
+        }),
+      ).trim();
+      expect(out).toBe('[a, b, c]');
+    });
+
+    it('should do complex regex split', () => {
       const out = vtl(
         `
         #set($splitted = $ctx.args.str.split("(\\|)(?!.*\\|)"))
