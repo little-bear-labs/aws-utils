@@ -7,7 +7,8 @@ const fs = require('fs');
 const path = require('path');
 const pkgUp = require('pkg-up');
 const { ArgumentParser } = require('argparse');
-const dynamoEmulator = require('@conduitvc/dynamodb-emulator');
+const { deriveDynamoDBClient } = require('../dynamodbUtil');
+const defaultConfig = require('../config');
 const createServer = require('../server');
 
 const main = async () => {
@@ -43,43 +44,45 @@ const main = async () => {
     help: 'Port to bind the dynamodb to (default is any free port)',
     type: 'int',
   });
+
+  parser.addArgument(['--config'], {
+    help:
+      'Name of optional configuration file which resides in the same directory as serverless.yml (default is appSyncConfig)',
+    type: 'string',
+  });
+
   // argparse converts any argument with a dash to underscores
   // eslint-disable-next-line
-  let { ws_port: wsPort, port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
+  const { config: configFileName, ws_port: wsPort } = parser.parseArgs();
+  // eslint-disable-next-line
+  let {
+    dynamodb_port: dynamodbPort,
+    port,
+    path: serverlessPath,
+  } = parser.parseArgs();
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
   dynamodbPort = dynamodbPort || null;
 
   // start the dynamodb emulator
   const pkgPath = pkgUp.sync(serverlessPath);
-  const emulator = await dynamoEmulator.launch({
-    dbPath: path.join(path.dirname(pkgPath), '.dynamodb'),
-    port: dynamodbPort,
+  const customConfigFilePath = path.join(serverlessPath, configFileName);
+  const hasCustomConfig = await new Promise(resolve => {
+    try {
+      fs.accessSync(`${customConfigFilePath}.js`);
+      resolve(true);
+    } catch (e) {
+      resolve(false);
+    }
   });
-  process.on('SIGINT', () => {
-    // _ensure_ we do not leave java processes lying around.
-    emulator.terminate().then(() => {
-      process.exit(0);
-    });
-  });
-  const dynamodb = dynamoEmulator.getClient(emulator);
+  const config = hasCustomConfig
+    ? // eslint-disable-next-line import/no-dynamic-require
+      require(customConfigFilePath)
+    : defaultConfig;
+  const dynamodb = await deriveDynamoDBClient(config, pkgPath, dynamodbPort);
 
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
-  const server = await createServer({ wsPort, serverless, port, dynamodb });
-  // eslint-disable-next-line no-console
-  console.log('started at url:', server.url);
-  if (dynamodbPort) {
-    /* eslint-disable no-console */
-    console.log(
-      `dynamodb config:
-    {
-      endpoint: 'http://localhost:${dynamodbPort}',
-      region: 'us-fake-1',
-      accessKeyId: 'fake',
-      secretAccessKey: 'fake',
-    }`,
-    );
-  }
+  createServer({ wsPort, serverless, port, dynamodb });
 };
 
 main().catch(err => {

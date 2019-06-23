@@ -3,7 +3,7 @@ const util = require('util');
 const { DynamoDB } = require('aws-sdk');
 const dynamoEmulator = require('@conduitvc/dynamodb-emulator');
 
-async function deriveDynamoClient(
+async function deriveDynamoDBClient(
   { DynamoDB: config },
   emulatorPath = process.cwd(),
 ) {
@@ -35,5 +35,5 @@ async function deriveDynamoClient(
 }
 
 module.exports = {
-  deriveDynamoClient,
+  deriveDynamoDBClient,
 };
