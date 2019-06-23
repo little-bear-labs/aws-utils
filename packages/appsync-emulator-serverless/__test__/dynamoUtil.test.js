@@ -1,4 +1,4 @@
-const { deriveDynamoClient } = require('../dynamodbUtil');
+const { deriveDynamoDBClient } = require('../dynamodbUtil');
 
 describe('dynamoUtil', () => {
   beforeAll(async () => {
@@ -6,12 +6,12 @@ describe('dynamoUtil', () => {
   });
 
   it('supports no dynamo', async () => {
-    const client = await deriveDynamoClient({ DynamoDB: false });
+    const client = await deriveDynamoDBClient({ DynamoDB: false });
     expect(client).toBeNull();
   });
 
   it('supports third party instance', async () => {
-    const client = await deriveDynamoClient({
+    const client = await deriveDynamoDBClient({
       DynamoDB: {
         endpoint: 'http://localhost:61023',
         accessKeyId: 'fake',
@@ -23,7 +23,7 @@ describe('dynamoUtil', () => {
   });
 
   it('supports local emulation', async () => {
-    const client = await deriveDynamoClient({
+    const client = await deriveDynamoDBClient({
       DynamoDB: {
         emulator: true,
       },
