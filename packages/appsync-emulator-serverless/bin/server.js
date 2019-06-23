@@ -5,41 +5,11 @@ process.env.APPSYNC_EMULATOR_LOG = 1;
 
 const fs = require('fs');
 const path = require('path');
-const util = require('util');
 const pkgUp = require('pkg-up');
 const { ArgumentParser } = require('argparse');
-const dynamoEmulator = require('@conduitvc/dynamodb-emulator');
 const createServer = require('../server');
 const defaultConfig = require('../config');
-const { DynamoDB } = require('aws-sdk');
-
-async function deriveDynamoClient({ DynamoDB: config }, pkgPath) {
-  if (config === false) {
-    // if false, we assume dynamo is not needed
-    return null;
-  } else if (!config.emulator) {
-    // if emulator is false, we create a client based on the config object
-    /* eslint-disable no-console */
-    console.log('dynamodb config: ', util.inspect(config, false, 2, true));
-    return new DynamoDB(...config);
-  }
-
-  // start the dynamodb emulator
-  const dbPath = path.join(path.dirname(pkgPath), '.dynamodb');
-  const port = { config };
-  const emulator = await dynamoEmulator.launch({
-    dbPath,
-    port,
-  });
-  console.log(`dynamodb emulator port: ${port}, dbPath: ${dbPath}`);
-  process.on('SIGINT', () => {
-    // _ensure_ we do not leave java processes lying around.
-    emulator.terminate().then(() => {
-      process.exit(0);
-    });
-  });
-  return dynamoEmulator.getClient(emulator);
-}
+const dynamo = require('../dynamoUtil');
 
 const main = async () => {
   const parser = new ArgumentParser({
@@ -78,8 +48,9 @@ const main = async () => {
   });
   // argparse converts any argument with a dash to underscores
   // eslint-disable-next-line
+  const { ws_port: wsPort } = parser.parseArgs();
+  // eslint-disable-next-line
   let {
-    ws_port: wsPort,
     port,
     path: serverlessPath,
     config: configFileName,
@@ -105,7 +76,7 @@ const main = async () => {
     // eslint-disable-next-line import/no-dynamic-require
     hasCustomConfig ? require(customConfigFilePath) : {},
   );
-  const dynamodb = await deriveDynamoClient(config, pkgPath);
+  const dynamodb = await dynamo.deriveDynamoClient(config, pkgPath);
 
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
   const server = await createServer({ wsPort, serverless, port, dynamodb });
