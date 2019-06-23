@@ -7,9 +7,8 @@ const fs = require('fs');
 const path = require('path');
 const pkgUp = require('pkg-up');
 const { ArgumentParser } = require('argparse');
+const dynamoEmulator = require('@conduitvc/dynamodb-emulator');
 const createServer = require('../server');
-const defaultConfig = require('../config');
-const dynamo = require('../dynamoUtil');
 
 const main = async () => {
   const parser = new ArgumentParser({
@@ -19,8 +18,7 @@ const main = async () => {
   });
 
   parser.addArgument(['--path'], {
-    help:
-      'Directory path in which serverless.yml, general config file is configured',
+    help: 'Directory path in which serverless.yml is configured',
     type: serverlessPath => {
       // eslint-disable-next-line
       serverlessPath = path.resolve(serverlessPath);
@@ -41,47 +39,47 @@ const main = async () => {
     type: 'int',
   });
 
-  parser.addArgument(['--config'], {
-    help:
-      'Name of optional configuration file which resides in the same directory as serverless.yml (default is appSyncConfig)',
-    type: 'string',
+  parser.addArgument(['--dynamodb-port'], {
+    help: 'Port to bind the dynamodb to (default is any free port)',
+    type: 'int',
   });
   // argparse converts any argument with a dash to underscores
   // eslint-disable-next-line
-  const { ws_port: wsPort } = parser.parseArgs();
-  // eslint-disable-next-line
-  let {
-    port,
-    path: serverlessPath,
-    config: configFileName,
-  } = parser.parseArgs();
+  let { ws_port: wsPort, port, path: serverlessPath, dynamodb_port: dynamodbPort } = parser.parseArgs();
   port = port || 0;
   serverlessPath = serverlessPath || process.cwd();
-  configFileName = configFileName || 'appSyncConfig';
+  dynamodbPort = dynamodbPort || null;
 
+  // start the dynamodb emulator
   const pkgPath = pkgUp.sync(serverlessPath);
-  const customConfigFilePath = path.join(serverlessPath, configFileName);
-  const hasCustomConfig = await new Promise(resolve => {
-    try {
-      fs.accessSync(customConfigFilePath);
-      resolve(true);
-    } catch (e) {
-      resolve(false);
-    }
+  const emulator = await dynamoEmulator.launch({
+    dbPath: path.join(path.dirname(pkgPath), '.dynamodb'),
+    port: dynamodbPort,
   });
-
-  const config = Object.assign(
-    {},
-    defaultConfig,
-    // eslint-disable-next-line import/no-dynamic-require
-    hasCustomConfig ? require(customConfigFilePath) : {},
-  );
-  const dynamodb = await dynamo.deriveDynamoClient(config, pkgPath);
+  process.on('SIGINT', () => {
+    // _ensure_ we do not leave java processes lying around.
+    emulator.terminate().then(() => {
+      process.exit(0);
+    });
+  });
+  const dynamodb = dynamoEmulator.getClient(emulator);
 
   const serverless = path.join(path.dirname(pkgPath), 'serverless.yml');
   const server = await createServer({ wsPort, serverless, port, dynamodb });
   // eslint-disable-next-line no-console
   console.log('started at url:', server.url);
+  if (dynamodbPort) {
+    /* eslint-disable no-console */
+    console.log(
+      `dynamodb config:
+    {
+      endpoint: 'http://localhost:${dynamodbPort}',
+      region: 'us-fake-1',
+      accessKeyId: 'fake',
+      secretAccessKey: 'fake',
+    }`,
+    );
+  }
 };
 
 main().catch(err => {
