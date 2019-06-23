@@ -19,6 +19,7 @@ We aim to support the majority of appsync features (as we use all of them except
 ## Known Deviations from AppSync
 
 This sections lists known deviations from AppSync behaviour
+
 * VTL String.split: AppSync Emulator is using JavaScript's regex engine which does not support
   look-behind. There might be other more subtle differences in the regex implementations.
 
@@ -75,6 +76,43 @@ const dynamodb = new DynamoDB({
 const client = new DynamoDB.DocumentClient({ service: dynamodb });
 ```
 
+#### configurable dynamodb
+
+The emulator now supports a configurable dynamodb setup. By default, the emulator
+uses the local dynamodb emulator. To specify an alternate config, create an
+`appSyncConfig.js` file which exports your specific configuration.
+
+You may also specify a different file name or path. Path is relative to the
+location of the serverless.yml config file path.
+
+```sh
+yarn appsync-emulator --config myConfigFile
+```
+
+```
+// default config
+module.exports = {
+  DynamoDB: {
+    emulator: true,
+  },
+};
+
+// config without dynamodb
+module.exports = {
+  DynamoDB: false,
+};
+
+// config pointint to third party dynamodb
+module.exports = {
+  DynamoDB: {
+    endpoint: 'http://localhost:61023',
+    accessKeyId: 'fake',
+    secretAccessKey: 'fake',
+    region: 'fake',
+  }
+};
+```
+
 #### Custom build prefix for webpack, typescript
 
 For compatibility with plugins such as Serverless Webpack that allow the usage of webpack
@@ -99,8 +137,8 @@ custom:
        ...
     - name: 'api 2'
 ```
+
 **However:** It does not start multiple endpoints, it will only use the first endpoint.
- 
 
 ## Testing
 

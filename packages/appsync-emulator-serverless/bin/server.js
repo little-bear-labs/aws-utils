@@ -43,7 +43,7 @@ const main = async () => {
 
   parser.addArgument(['--config'], {
     help:
-      'Name of optional configuration file which resides in the same directory as serverless.yml (default is config)',
+      'Name of optional configuration file which resides in the same directory as serverless.yml (default is appSyncConfig)',
     type: 'string',
   });
   // argparse converts any argument with a dash to underscores
