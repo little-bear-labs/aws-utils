@@ -102,7 +102,7 @@ module.exports = {
   DynamoDB: false,
 };
 
-// config pointint to third party dynamodb
+// config pointing to third party dynamodb
 module.exports = {
   DynamoDB: {
     endpoint: 'http://localhost:61023',
