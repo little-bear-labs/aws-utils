@@ -66,7 +66,10 @@ const main = async () => {
 
   // start the dynamodb emulator
   const pkgPath = pkgUp.sync(serverlessPath);
-  const customConfigFilePath = path.join(serverlessPath, configFileName);
+  const customConfigFilePath = path.join(
+    serverlessPath,
+    configFileName || 'appSyncConfig',
+  );
   const hasCustomConfig = await new Promise(resolve => {
     try {
       fs.accessSync(`${customConfigFilePath}.js`);
