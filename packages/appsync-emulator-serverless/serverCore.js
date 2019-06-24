@@ -361,8 +361,10 @@ const createServer = async ({
   mqttServer.on('clientConnected', client => {
     log.info('client has connected', client.id);
   });
-  mqttHTTP.listen(wsPort);
-  await e2p(mqttServer, 'ready');
+  await Promise.all([
+    new Promise(resolve => mqttHTTP.listen(wsPort, resolve)),
+    await e2p(mqttServer, 'ready'),
+  ]);
   // Trailing slash is very important. The mqtt client will not connect without it.
   const mqttURL = `ws://localhost:${mqttHTTP.address().port}/`;
   // eslint-disable-next-line
