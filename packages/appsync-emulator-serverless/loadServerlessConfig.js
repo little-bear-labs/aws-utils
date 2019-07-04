@@ -6,6 +6,7 @@
 const Serverless = require('serverless');
 const path = require('path');
 const fs = require('fs');
+const util = require('./util');
 
 // const testCWD = '/Users/sahajalal/workspace/conduit/file-service/backend';
 
@@ -75,14 +76,6 @@ const normalizeResources = config => {
   };
 };
 
-const flatten = arr =>
-  arr.reduce((acc, curr) => {
-    if (Array.isArray(curr)) {
-      return [...acc, ...flatten(curr)];
-    }
-    return [...acc, curr];
-  }, []);
-
 const loadServerlessConfig = async (cwd = process.cwd()) => {
   const stat = fs.statSync(cwd);
   if (!stat.isDirectory()) {
@@ -99,8 +92,8 @@ const loadServerlessConfig = async (cwd = process.cwd()) => {
 
   const { custom = {} } = config;
   const { appSync = {} } = custom;
-  const { mappingTemplates = [] } = appSync;
-  const { dataSources = [] } = appSync;
+
+  util.flatteningMappingTemplatesAndDataSources(appSync);
 
   const output = {
     config: {
@@ -109,8 +102,6 @@ const loadServerlessConfig = async (cwd = process.cwd()) => {
         ...custom,
         appSync: {
           ...appSync,
-          mappingTemplates: flatten(mappingTemplates),
-          dataSources: flatten(dataSources),
         },
       },
       resources: normalizeResources(config),
