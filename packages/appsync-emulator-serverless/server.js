@@ -8,7 +8,10 @@ const createServerCore = require('./serverCore');
 const log = require('logdown')('appsync-emulator:server');
 const { wrapSchema } = require('./schemaWrapper');
 const { cloudFormationProcessor } = require('./cloudFormationProcessor');
-const { getAppSyncConfig } = require('./util');
+const {
+  getAppSyncConfig,
+  flatteningMappingTemplatesAndDataSources,
+} = require('./util');
 
 const ensureDynamodbTables = async (
   dynamodb,
@@ -51,6 +54,9 @@ const createSchema = async ({
   let serverlessDirectory;
   if (typeof serverless === 'object') {
     serverlessConfig = serverless.service;
+    const appSyncConfig = getAppSyncConfig(serverlessConfig);
+    flatteningMappingTemplatesAndDataSources(appSyncConfig);
+    serverlessConfig.appSyncConfig = appSyncConfig;
     serverlessDirectory = serverless.config.servicePath;
   } else {
     serverlessDirectory =

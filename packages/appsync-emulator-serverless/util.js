@@ -295,10 +295,32 @@ const getAppSyncConfig = cfConfig => {
   return appSyncConfig[0];
 };
 
+const flatten = arr =>
+  arr.reduce((acc, curr) => {
+    if (Array.isArray(curr)) {
+      return [...acc, ...flatten(curr)];
+    }
+    return [...acc, curr];
+  }, []);
+
+const flatteningMappingTemplatesAndDataSources = appSync => {
+  // eslint-disable-next-line
+  appSync.mappingTemplates =
+    typeof appSync.mappingTemplates !== 'undefined'
+      ? flatten(appSync.mappingTemplates)
+      : [];
+  // eslint-disable-next-line
+  appSync.dataSources =
+    typeof appSync.dataSources !== 'undefined'
+      ? flatten(appSync.dataSources)
+      : [];
+};
+
 module.exports = {
   create,
   TemplateSentError,
   Unauthorized,
   ValidateError,
   getAppSyncConfig,
+  flatteningMappingTemplatesAndDataSources,
 };
