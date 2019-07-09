@@ -1,6 +1,6 @@
 {
   "name": "@conduitvc/appsync-emulator-serverless",
-  "version": "0.14.1",
+  "version": "0.14.2",
   "main": "schema.js",
   "license": "Apache-2.0",
   "bin": {
