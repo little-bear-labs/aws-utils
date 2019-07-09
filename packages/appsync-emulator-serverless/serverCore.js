@@ -379,7 +379,7 @@ const createServer = async ({
 
   // graphql server.
   const app = express();
-  app.use(express.json());
+  app.use(express.json({ type: ['application/graphql', 'application/json'] }));
   app.use(require('cors')());
   const handler = createGQLHandler({ schema, subServer });
 
