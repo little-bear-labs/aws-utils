@@ -5,6 +5,7 @@ const { DynamoDB } = require('aws-sdk');
 async function deriveDynamoDBClient(
   { DynamoDB: config },
   emulatorPath = process.cwd(),
+  port,
 ) {
   if (config === false) {
     // if false, we assume dynamo is not needed
@@ -19,7 +20,6 @@ async function deriveDynamoDBClient(
   // start the dynamodb emulator
   const dynamoEmulator = require('@conduitvc/dynamodb-emulator');
   const dbPath = path.join(path.dirname(emulatorPath), '.dynamodb');
-  const { port } = config;
   const emulator = await dynamoEmulator.launch({
     dbPath,
     port,
