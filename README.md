@@ -2,6 +2,13 @@
 
 Home of various packages for testing, deploying and building applications on top of AWS and other cloud infrastructure.
 
+
+## AppSync Emulator Deprecation notice
+
+We've worked with AWS over the last few months to transition ownership of the emulator directly into Amplify's (and AWS) hands. 
+
+Please see: https://www.linkedin.com/feed/update/urn:li:activity:6565000058121572352 for details. We will be deprecating the package shortly.
+
 ## Prerequisites
 
 * Java version >= 8
