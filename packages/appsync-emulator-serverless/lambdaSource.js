@@ -82,7 +82,7 @@ const lambdaSource = async (
       },
       stdio: [0, 1, 2, 'ipc'],
     };
-    if (process.env.SLS_DEBUG) childOptions.execArgv = ['--inspect-brk'];
+    if (process.env.SLS_DEBUG) childOptions.execArgv = ['--inspect'];
     child = fork(Runner, [], childOptions);
 
     child.send({
