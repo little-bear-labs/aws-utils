@@ -583,7 +583,7 @@ describe('creates executable schema', () => {
       source,
     });
 
-    expect(result).toMatchObject({ data: { jsonTest: { test: 'yup' } } });
+    expect(result).toMatchObject({ data: { jsonTest: JSON.stringify({ test: 'yup' }) } });
   });
 
   it('should pass stash to response template', async () => {
