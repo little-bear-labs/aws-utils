@@ -97,8 +97,22 @@ const AWSDateTime = new GraphQLScalarType({
   },
 });
 
+const AWSJSON = new GraphQLScalarType({
+  name: 'AWSJSON',
+  description: GraphQLJSON.description,
+  serialize(value) {
+    return JSON.stringify(GraphQLJSON.serialize(value));
+  },
+  parseValue(value) {
+    return GraphQLJSON.parseValue(value);
+  },
+  parseLiteral(value) {
+    return GraphQLJSON.parseLiteral(value);
+  },
+});
+
 const scalars = {
-  AWSJSON: GraphQLJSON,
+  AWSJSON,
   AWSDate,
   AWSTime,
   AWSDateTime,
