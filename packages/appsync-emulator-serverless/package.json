@@ -1,6 +1,6 @@
 {
   "name": "@conduitvc/appsync-emulator-serverless",
-  "version": "0.14.4",
+  "version": "0.14.5",
   "main": "schema.js",
   "license": "Apache-2.0",
   "bin": {
@@ -35,7 +35,7 @@
     "node-fetch": "^2.2.0",
     "paho-mqtt": "^1.0.4",
     "pkg-up": "^2.0.0",
-    "serverless": "1.38.0",
+    "serverless": "^1.38.0",
     "uuid": "^3.2.1",
     "velocityjs": "^1.1.3"
   },
