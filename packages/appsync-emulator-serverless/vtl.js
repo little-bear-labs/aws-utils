@@ -257,7 +257,7 @@ const vtl = (str, context, macros = {}) => {
   log.info('render\n', str);
   const output = velocity.render(str, context, macros, {
     valueMapper: javaify,
-    escape: false
+    escape: false,
   });
   log.info('render output\n', output);
   return output;
