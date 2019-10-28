@@ -276,6 +276,73 @@ const create = (errors = [], now = new Date()) => ({
       throw new Error('not implemented');
     },
   },
+  transform: {
+    toDynamoDBFilterExpression(filter) {
+      const opMap = {
+        ne: '<>',
+        eq: '=',
+        lt: '<',
+        le: '<=',
+        gt: '>',
+        ge: '>=',
+      };
+      const funcMap = {
+        notContains: 'NOT contains',
+        beginsWith: 'begins_with',
+      };
+      const {
+        DynamoDB: { Converter },
+      } = require('aws-sdk');
+
+      const filterObj = filter.toJSON();
+      const expressionValues = {};
+      const expressionNames = {};
+      const expression = Object.entries(filterObj).reduce(
+        (result, [fieldName, fieldFilters]) =>
+          Object.entries(fieldFilters).reduce(
+            (conditions, [op, expectedValue]) => {
+              let currCondition;
+              if (op === 'between') {
+                currCondition = `(#${fieldName} between :${fieldName}Lower AND :${fieldName}Upper)`;
+                expressionValues[`:${fieldName}Lower`] = Converter.input(
+                  toJSON(expectedValue[0]),
+                );
+                expressionValues[`:${fieldName}Upper`] = Converter.input(
+                  toJSON(expectedValue[1]),
+                );
+                expressionNames[`#${fieldName}`] = fieldName;
+              } else {
+                const dynamoOp = opMap[op];
+                if (dynamoOp) {
+                  currCondition = `(#${fieldName} ${
+                    opMap[op]
+                  } :${fieldName}_${op})`;
+                } else {
+                  const func = funcMap[op] || op;
+                  currCondition = `(${func}(#${fieldName},:${fieldName}_${func.replace(
+                    ' ',
+                    '_',
+                  )}))`;
+                }
+                expressionValues[
+                  `:${fieldName}_${op.replace(' ', '_')}`
+                ] = Converter.input(toJSON(expectedValue));
+                expressionNames[`#${fieldName}`] = fieldName;
+              }
+              return conditions
+                ? `${conditions} AND ${currCondition}`
+                : currCondition;
+            },
+            result,
+          ),
+        undefined,
+      );
+      // wrap result in String to protect from escaping
+      return new String( // eslint-disable-line no-new-wrappers
+        JSON.stringify({ expression, expressionValues, expressionNames }),
+      );
+    },
+  },
 });
 
 const getAppSyncConfig = cfConfig => {
